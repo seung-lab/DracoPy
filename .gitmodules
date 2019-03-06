@@ -1,0 +1,3 @@
+[submodule "draco"]
+	path = draco
+	url = https://github.com/google/draco

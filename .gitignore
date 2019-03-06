@@ -1,0 +1,7 @@
+DracoPy.egg-info/
+MANIFEST
+_skbuild/
+*.so
+.vscode/
+dist/
+bunny_test.drc
