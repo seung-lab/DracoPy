@@ -11,6 +11,8 @@ class DracoMesh(object):
         if mesh_struct['encoding_options_set']:
             self.encoding_options = EncodingOptions(mesh_struct['quantization_bits'],
                 mesh_struct['quantization_range'], mesh_struct['quantization_origin'])
+        else:
+            self.encoding_options = None
     
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
