@@ -1,5 +1,6 @@
 from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
+from libcpp cimport bool
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
     
@@ -9,6 +10,12 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         # TODO: add support for normals, which are not currently supported.
         vector[float] normals
+
+        # Encoding options
+        bool encoding_options_set
+        int quantization_bits
+        double quantization_range
+        vector[double] quantization_origin
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 

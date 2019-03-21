@@ -6,9 +6,11 @@ import struct
 from math import floor
 
 class DracoMesh(object):
-    def __init__(self, cython_mesh_struct, encoding_options=None):
-        self.cython_mesh_struct = cython_mesh_struct
-        self.encoding_options = encoding_options
+    def __init__(self, mesh_struct):
+        self.mesh_struct = mesh_struct
+        if mesh_struct['encoding_options_set']:
+            self.encoding_options = EncodingOptions(mesh_struct['quantization_bits'],
+                mesh_struct['quantization_range'], mesh_struct['quantization_origin'])
     
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
@@ -24,15 +26,15 @@ class DracoMesh(object):
 
     @property
     def points(self):
-        return self.cython_mesh_struct['points']
+        return self.mesh_struct['points']
 
     @property
     def faces(self):
-        return self.cython_mesh_struct['faces']
+        return self.mesh_struct['faces']
 
     @property
     def normals(self):
-        return self.cython_mesh_struct['normals']
+        return self.mesh_struct['normals']
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -58,8 +60,14 @@ class EncodingOptions(object):
     def num_axes(self):
         return 3
 
-
-def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=0, quantization_origin=None, encode_custom_options=False):
+# Encode a list of points/vertices (float) and faces (unsigned int) to a draco buffer.
+# Quantization bits should be an integer between 0 and 31
+# Compression level should be an integer between 0 and 10
+# Quantization_range is a float representing the size of the bounding cube for the mesh.
+# By default it is the range of the dimension of the input vertices with greatest range.
+# Quantization_origin is the point in space where the bounding box begins. By default it is
+# a point where each coordinate is the minimum of that coordinate among the input vertices.
+def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None):
     cdef float* quant_origin = NULL
     num_dims = 3
     if quantization_origin is not None:
@@ -69,23 +77,8 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
     encodedMesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin)
     if quant_origin != NULL:
         PyMem_Free(quant_origin)
-    if encode_custom_options:
-        encoded_floats = bytes([0, 0, 0, 0])
-        if quantization_origin is not None:
-            encoded_floats = struct.pack('%sf' % (num_dims + 1), quantization_range, *quantization_origin)
-        return b''.join([bytes([quantization_bits]), encoded_floats, bytes(encodedMesh)])
-    else:
-        return bytes(encodedMesh)
+    return bytes(encodedMesh)
 
 def decode_buffer_to_mesh(buffer):
-    cython_mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
-    return DracoMesh(cython_mesh_struct)
-
-def decode_buffer_with_encoded_options_to_mesh(buffer):
-    quantization_bits = buffer[0]
-    quantization_range = struct.unpack("=f", buffer[1:5])[0]
-    quantization_origin = []
-    for dim in range(3):
-        quantization_origin.append(struct.unpack("=f", buffer[5+dim*4:9+dim*4])[0])
-    cython_mesh_struct = DracoPy.decode_buffer(buffer[17:], len(buffer[17:]))
-    return DracoMesh(cython_mesh_struct, EncodingOptions(quantization_bits, quantization_range, quantization_origin))
+    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+    return DracoMesh(mesh_struct)
