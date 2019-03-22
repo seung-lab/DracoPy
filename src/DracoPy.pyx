@@ -62,7 +62,7 @@ class EncodingOptions(object):
     def num_axes(self):
         return 3
 
-# Encode a list of points/vertices (float) and faces (unsigned int) to a draco buffer.
+# Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
 # Quantization bits should be an integer between 0 and 31
 # Compression level should be an integer between 0 and 10
 # Quantization_range is a float representing the size of the bounding cube for the mesh.
@@ -71,16 +71,24 @@ class EncodingOptions(object):
 # a point where each coordinate is the minimum of that coordinate among the input vertices.
 def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None):
     cdef float* quant_origin = NULL
-    num_dims = 3
-    if quantization_origin is not None:
-        quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
-        for dim in range(num_dims):
-            quant_origin[dim] = quantization_origin[dim]
-    encodedMesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin)
-    if quant_origin != NULL:
-        PyMem_Free(quant_origin)
-    return bytes(encodedMesh)
+    try:
+        num_dims = 3
+        if quantization_origin is not None:
+            quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
+            for dim in range(num_dims):
+                quant_origin[dim] = quantization_origin[dim]
+        encodedMesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin)
+        if quant_origin != NULL:
+            PyMem_Free(quant_origin)
+        return bytes(encodedMesh)
+    except:
+        if quant_origin != NULL:
+            PyMem_Free(quant_origin)
+        raise ValueError("Input invalid")
 
 def decode_buffer_to_mesh(buffer):
     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
-    return DracoMesh(mesh_struct)
+    if mesh_struct.properly_decoded:
+        return DracoMesh(mesh_struct)
+    else:
+        raise ValueError('Input is not a valid draco mesh')

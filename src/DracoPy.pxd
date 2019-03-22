@@ -17,6 +17,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         double quantization_range
         vector[double] quantization_origin
 
+        # Represents whether mesh was successfully decoded
+        bool properly_decoded
+
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
     vector[unsigned char] encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,

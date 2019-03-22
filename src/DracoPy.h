@@ -18,23 +18,26 @@ namespace DracoFunctions {
     int quantization_bits;
     double quantization_range;
     std::vector<double> quantization_origin;
+
+    bool properly_decoded;
   };
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
+    MeshObject meshObject;
+    meshObject.properly_decoded = false;
     draco::DecoderBuffer decoderBuffer;
     decoderBuffer.Init(buffer, buffer_len);
     draco::Decoder decoder;
     auto statusor = decoder.DecodeMeshFromBuffer(&decoderBuffer);
     if (!statusor.ok()) {
-      throw;
+      return meshObject;
     }
     std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
     draco::Mesh *mesh = in_mesh.get();
     const int pos_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::POSITION);
     if (pos_att_id < 0) {
-      throw;
+      return meshObject;
     }
-    MeshObject meshObject;
     meshObject.points.reserve(3 * mesh->num_points());
     meshObject.faces.reserve(3 * mesh->num_faces());
     const auto *const pos_att = mesh->attribute(pos_att_id);
@@ -60,6 +63,7 @@ namespace DracoFunctions {
           meshObject.encoding_options_set = true;
       }
     }
+    meshObject.properly_decoded = true;
     return meshObject;
   }
 
@@ -70,7 +74,7 @@ namespace DracoFunctions {
     const int pos_att_id =
       mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
 
-    for (std::size_t i = 0; i < faces.size(); i += 3) {
+    for (std::size_t i = 0; i < faces.size() - 3; i += 3) {
       auto point1Index = faces[i]*3;
       auto point2Index = faces[i+1]*3;
       auto point3Index = faces[i+2]*3;
