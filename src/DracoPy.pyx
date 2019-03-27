@@ -62,14 +62,16 @@ class EncodingOptions(object):
     def num_axes(self):
         return 3
 
-# Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
-# Quantization bits should be an integer between 0 and 31
-# Compression level should be an integer between 0 and 10
-# Quantization_range is a float representing the size of the bounding cube for the mesh.
-# By default it is the range of the dimension of the input vertices with greatest range.
-# Quantization_origin is the point in space where the bounding box begins. By default it is
-# a point where each coordinate is the minimum of that coordinate among the input vertices.
 def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None):
+    """
+    Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
+    Quantization bits should be an integer between 0 and 31
+    Compression level should be an integer between 0 and 10
+    Quantization_range is a float representing the size of the bounding cube for the mesh.
+    By default it is the range of the dimension of the input vertices with greatest range.
+    Quantization_origin is the point in space where the bounding box begins. By default it is
+    a point where each coordinate is the minimum of that coordinate among the input vertices.
+    """
     cdef float* quant_origin = NULL
     try:
         num_dims = 3

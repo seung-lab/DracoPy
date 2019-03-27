@@ -74,7 +74,7 @@ namespace DracoFunctions {
     const int pos_att_id =
       mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
 
-    for (std::size_t i = 0; i < faces.size() - 3; i += 3) {
+    for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
       auto point1Index = faces[i]*3;
       auto point2Index = faces[i+1]*3;
       auto point3Index = faces[i+2]*3;
