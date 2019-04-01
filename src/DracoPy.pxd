@@ -3,6 +3,10 @@ from libc.stdint cimport uint32_t
 from libcpp cimport bool
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
+
+    cdef enum decoding_status:
+        successful, not_draco_encoded, no_position_attribute, 
+        failed_during_decoding
     
     cdef struct MeshObject:
         vector[float] points
@@ -17,8 +21,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         double quantization_range
         vector[double] quantization_origin
 
-        # Represents whether mesh was successfully decoded
-        bool properly_decoded
+        # Represents the decoding success or error message
+        decoding_status decode_status
+
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 

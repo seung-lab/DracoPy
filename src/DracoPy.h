@@ -7,6 +7,8 @@
 #include "draco/core/vector_d.h"
 
 namespace DracoFunctions {
+
+  enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
   
   struct MeshObject {
     std::vector<float> points;
@@ -19,23 +21,30 @@ namespace DracoFunctions {
     double quantization_range;
     std::vector<double> quantization_origin;
 
-    bool properly_decoded;
+    decoding_status decode_status;
   };
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
     MeshObject meshObject;
-    meshObject.properly_decoded = false;
     draco::DecoderBuffer decoderBuffer;
     decoderBuffer.Init(buffer, buffer_len);
     draco::Decoder decoder;
     auto statusor = decoder.DecodeMeshFromBuffer(&decoderBuffer);
     if (!statusor.ok()) {
+      std::string status_string = statusor.status().error_msg_string();
+      if (status_string.compare("Not a Draco file.") || status_string.compare("Failed to parse Draco header.")) {
+        meshObject.decode_status = not_draco_encoded;
+      }
+      else {
+        meshObject.decode_status = failed_during_decoding;
+      }
       return meshObject;
     }
     std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
     draco::Mesh *mesh = in_mesh.get();
     const int pos_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::POSITION);
     if (pos_att_id < 0) {
+      meshObject.decode_status = no_position_attribute;
       return meshObject;
     }
     meshObject.points.reserve(3 * mesh->num_points());
@@ -63,7 +72,7 @@ namespace DracoFunctions {
           meshObject.encoding_options_set = true;
       }
     }
-    meshObject.properly_decoded = true;
+    meshObject.decode_status = successful;
     return meshObject;
   }
 

@@ -5,3 +5,5 @@ _skbuild/
 .vscode/
 dist/
 bunny_test.drc
+*secret.json
+__pycache__/

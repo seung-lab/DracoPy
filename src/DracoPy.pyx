@@ -4,6 +4,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
 import struct
 from math import floor
+from libc.string cimport memcmp
 
 class DracoMesh(object):
     def __init__(self, mesh_struct):
@@ -62,6 +63,9 @@ class EncodingOptions(object):
     def num_axes(self):
         return 3
 
+class FileTypeException(Exception):
+    pass
+
 def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
@@ -90,7 +94,11 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
 
 def decode_buffer_to_mesh(buffer):
     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
-    if mesh_struct.properly_decoded:
+    if mesh_struct.decode_status == DracoPy.decoding_status.successful:
         return DracoMesh(mesh_struct)
-    else:
-        raise ValueError('Input is not a valid draco mesh')
+    elif mesh_struct.decode_status == DracoPy.decoding_status.not_draco_encoded:
+        raise FileTypeException('Input mesh is not draco encoded')
+    elif mesh_struct.decode_status == DracoPy.decoding_status.failed_during_decoding:
+        raise TypeError('Failed to decode input mesh. Data might be corrupted')
+    elif mesh_struct.decode_status == DracoPy.decoding_status.no_position_attribute:
+        raise ValueError('DracoPy only supports meshes with position attributes')

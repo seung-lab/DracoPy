@@ -16,6 +16,7 @@ except SKBuildError:
 
 # If you want to re-build the cython cpp file (DracoPy.cpp), run:
 # cython --cplus -3 -I./_skbuild/linux-x86_64-3.6/cmake-install/include/draco/ ./src/DracoPy.pyx
+# Replace "linux-x86_64-3.6" with the directory under _skbuild in your system
 # Draco must already be built/setup.py already be run before running the above command
 
 src_dir = './src'
@@ -25,13 +26,14 @@ extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
 
 setup(
     name='DracoPy',
-    version='0.0.6',
+    version='0.0.7',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro',
     author_email = 'macastro@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     cmake_source_dir='./draco',
     setup_requires=setup_requires,
+    install_requires=['pytest'],
     ext_modules=[
         setuptools.Extension(
             'DracoPy',
