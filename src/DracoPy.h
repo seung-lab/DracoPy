@@ -77,7 +77,7 @@ namespace DracoFunctions {
   }
 
   std::vector<unsigned char> encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces,
-      int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin) {
+      int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
     const int pos_att_id =
@@ -96,20 +96,24 @@ namespace DracoFunctions {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
     std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
-    metadata->AddEntryInt("quantization_bits", quantization_bits);
     if (quantization_origin == NULL || quantization_range == -1) {
       encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
     } 
     else {
       encoder.SetAttributeExplicitQuantization(draco::GeometryAttribute::POSITION, quantization_bits, 3, quantization_origin, quantization_range);
-      metadata->AddEntryDouble("quantization_range", quantization_range);
-      std::vector<double> quantization_origin_vec;
-      for (int i = 0; i < 3; i++) {
-        quantization_origin_vec.push_back(quantization_origin[i]);
+      if (create_metadata) {
+        metadata->AddEntryDouble("quantization_range", quantization_range);
+        std::vector<double> quantization_origin_vec;
+        for (int i = 0; i < 3; i++) {
+          quantization_origin_vec.push_back(quantization_origin[i]);
+        }
+        metadata->AddEntryDoubleArray("quantization_origin", quantization_origin_vec);
       }
-      metadata->AddEntryDoubleArray("quantization_origin", quantization_origin_vec);
     }
-    mesh->AddMetadata(std::move(metadata));
+    if (create_metadata) {
+      metadata->AddEntryInt("quantization_bits", quantization_bits);
+      mesh->AddMetadata(std::move(metadata));
+    }
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
     return *((std::vector<unsigned char> *)buffer.buffer());

@@ -26,7 +26,7 @@ extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
 
 setup(
     name='DracoPy',
-    version='0.0.7',
+    version='0.0.8',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro',
     author_email = 'macastro@princeton.edu',

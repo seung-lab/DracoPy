@@ -28,4 +28,4 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
     vector[unsigned char] encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
-        int compression_level, float quantization_range, const float *quantization_origin) except +
+        int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
