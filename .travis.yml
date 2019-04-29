@@ -2,7 +2,7 @@ language: python
 python:
 - '3.5'
 - '3.6'
-- '3.7'
+- '3.7-dev'
 matrix:
   include:
     - os: linux
@@ -20,6 +20,7 @@ matrix:
     - os: osx
       osx_image: xcode9.4
 before_install:
+- python -m pip install --upgrade pip
 - PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
 - sudo apt-get install python3-pip
 install:

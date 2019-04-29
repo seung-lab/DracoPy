@@ -1,6 +1,6 @@
 [![PyPI version](https://badge.fury.io/py/DracoPy.svg)](https://badge.fury.io/py/DracoPy)
 
-# DracoPy 
+# DracoPy
 
 DracoPy is a Python wrapper for Google's Draco mesh compression library
 
