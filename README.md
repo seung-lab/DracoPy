@@ -4,7 +4,7 @@
 
 DracoPy is a Python wrapper for Google's Draco mesh compression library
 
-Available as a PyPI package: pip install DracoPy
+Available as a PyPI package: pip install DracoPy 
 
 DracoPy requires pip >= 10 and a C++ compiler that is fully compatible with C++11.
 
