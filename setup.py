@@ -1,7 +1,8 @@
 import setuptools
 import os
+import sys
 from skbuild import setup
-from skbuild.constants import CMAKE_INSTALL_DIR
+from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
 from packaging.version import LegacyVersion
 from skbuild.exceptions import SKBuildError
 from skbuild.cmaker import get_cmake_version
@@ -21,7 +22,15 @@ except SKBuildError:
 
 src_dir = './src'
 lib_dir = os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib/'))
-library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
+cmake_args = []
+if sys.platform == 'darwin':
+    plat_name = skbuild_plat_name()
+    first_sep = plat_name.find('-')
+    second_sep = plat_name[first_sep+1:].find('-') + first_sep
+    cmake_args = ['CMAKE_OSX_DEPLOYMENT_TARGET='+plat_name[:second_sep],'CMAKE_OSX_ARCHITECTURES='+plat_name[second_sep+1:]]
+    library_link_args = ['-l{0}'.format(lib) for lib in ('dracoenc', 'draco', 'dracodec')]
+else:
+    library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
 extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
 
 setup(
@@ -32,6 +41,7 @@ setup(
     author_email = 'macastro@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     cmake_source_dir='./draco',
+    cmake_args=cmake_args,
     setup_requires=setup_requires,
     install_requires=['pytest'],
     ext_modules=[
