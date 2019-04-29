@@ -1,0 +1,57 @@
+language: python
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      python: 3.5
+    - os: linux
+      dist: xenial
+      python: 3.6
+    - os: linux
+      dist: xenial
+      python: 3.7
+    - os: osx
+      osx_image: xcode9.4
+      language: shell
+      env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
+      before_install:
+        - export LDFLAGS="-L/usr/local/opt/zlib/lib"
+        - export CPPFLAGS="-I/usr/local/opt/zlib/include"
+    - os: osx
+      osx_image: xcode9.4
+      language: shell
+      env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
+      before_install:
+        - export LDFLAGS="-L/usr/local/opt/zlib/lib"
+        - export CPPFLAGS="-I/usr/local/opt/zlib/include"
+    - os: osx
+      osx_image: xcode9.4
+      language: shell
+      env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
+      before_install:
+        - export LDFLAGS="-L/usr/local/opt/zlib/lib"
+        - export CPPFLAGS="-I/usr/local/opt/zlib/include"
+install:
+- |
+  if [[ -n "$PYENV_VERSION" ]]; then
+    wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
+    source setup-pyenv.sh
+  fi
+- PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
+- pip3 install scikit-build
+- python setup.py develop
+script:
+- pytest -v -x tests.py
+
