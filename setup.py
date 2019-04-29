@@ -25,9 +25,9 @@ lib_dir = os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib/'))
 cmake_args = []
 if sys.platform == 'darwin':
     plat_name = skbuild_plat_name()
-    first_sep = plat_name.find('-')
-    second_sep = plat_name[first_sep+1:].find('-') + first_sep
-    cmake_args = ['CMAKE_OSX_DEPLOYMENT_TARGET='+plat_name[:second_sep],'CMAKE_OSX_ARCHITECTURES='+plat_name[second_sep+1:]]
+    sep = [pos for pos, char in enumerate(plat_name) if char == '-']
+    assert len(sep) == 2
+    cmake_args = ['-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING='+plat_name[sep[0]+1:sep[1]],'-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]]
     library_link_args = ['-l{0}'.format(lib) for lib in ('dracoenc', 'draco', 'dracodec')]
 else:
     library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
@@ -35,7 +35,7 @@ extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
 
 setup(
     name='DracoPy',
-    version='0.0.8',
+    version='0.0.9',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro',
     author_email = 'macastro@princeton.edu',
