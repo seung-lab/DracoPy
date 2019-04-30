@@ -10,8 +10,8 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-        env:
-          - CXX=g++-5
+      env:
+        - CXX=g++-5
     - os: linux
       dist: trusty
       python: 3.6
@@ -21,10 +21,10 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-        env:
-          - CXX=g++-5
+      env:
+        - CXX=g++-5
     - os: linux
-      dist: trusty
+      dist: xenial
       python: 3.7
       addons:
         apt:
@@ -32,8 +32,8 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-        env:
-          - CXX=g++-5
+      env:
+        - CXX=g++-5
     - os: osx
       osx_image: xcode10.2
       language: shell
@@ -44,8 +44,6 @@ before_install:
 - PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
 - pip3 install scikit-build
 install:
-- virtualenv -p python3 venv
-- source venv/bin/activate
 - python3 setup.py develop
 script:
 - python3 -m pytest -v -x tests.py
