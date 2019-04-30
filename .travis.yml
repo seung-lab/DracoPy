@@ -2,49 +2,47 @@ language: python
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: xenial
       python: 3.5
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-        - CXX=g++-5
     - os: linux
-      dist: trusty
+      dist: xenial
       python: 3.6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-        - CXX=g++-5
     - os: linux
       dist: xenial
       python: 3.7
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-        - CXX=g++-5
-    - os: osx
-      osx_image: xcode10.2
-      language: shell
     - os: osx
       osx_image: xcode9.4
       language: shell
+      env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
+    - os: osx
+      osx_image: xcode9.4
+      language: shell
+      env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
+    - os: osx
+      osx_image: xcode9.4
+      language: shell
+      env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
+    - os: osx
+      osx_image: xcode10.2
+      language: shell
+      env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
 before_install:
+- if [[ -n "$PYENV_VERSION" ]]; then
+    wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
+    source setup-pyenv.sh
+  fi
 - PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
 - pip3 install scikit-build
 install:
-- python3 setup.py develop
+- python setup.py develop
 script:
-- python3 -m pytest -v -x tests.py
+- pytest -v -x tests.py
 
