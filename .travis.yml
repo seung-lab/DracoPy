@@ -35,10 +35,11 @@ matrix:
       language: shell
       env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
 before_install:
-- if [[ -n "$PYENV_VERSION" ]]; then
-    wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
-    source setup-pyenv.sh
-  fi
+- |
+    if [[ -n "$PYENV_VERSION" ]]; then
+      wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
+      source setup-pyenv.sh
+    fi
 - PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
 - pip3 install scikit-build
 install:
