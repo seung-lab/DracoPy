@@ -9,6 +9,6 @@ Available as a PyPI package: pip install DracoPy
 
 DracoPy requires pip >= 10 and a C++ compiler that is fully compatible with C++11.
 
-It supports Linux and OS X, but installation is currently broken on OS X.
+It supports Linux and OS X.
 
 An example of usage is given in example.py.
