@@ -49,7 +49,6 @@ install:
     wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
     source setup-pyenv.sh
   fi
-- PYTHON_MAJOR_VERSION=`echo $TRAVIS_PYTHON_VERSION | head -c 1`
 - pip3 install scikit-build
 - python setup.py develop
 script:
@@ -62,5 +61,6 @@ deploy:
   on:
     tags: true
     branch: travis-pypi
+    condition: -n "$PYENV_VERSION"
   password:
     secure: BAWEWE8/grPOchNaJb3ex+A5H4aT/OcSFj8TKJHfmmI6TXNI5QiJvPfGMszp+GD5oD0/wNdSz4K9Dr2KhsbNQ2p83KE0mHZGR+efWZrduBTYPZqtfIbSgHQbFFKcZjq0ybjzP/+ns13GMC8kkvY0T4BXaF6Vs7coURp+EBo5AFI8DVCMiAfjP8xvwtzlO7WOgNensiOGdUEe0uFJjIMbRslIo8tL0vdxmC92bVTO8a14A5+X9L9D2dFtoqrsoUj9YpCQBuaMECJGik3obsIg2Yy7d4g7vVnXygwYrOQoLa42l2ab4xv6KPySFfBgV7JSARl53DNdpI/ZJNAigdQwncbsDBjabnF9NHyLv/7zgqtzCLbkRm2S4/akGFbkQVW+vL9ZxSqSMSAbX6OqnFI5CMo5TjO7qF1qQSlYOVoH4wSwiXK/0EbQSEmR6tiU1G/TAtazUV+b46yD7/7nA5gbZtR+8fdeqXHj2qJgg4EcybN1EyX2QTnK8SdqcR6jLgiNcRLEESuCsb64hyzEc4mjc6Bola/VWjwMGpfSx1wRGyErMhn5V9uh9hEhG6R7z85Dch2SH7YojTkc8yAksYzOERHZnFTRqUn6QyJc6TJVE9QXIPl8fFuG6P+BhxfdkWVSo35DCkzc43GtfNnmh4AmFtyC3YecOqmlbeh2StweSC8=
