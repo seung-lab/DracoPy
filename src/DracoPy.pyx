@@ -66,6 +66,9 @@ class EncodingOptions(object):
 class FileTypeException(Exception):
     pass
 
+class EncodingFailedException(Exception):
+    pass
+
 def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
@@ -83,10 +86,15 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encodedMesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
+        encoded_mesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
-        return bytes(encodedMesh)
+        if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
+            return bytes(encoded_mesh.buffer)
+        elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+            raise EncodingFailedException('Invalid mesh')
+    except EncodingFailedException:
+        raise EncodingFailedException('Invalid mesh')
     except:
         if quant_origin != NULL:
             PyMem_Free(quant_origin)

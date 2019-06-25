@@ -9,6 +9,7 @@
 namespace DracoFunctions {
 
   enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
+  enum encoding_status { successful_encoding, failed_during_encoding };
   
   struct MeshObject {
     std::vector<float> points;
@@ -22,6 +23,11 @@ namespace DracoFunctions {
     std::vector<double> quantization_origin;
 
     decoding_status decode_status;
+  };
+
+  struct EncodedMeshObject {
+    std::vector<unsigned char> buffer;
+    encoding_status encode_status;
   };
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
@@ -76,7 +82,7 @@ namespace DracoFunctions {
     return meshObject;
   }
 
-  std::vector<unsigned char> encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces,
+  EncodedMeshObject encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces,
       int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
@@ -116,6 +122,14 @@ namespace DracoFunctions {
     }
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
-    return *((std::vector<unsigned char> *)buffer.buffer());
+    EncodedMeshObject encodedMeshObject;
+    encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
+    if (status.ok()) {
+      encodedMeshObject.encode_status = successful_encoding;
+    } else {
+      std::cout << "Draco encoding error: " << status.error_msg_string() << std::endl;
+      encodedMeshObject.encode_status = failed_during_encoding;
+    }
+    return encodedMeshObject;
   }
 }
