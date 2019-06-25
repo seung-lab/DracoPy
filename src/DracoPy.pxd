@@ -7,6 +7,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     cdef enum decoding_status:
         successful, not_draco_encoded, no_position_attribute, 
         failed_during_decoding
+
+    cdef enum encoding_status:
+        successful_encoding, failed_during_encoding
     
     cdef struct MeshObject:
         vector[float] points
@@ -24,8 +27,11 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         # Represents the decoding success or error message
         decoding_status decode_status
 
+    cdef struct EncodedMeshObject:
+        vector[unsigned char] buffer
+        encoding_status encode_status
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
-    vector[unsigned char] encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
+    EncodedMeshObject encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
