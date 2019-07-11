@@ -90,7 +90,7 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
-            return bytes(encoded_mesh.buffer)
+            return bytearray(encoded_mesh.buffer)
         elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
             raise EncodingFailedException('Invalid mesh')
     except EncodingFailedException:

@@ -1,45 +1,14 @@
 language: python
 matrix:
   include:
-  - os: linux
-    dist: xenial
-    python: 3.5
-  - os: linux
-    dist: xenial
-    python: 3.6
-  - os: linux
-    dist: xenial
-    python: 3.7
   - os: osx
     osx_image: xcode9.4
     language: shell
-    env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
+    env: PYENV_VERSION='2.7.16' PYENV_VERSION_STRING='Python 2.7.16'
   - os: osx
     osx_image: xcode10.2
     language: shell
-    env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
-    before_install:
-    - export LDFLAGS="-L/usr/local/opt/zlib/lib"
-    - export CPPFLAGS="-I/usr/local/opt/zlib/include"
-  - os: osx
-    osx_image: xcode9.4
-    language: shell
-    env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
-  - os: osx
-    osx_image: xcode10.2
-    language: shell
-    env: PYENV_VERSION='3.6.7' PYENV_VERSION_STRING='Python 3.6.7'
-    before_install:
-    - export LDFLAGS="-L/usr/local/opt/zlib/lib"
-    - export CPPFLAGS="-I/usr/local/opt/zlib/include"
-  - os: osx
-    osx_image: xcode9.4
-    language: shell
-    env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
-  - os: osx
-    osx_image: xcode10.2
-    language: shell
-    env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
+    env: PYENV_VERSION='2.7.16' PYENV_VERSION_STRING='Python 2.7.16'
     before_install:
     - export LDFLAGS="-L/usr/local/opt/zlib/lib"
     - export CPPFLAGS="-I/usr/local/opt/zlib/include"
@@ -49,7 +18,7 @@ install:
     wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.4.0/setup-pyenv.sh
     source setup-pyenv.sh
   fi
-- pip3 install scikit-build
+- pip install scikit-build pytest
 - python setup.py develop
 script:
 - pytest -v -x tests.py
@@ -60,7 +29,7 @@ deploy:
   skip_existing: true
   on:
     tags: true
-    branch: master
+    branch: python2.7
     condition: -n "$PYENV_VERSION"
   password:
     secure: BAWEWE8/grPOchNaJb3ex+A5H4aT/OcSFj8TKJHfmmI6TXNI5QiJvPfGMszp+GD5oD0/wNdSz4K9Dr2KhsbNQ2p83KE0mHZGR+efWZrduBTYPZqtfIbSgHQbFFKcZjq0ybjzP/+ns13GMC8kkvY0T4BXaF6Vs7coURp+EBo5AFI8DVCMiAfjP8xvwtzlO7WOgNensiOGdUEe0uFJjIMbRslIo8tL0vdxmC92bVTO8a14A5+X9L9D2dFtoqrsoUj9YpCQBuaMECJGik3obsIg2Yy7d4g7vVnXygwYrOQoLa42l2ab4xv6KPySFfBgV7JSARl53DNdpI/ZJNAigdQwncbsDBjabnF9NHyLv/7zgqtzCLbkRm2S4/akGFbkQVW+vL9ZxSqSMSAbX6OqnFI5CMo5TjO7qF1qQSlYOVoH4wSwiXK/0EbQSEmR6tiU1G/TAtazUV+b46yD7/7nA5gbZtR+8fdeqXHj2qJgg4EcybN1EyX2QTnK8SdqcR6jLgiNcRLEESuCsb64hyzEc4mjc6Bola/VWjwMGpfSx1wRGyErMhn5V9uh9hEhG6R7z85Dch2SH7YojTkc8yAksYzOERHZnFTRqUn6QyJc6TJVE9QXIPl8fFuG6P+BhxfdkWVSo35DCkzc43GtfNnmh4AmFtyC3YecOqmlbeh2StweSC8=
