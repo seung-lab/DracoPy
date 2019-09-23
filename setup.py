@@ -10,10 +10,11 @@ from skbuild.cmaker import get_cmake_version
 # Add CMake as a build requirement if cmake is not installed or is too low a version
 setup_requires = []
 try:
-    if LegacyVersion(get_cmake_version()) < LegacyVersion("3.5"):
-        setup_requires.append('cmake')
+    cmake_version = LegacyVersion(get_cmake_version())
+    if cmake_version < LegacyVersion("3.5") or cmake_version >= LegacyVersion("3.15"):
+        setup_requires.append('cmake<3.15')
 except SKBuildError:
-    setup_requires.append('cmake')
+    setup_requires.append('cmake<3.15')
 
 # If you want to re-build the cython cpp file (DracoPy.cpp), run:
 # cython --cplus -3 -I./_skbuild/linux-x86_64-3.6/cmake-install/include/draco/ ./src/DracoPy.pyx
@@ -35,7 +36,7 @@ extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
 
 setup(
     name='DracoPy',
-    version='0.0.11',
+    version='0.0.14',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro',
     author_email = 'macastro@princeton.edu',
