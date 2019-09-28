@@ -27,11 +27,32 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         # Represents the decoding success or error message
         decoding_status decode_status
 
+    cdef struct PointCloudObject:
+        vector[float] points
+
+        # Encoding options
+        bool encoding_options_set
+        int quantization_bits
+        double quantization_range
+        vector[double] quantization_origin
+
+        # Represents the decoding success or error message
+        decoding_status decode_status
+
     cdef struct EncodedMeshObject:
+        vector[unsigned char] buffer
+        encoding_status encode_status
+
+    cdef struct EncodedPointCloudObject:
         vector[unsigned char] buffer
         encoding_status encode_status
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
+    PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
+
     EncodedMeshObject encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
+        int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
+    
+    EncodedPointCloudObject encode_point_cloud(vector[float] points, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
