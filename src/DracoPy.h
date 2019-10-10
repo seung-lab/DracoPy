@@ -151,7 +151,7 @@ namespace DracoFunctions {
     return encodedMeshObject;
   }
 
-  EncodedPointCloudObject encode_point_cloud(const std::vector<float> &points, bool position, bool sequential, int quantization_bits,
+  EncodedPointCloudObject encode_point_cloud(const std::vector<float> &points, bool position, bool sequential, bool removeDuplicates, int quantization_bits,
       int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
 
 
@@ -175,6 +175,7 @@ namespace DracoFunctions {
         pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());  
       }
 
+
     } else {
 
       const int gen_att_id =
@@ -184,13 +185,11 @@ namespace DracoFunctions {
         pcb.SetAttributeValueForPoint(gen_att_id, i, points.data() + i.value());  
       }
 
-      // pcb.SetAttributeValuesForAllPoints(gen_att_id, &points, 0);
-
     }
 
 
 
-    std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(true);
+    std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(removeDuplicates);
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
 
     draco::Encoder encoder;
@@ -233,7 +232,7 @@ namespace DracoFunctions {
 
     if (sequential) {
       encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
-      encoder.options().SetGlobalInt("encoding_method", draco::POINT_CLOUD_SEQUENTIAL_ENCODING);    
+      // encoder.options().SetGlobalInt("encoding_method", draco::POINT_CLOUD_SEQUENTIAL_ENCODING);    
     }
 
     const draco::Status status = encoder.EncodePointCloudToBuffer(*point_cloud, &buffer);
