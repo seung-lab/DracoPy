@@ -136,7 +136,7 @@ def decode_buffer_to_mesh(buffer):
     elif mesh_struct.decode_status == DracoPy.decoding_status.no_position_attribute:
         raise ValueError('DracoPy only supports meshes with position attributes')
 
-def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
+def encode_point_cloud_to_buffer(points, position=True, sequential=True, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -153,7 +153,7 @@ def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encoded_point_cloud = DracoPy.encode_point_cloud(points, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
+        encoded_point_cloud = DracoPy.encode_point_cloud(points, position, sequential, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:

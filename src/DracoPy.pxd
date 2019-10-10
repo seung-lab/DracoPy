@@ -54,5 +54,5 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     EncodedMeshObject encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
     
-    EncodedPointCloudObject encode_point_cloud(vector[float] points, int quantization_bits,
+    EncodedPointCloudObject encode_point_cloud(vector[float] points, bool position, bool sequential, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
