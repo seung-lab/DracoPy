@@ -6,12 +6,12 @@ import struct
 from math import floor
 from libc.string cimport memcmp
 
-class DracoMesh(object):
-    def __init__(self, mesh_struct):
-        self.mesh_struct = mesh_struct
-        if mesh_struct['encoding_options_set']:
-            self.encoding_options = EncodingOptions(mesh_struct['quantization_bits'],
-                mesh_struct['quantization_range'], mesh_struct['quantization_origin'])
+class DracoPointCloud(object):
+    def __init__(self, data_struct):
+        self.data_struct = data_struct
+        if data_struct['encoding_options_set']:
+            self.encoding_options = EncodingOptions(data_struct['quantization_bits'],
+                data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
     
@@ -29,40 +29,16 @@ class DracoMesh(object):
 
     @property
     def points(self):
-        return self.mesh_struct['points']
+        return self.data_struct['points']
 
+class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
-        return self.mesh_struct['faces']
+        return self.data_struct['faces']
 
     @property
     def normals(self):
-        return self.mesh_struct['normals']
-
-class DracoPointCloud(object):
-    def __init__(self, point_cloud_struct):
-        self.point_cloud_struct = point_cloud_struct
-        if point_cloud_struct['encoding_options_set']:
-            self.encoding_options = EncodingOptions(point_cloud_struct['quantization_bits'],
-                point_cloud_struct['quantization_range'], point_cloud_struct['quantization_origin'])
-        else:
-            self.encoding_options = None
-    
-    def get_encoded_coordinate(self, value, axis):
-        if self.encoding_options is not None:
-            return self.encoding_options.get_encoded_coordinate(value, axis)
-
-    def get_encoded_point(self, point):
-        if self.encoding_options is not None:
-            return self.encoding_options.get_encoded_point(point)
-
-    @property
-    def num_axes(self):
-        return 3
-
-    @property
-    def points(self):
-        return self.point_cloud_struct['points']
+        return self.data_struct['normals']
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -125,17 +101,6 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")
 
-def decode_buffer_to_mesh(buffer):
-    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
-    if mesh_struct.decode_status == DracoPy.decoding_status.successful:
-        return DracoMesh(mesh_struct)
-    elif mesh_struct.decode_status == DracoPy.decoding_status.not_draco_encoded:
-        raise FileTypeException('Input mesh is not draco encoded')
-    elif mesh_struct.decode_status == DracoPy.decoding_status.failed_during_decoding:
-        raise TypeError('Failed to decode input mesh. Data might be corrupted')
-    elif mesh_struct.decode_status == DracoPy.decoding_status.no_position_attribute:
-        raise ValueError('DracoPy only supports meshes with position attributes')
-
 def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
@@ -159,21 +124,32 @@ def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level
         if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
             return bytes(encoded_point_cloud.buffer)
         elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
-            raise EncodingFailedException('Invalid mesh')
+            raise EncodingFailedException('Invalid point cloud')
     except EncodingFailedException:
-        raise EncodingFailedException('Invalid mesh')
+        raise EncodingFailedException('Invalid point cloud')
     except:
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")
 
+def raise_decoding_error(decoding_status):
+    if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+        raise FileTypeException('Input mesh is not draco encoded')
+    elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+        raise TypeError('Failed to decode input mesh. Data might be corrupted')
+    elif decoding_status == DracoPy.decoding_status.no_position_attribute:
+        raise ValueError('DracoPy only supports meshes with position attributes')
+
+def decode_buffer_to_mesh(buffer):
+    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+    if mesh_struct.decode_status == DracoPy.decoding_status.successful:
+        return DracoMesh(mesh_struct)
+    else:
+        raise_decoding_error(mesh_struct.decode_status)
+
 def decode_point_cloud_buffer(buffer):
     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
-        return DracoMesh(point_cloud_struct)
-    elif point_cloud_struct.decode_status == DracoPy.decoding_status.not_draco_encoded:
-        raise FileTypeException('Input point cloud is not draco encoded')
-    elif point_cloud_struct.decode_status == DracoPy.decoding_status.failed_during_decoding:
-        raise TypeError('Failed to decode input point cloud. Data might be corrupted')
-    elif point_cloud_struct.decode_status == DracoPy.decoding_status.no_position_attribute:
-        raise ValueError('DracoPy only supports point clouds with position attributes')
+        return DracoPointCloud(point_cloud_struct)
+    else:
+        raise_decoding_error(point_cloud_struct.decode_status)

@@ -16,7 +16,7 @@ def test_decoding_and_encoding_mesh_file():
         encoding_test = DracoPy.encode_mesh_to_buffer(
             mesh_object.points, mesh_object.faces
         )
-        with open("bunny_test.drc", "wb") as test_file:
+        with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
             test_file.write(encoding_test)
 
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "rb") as test_file:
