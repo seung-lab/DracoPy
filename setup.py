@@ -30,9 +30,22 @@ if sys.platform == 'darwin':
     assert len(sep) == 2
     cmake_args = ['-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING='+plat_name[sep[0]+1:sep[1]],'-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]]
     library_link_args = ['-l{0}'.format(lib) for lib in ('dracoenc', 'draco', 'dracodec')]
+elif sys.platform == 'win32':
+    library_link_args = ['{0}'.format(lib) for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')]
 else:
-    library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
-extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
+    library_link_args = ['-l{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
+
+if sys.platform == 'win32':
+    extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)]+ library_link_args
+    extra_compile_args = [
+              '/std:c++17','-O3'
+            ]
+else:
+    extra_link_args = ['-L{0}'.format(lib_dir)] 
+    extra_compile_args = [
+              '-std=c++11','-O3'
+            ]
+if sys.platform == 'win32':
 
 setup(
     name='DracoPy',
@@ -52,9 +65,7 @@ setup(
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
             include_dirs = [ os.path.join(CMAKE_INSTALL_DIR(), 'include/')],
-            extra_compile_args=[
-              '-std=c++11','-O3'
-            ],
+            extra_compile_args=extra_compile_args,
             extra_link_args=extra_link_args
         )
     ]
