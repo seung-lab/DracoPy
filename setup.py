@@ -33,15 +33,15 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
     library_link_args = ['{0}'.format(lib) for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')]
 else:
-    library_link_args = ['-l{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
+    library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
 
 if sys.platform == 'win32':
-    extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)]+ library_link_args
+    extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
               '/std:c++17','-O3'
             ]
 else:
-    extra_link_args = ['-L{0}'.format(lib_dir)] 
+    extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
               '-std=c++11','-O3'
             ]
@@ -49,7 +49,7 @@ else:
 
 setup(
     name='DracoPy',
-    version='0.0.14',
+    version='0.0.15',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro',
     author_email = 'macastro@princeton.edu',
