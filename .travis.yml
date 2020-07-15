@@ -10,6 +10,9 @@ matrix:
   - os: linux
     dist: xenial
     python: 3.7
+  - os: linux
+    dist: xenial
+    python: 3.8
   - os: osx
     osx_image: xcode9.4
     language: shell
@@ -40,6 +43,17 @@ matrix:
     osx_image: xcode10.2
     language: shell
     env: PYENV_VERSION='3.7.2' PYENV_VERSION_STRING='Python 3.7.2'
+    before_install:
+    - export LDFLAGS="-L/usr/local/opt/zlib/lib"
+    - export CPPFLAGS="-I/usr/local/opt/zlib/include"
+  - os: osx
+    osx_image: xcode9.4
+    language: shell
+    env: PYENV_VERSION='3.8.1' PYENV_VERSION_STRING='Python 3.8.1'
+  - os: osx
+    osx_image: xcode10.2
+    language: shell
+    env: PYENV_VERSION='3.8.1' PYENV_VERSION_STRING='Python 3.8.1'
     before_install:
     - export LDFLAGS="-L/usr/local/opt/zlib/lib"
     - export CPPFLAGS="-I/usr/local/opt/zlib/include"
