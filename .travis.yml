@@ -3,9 +3,6 @@ matrix:
   include:
   - os: linux
     dist: xenial
-    python: 3.5
-  - os: linux
-    dist: xenial
     python: 3.6
   - os: linux
     dist: xenial
@@ -16,17 +13,6 @@ matrix:
   - os: linux
     dist: xenial
     python: 3.9
-  - os: osx
-    osx_image: xcode9.4
-    language: shell
-    env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
-  - os: osx
-    osx_image: xcode10.2
-    language: shell
-    env: PYENV_VERSION='3.5.6' PYENV_VERSION_STRING='Python 3.5.6'
-    before_install:
-    - export LDFLAGS="-L/usr/local/opt/zlib/lib"
-    - export CPPFLAGS="-I/usr/local/opt/zlib/include"
   - os: osx
     osx_image: xcode9.4
     language: shell

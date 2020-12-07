@@ -7,10 +7,11 @@ DracoPy is a Python wrapper for Google's Draco mesh compression library
 
 Available as a PyPI package: pip install DracoPy 
 
-DracoPy requires Python >= 3.5, pip >= 10, and a C++ compiler that is fully compatible with C++11.
+Binary wheels are available for users with Python >= 3.6 and pip >= 20.
 
-It supports Linux and OS X. 
+Installation from source requires Python >= 3.6, pip >= 10, and a C++ compiler that is fully compatible with C++11.
 
-Windows installation is currently broken, and it is recommended that Windows users use the Windows Subsystem for Linux instead.
+It supports Linux, OS X, and Windows. Windows 3.9 wheels are currently missing until Appveyor supports it, so
+Windows users are recommended to use Python <= 3.8. 
 
 An example of usage is given in example.py.
