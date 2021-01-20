@@ -32,7 +32,17 @@ if sys.platform == 'darwin':
     plat_name = skbuild_plat_name()
     sep = [pos for pos, char in enumerate(plat_name) if char == '-']
     assert len(sep) == 2
-    cmake_args = ['-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING='+plat_name[sep[0]+1:sep[1]],'-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]]
+    macosx, macos_version, arch = plat_name.split("-") # e.g. macosx-11.1-arm64
+    major, minor = [ int(_) for _ in macos_version.split(".") ]
+    if major == 10:
+        macos_version = "10.9" # minimum version
+    elif major >= 11:
+        macos_version = "11.0"
+
+    cmake_args = [
+        f'-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING={macos_version}',
+        f'-DCMAKE_OSX_ARCHITECTURES:STRING={arch}'
+    ]
     library_link_args = ['-l{0}'.format(lib) for lib in ('dracoenc', 'draco', 'dracodec')]
 elif sys.platform == 'win32':
     library_link_args = ['{0}'.format(lib) for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')]
