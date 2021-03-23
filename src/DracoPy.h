@@ -61,8 +61,8 @@ namespace DracoFunctions {
     meshObject.faces.reserve(3 * mesh->num_faces());
     const auto *const pos_att = mesh->attribute(pos_att_id);
     std::array<float, 3> pos_val;
-    for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(pos_att->size()); ++i) {
-      if (!pos_att->ConvertValue<float, 3>(i, &pos_val[0])) {
+    for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
+      if (!pos_att->ConvertValue<float, 3>(pos_att->mapped_index(v), &pos_val[0])) {
         meshObject.decode_status = no_position_attribute;
         return meshObject;
       }
@@ -115,8 +115,8 @@ namespace DracoFunctions {
     pointCloudObject.points.reserve(3 * point_cloud->num_points());
     const auto *const pos_att = point_cloud->attribute(pos_att_id);
     std::array<float, 3> pos_val;
-    for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(pos_att->size()); ++i) {
-      if (!pos_att->ConvertValue<float, 3>(i, &pos_val[0])) {
+    for (draco::PointIndex v(0); v < point_cloud->num_points(); ++v) {
+      if (!pos_att->ConvertValue<float, 3>(pos_att->mapped_index(v), &pos_val[0])) {
         pointCloudObject.decode_status = no_position_attribute;
         return pointCloudObject;
       }
