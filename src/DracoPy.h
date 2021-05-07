@@ -8,8 +8,7 @@
 #include "draco/point_cloud/point_cloud_builder.h"
 
 namespace DracoFunctions {
-
-  enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
+  enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding, no_tex_coord_attribute, no_normal_coord_attribute };
   enum encoding_status { successful_encoding, failed_during_encoding };
 
   struct PointCloudObject {
@@ -27,6 +26,7 @@ namespace DracoFunctions {
   struct MeshObject : PointCloudObject {
     std::vector<float> normals;
     std::vector<unsigned int> faces;
+    std::vector<float> tex_coord;
   };
 
   struct EncodedObject {
@@ -35,11 +35,18 @@ namespace DracoFunctions {
   };
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
+
+    std::cout << "Decode Buffer" << "Begin" << std::endl;
+
     MeshObject meshObject;
     draco::DecoderBuffer decoderBuffer;
     decoderBuffer.Init(buffer, buffer_len);
     draco::Decoder decoder;
+
     auto statusor = decoder.DecodeMeshFromBuffer(&decoderBuffer);
+
+    std::cout << "Decode Buffer " << "Status : "<< std::boolalpha << statusor.ok() << std::endl;
+
     if (!statusor.ok()) {
       std::string status_string = statusor.status().error_msg_string();
       if (status_string.compare("Not a Draco file.") || status_string.compare("Failed to parse Draco header.")) {
@@ -50,15 +57,27 @@ namespace DracoFunctions {
       }
       return meshObject;
     }
+
     std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
     draco::Mesh *mesh = in_mesh.get();
+    //Position Attribute ID
     const int pos_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::POSITION);
+    std::cout << "Decode Buffer " << "Attribute Position : " << pos_att_id << std::endl;
+
+
+
     if (pos_att_id < 0) {
       meshObject.decode_status = no_position_attribute;
       return meshObject;
     }
+
+    std::cout << "Decode Buffer " << "Mesh Number Points : " << 3 * mesh->num_points() << std::endl;
     meshObject.points.reserve(3 * mesh->num_points());
+    std::cout << "Decode Buffer " << "Mesh Number Faces : " << 3 * mesh->num_faces() << std::endl;
     meshObject.faces.reserve(3 * mesh->num_faces());
+
+
+
     const auto *const pos_att = mesh->attribute(pos_att_id);
     std::array<float, 3> pos_val;
     for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
@@ -76,6 +95,40 @@ namespace DracoFunctions {
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[1]))));
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[2]))));
     }
+
+    const int tex_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::TEX_COORD);
+    if(tex_att_id >= 0) {
+
+        const auto *const tex_att = mesh->attribute(tex_att_id);
+        meshObject.tex_coord.reserve(tex_att->size());
+        std::array<float, 2> tex_val;
+        std::cout << "Decode Buffer " << "Attribute Tex Coord : " << tex_att->size() << std::endl;
+
+        for (draco::PointIndex v(0); v < tex_att->size(); ++v) {
+            if (!tex_att->ConvertValue<float, 2>(tex_att->mapped_index(v), &tex_val[0])) {
+                std::cout << "Convert Error" << std::endl;
+                meshObject.decode_status = no_tex_coord_attribute;
+                }
+            meshObject.tex_coord.push_back(tex_val[0]);
+            meshObject.tex_coord.push_back(tex_val[1]);
+      }
+    }
+
+    const int normal_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::NORMAL);
+    const auto *const normal_att = mesh->attribute(normal_att_id);
+    meshObject.normals.reserve(normal_att->size());
+    std::array<float, 3> normal_val;
+    std::cout << "Decode Buffer" << "Attribute Normal Coord : " << normal_att->size() << std::endl;
+    for (draco::PointIndex v(0); v < normal_att->size(); ++v){
+        if (!normal_att->ConvertValue<float, 3>(normal_att->mapped_index(v), &normal_val[0])){
+            std::cout << "Convert Error" << std::endl;
+            meshObject.decode_status = no_normal_coord_attribute;
+            }
+        meshObject.normals.push_back(normal_val[0]);
+        meshObject.normals.push_back(normal_val[1]);
+        meshObject.normals.push_back(normal_val[3]);
+        }
+
     const draco::GeometryMetadata *metadata = mesh->GetMetadata();
     meshObject.encoding_options_set = false;
     if (metadata) {
@@ -161,12 +214,13 @@ namespace DracoFunctions {
     }
   }
 
-  EncodedObject encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces,
-      int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
+  EncodedObject encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces, const std::vector<float> &normals, int quantization_bits,
+  int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
-    const int pos_att_id =
-      mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
+
+    const int pos_att_id = mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32); //attribute_type, num_components, data_type
+   std::cout << "POSITION :" << pos_att_id << std::endl;
 
     for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
       auto point1Index = faces[i]*3;
@@ -174,6 +228,9 @@ namespace DracoFunctions {
       auto point3Index = faces[i+2]*3;
       mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), draco::Vector3f(points[point1Index], points[point1Index+1], points[point1Index+2]).data(), draco::Vector3f(points[point2Index], points[point2Index+1], points[point2Index+2]).data(), draco::Vector3f(points[point3Index], points[point3Index+1], points[point3Index+2]).data());
     }
+
+    const int tex_att_id = mb.AddAttribute(draco::GeometryAttribute::TEX_COORD, 2, draco::DataType::DT_FLOAT32);
+    std::cout << "TEX_COORD :" << tex_att_id << std::endl;
 
     std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
     draco::Mesh *mesh = ptr_mesh.get();
@@ -183,6 +240,7 @@ namespace DracoFunctions {
     const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
     EncodedObject encodedMeshObject;
     encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
+
     if (status.ok()) {
       encodedMeshObject.encode_status = successful_encoding;
     } else {
@@ -199,7 +257,6 @@ namespace DracoFunctions {
     pcb.Start(num_points);
     const int pos_att_id =
       pcb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
-
     for (draco::PointIndex i(0); i < num_points; i++) {
       pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());  
     }

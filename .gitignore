@@ -1,7 +1,10 @@
 DracoPy.egg-info/
 MANIFEST
 _skbuild/
+venv/*
+.eggs/*
 *.so
+.idea/
 .vscode/
 dist/
 bunny_test.drc

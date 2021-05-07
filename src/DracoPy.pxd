@@ -26,9 +26,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     cdef struct MeshObject:
         vector[float] points
         vector[unsigned int] faces
-
-        # TODO: add support for normals, which are not currently supported.
         vector[float] normals
+        vector[float] tex_coord
 
         # Encoding options
         bool encoding_options_set
@@ -47,8 +46,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
 
-    EncodedObject encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
+    EncodedObject encode_mesh(vector[float] points, vector[uint32_t] faces, vector[float] normals, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
-    
+
     EncodedObject encode_point_cloud(vector[float] points, int quantization_bits,
         int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +

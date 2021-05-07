@@ -15,10 +15,10 @@ def read(fname):
 setup_requires = []
 try:
     cmake_version = LegacyVersion(get_cmake_version())
-    if cmake_version < LegacyVersion("3.5") or cmake_version >= LegacyVersion("3.15"):
-        setup_requires.append('cmake<3.15')
+    if cmake_version < LegacyVersion("3.5") or cmake_version >= LegacyVersion("3.20"):
+        setup_requires.append('cmake<3.20')
 except SKBuildError:
-    setup_requires.append('cmake<3.15')
+    setup_requires.append('cmake<3.20')
 
 # If you want to re-build the cython cpp file (DracoPy.cpp), run:
 # cython --cplus -3 -I./_skbuild/linux-x86_64-3.6/cmake-install/include/draco/ ./src/DracoPy.pyx
@@ -50,12 +50,11 @@ else:
               '-std=c++11','-O3'
             ]
 
-
 setup(
     name='DracoPy',
     version='0.0.19',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
-    author = 'Manuel Castro',
+    author = 'Manuel Castro :: Contributors :: Fatih Erol, Faru Nuri Sonmez',
     author_email = 'macastro@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     long_description=read('README.md'),
@@ -69,7 +68,7 @@ setup(
         setuptools.Extension(
             'DracoPy',
             sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
-            depends=[ os.path.join(src_dir, 'DracoPy.h') ],
+            depends=[ os.path.join(src_dir, 'DracoPy.h'), os.path.join(src_dir, 'DracoPy.pyx')],
             language='c++',
             include_dirs = [ os.path.join(CMAKE_INSTALL_DIR(), 'include/')],
             extra_compile_args=extra_compile_args,

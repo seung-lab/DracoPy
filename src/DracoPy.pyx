@@ -40,6 +40,10 @@ class DracoMesh(DracoPointCloud):
     def normals(self):
         return self.data_struct['normals']
 
+    @property
+    def tex_coord(self):
+        return self.data_struct['tex_coord']
+
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
         self.quantization_bits = quantization_bits
@@ -70,7 +74,7 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
+def encode_mesh_to_buffer(points, faces, normals, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -87,7 +91,7 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encoded_mesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
+        encoded_mesh = DracoPy.encode_mesh(points, faces, normals, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
