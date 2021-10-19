@@ -1,10 +1,97 @@
 # distutils: language = c++
+import typing
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
-import struct
 from math import floor
 from libc.string cimport memcmp
+
+
+class _Reader:
+    def __init__(self, in_bytes: bytes):
+        self._in_bytes = in_bytes
+        self._pos = 0
+
+    @staticmethod
+    def __get_endian() -> str:
+        endian_order = get_endian_order()
+        if endian_order == DracoPy.endian_order.little_endian:
+            return "little"
+        elif endian_order == DracoPy.endian_order.big_endian:
+            return "big"
+        else:
+            raise Exception("unknown endian order")
+
+    def __read_bytes(self, count: int) -> bytes:
+        end = self._pos + count
+        result_bytes = self._in_bytes[self._pos:end]
+        self._pos = end
+        return result_bytes
+
+    def read_uint(self) -> int:
+        value = int.from_bytes(self.__read_bytes(4),
+                               byteorder=self.__get_endian(), signed=False)
+        return value
+
+    def read_str(self) -> str:
+        count = self.read_uint()
+        return self.__read_bytes(count).decode()
+
+    def read_bytes(self) -> bytes:
+        count = self.read_uint()
+        return self.__read_bytes(count)
+
+    def is_end(self) -> bool:
+        return len(self._in_bytes) == self._pos
+
+
+class MetadataObject:
+    def __init__(self, entries: typing.Dict[str, bytes] = None,
+                 sub_metadatas: typing.Dict[str, 'MetadataObject'] = None):
+        self.entries = entries if entries else {}
+        self.sub_metadatas = sub_metadatas if sub_metadatas else {}
+
+
+class GeometryMetadataObject(MetadataObject):
+    def __init__(self, entries: typing.Dict[str, bytes] = None,
+                 sub_metadatas: typing.Dict[str, 'MetadataObject'] = None,
+                 attribute_metadatas: typing.List['MetadataObject'] = None):
+        super().__init__(entries, sub_metadatas)
+        self.attribute_metadatas = attribute_metadatas if attribute_metadatas \
+            else []
+
+
+def _parse_binary_metadata(binary_metadata: bytes) -> MetadataObject:
+    reader = _Reader(binary_metadata)
+    geometry_metadata = GeometryMetadataObject()
+    to_parse_metadatas = [geometry_metadata]
+    # parse attribute metadatas
+    attribute_metadatas_len = reader.read_uint()
+    for _ in range(attribute_metadatas_len):
+        attribute_metadata = MetadataObject()
+        geometry_metadata.attribute_metadatas.append(attribute_metadata)
+        to_parse_metadatas.append(attribute_metadata)
+    # parse metadatas level by level
+    while to_parse_metadatas:
+        to_parse_metadata_next = []
+        for metadata in to_parse_metadatas:
+            # parse entries
+            attr_len = reader.read_uint()
+            for _ in range(attr_len):
+                name = reader.read_str()
+                value = reader.read_bytes()
+                metadata.entries[name] = value
+            sub_metadatas_len = reader.read_uint()
+            for _ in range(sub_metadatas_len):
+                name = reader.read_str()
+                sub_metadata = MetadataObject()
+                metadata.sub_metadatas[name] = sub_metadata
+                to_parse_metadata_next.append(sub_metadata)
+        to_parse_metadatas = to_parse_metadata_next
+    if not reader.is_end():
+        raise Exception("not read bytes detected")
+    return geometry_metadata
+
 
 class DracoPointCloud(object):
     def __init__(self, data_struct):
@@ -14,7 +101,8 @@ class DracoPointCloud(object):
                 data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
-    
+        self.metadata = _parse_binary_metadata(data_struct["binary_metadata"])
+
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
             return self.encoding_options.get_encoded_coordinate(value, axis)
@@ -31,6 +119,7 @@ class DracoPointCloud(object):
     def points(self):
         return self.data_struct['points']
 
+
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
@@ -46,7 +135,7 @@ class EncodingOptions(object):
         self.quantization_range = quantization_range
         self.quantization_origin = quantization_origin
         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
-    
+
     def get_encoded_coordinate(self, value, axis):
         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
             raise ValueError('Specified value out of encoded range')
@@ -59,7 +148,7 @@ class EncodingOptions(object):
         for axis in range(self.num_axes):
             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))
         return encoded_point
-    
+
     @property
     def num_axes(self):
         return 3

@@ -1,6 +1,8 @@
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 from libc.stdint cimport uint32_t
 from libcpp cimport bool
+
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
@@ -10,6 +12,11 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     cdef enum encoding_status:
         successful_encoding, failed_during_encoding
+
+    cdef enum endian_order:
+        little_endian
+        big_endian
+        unknown_endian
 
     cdef struct PointCloudObject:
         vector[float] points
@@ -22,6 +29,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         # Represents the decoding success or error message
         decoding_status decode_status
+
+        string binary_metadata
 
     cdef struct MeshObject:
         vector[float] points
@@ -39,9 +48,13 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         # Represents the decoding success or error message
         decoding_status decode_status
 
+        string binary_metadata
+
     cdef struct EncodedObject:
         vector[unsigned char] buffer
         encoding_status encode_status
+
+    endian_order get_endian_order() except +
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
