@@ -1,74 +1,45 @@
 # distutils: language = c++
-import typing
+from typing import Dict, List
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
 from math import floor
-from libc.string cimport memcmp
-
-
-class _Reader:
-    def __init__(self, in_bytes: bytes):
-        self._in_bytes = in_bytes
-        self._pos = 0
-
-    @staticmethod
-    def __get_endian() -> str:
-        endian_order = get_endian_order()
-        if endian_order == DracoPy.endian_order.little_endian:
-            return "little"
-        elif endian_order == DracoPy.endian_order.big_endian:
-            return "big"
-        else:
-            raise Exception("unknown endian order")
-
-    def __read_bytes(self, count: int) -> bytes:
-        end = self._pos + count
-        result_bytes = self._in_bytes[self._pos:end]
-        self._pos = end
-        return result_bytes
-
-    def read_uint(self) -> int:
-        value = int.from_bytes(self.__read_bytes(4),
-                               byteorder=self.__get_endian(), signed=False)
-        return value
-
-    def read_str(self) -> str:
-        count = self.read_uint()
-        return self.__read_bytes(count).decode()
-
-    def read_bytes(self) -> bytes:
-        count = self.read_uint()
-        return self.__read_bytes(count)
-
-    def is_end(self) -> bool:
-        return len(self._in_bytes) == self._pos
 
 
 class MetadataObject:
-    def __init__(self, entries: typing.Dict[str, bytes] = None,
-                 sub_metadatas: typing.Dict[str, 'MetadataObject'] = None):
+    def __init__(self, entries: Dict[str, bytes] = None,
+                 sub_metadatas: Dict[str, 'MetadataObject'] = None):
         self.entries = entries if entries else {}
         self.sub_metadatas = sub_metadatas if sub_metadatas else {}
 
 
+class AttributeMetadataObject(MetadataObject):
+    def __init__(self, unique_id: int,
+                 entries: Dict[str, bytes] = None,
+                 sub_metadatas: Dict[str, 'MetadataObject'] = None):
+        super().__init__(entries, sub_metadatas)
+        self.unique_id = unique_id
+
+
 class GeometryMetadataObject(MetadataObject):
-    def __init__(self, entries: typing.Dict[str, bytes] = None,
-                 sub_metadatas: typing.Dict[str, 'MetadataObject'] = None,
-                 attribute_metadatas: typing.List['MetadataObject'] = None):
+    def __init__(self, entries: Dict[str, bytes] = None,
+                 sub_metadatas: Dict[str, 'MetadataObject'] = None,
+                 attribute_metadatas: List['AttributeMetadataObject'] = None):
         super().__init__(entries, sub_metadatas)
         self.attribute_metadatas = attribute_metadatas if attribute_metadatas \
             else []
 
 
-def _parse_binary_metadata(binary_metadata: bytes) -> MetadataObject:
-    reader = _Reader(binary_metadata)
+def decode_metadata(binary_metadata: bytes) -> MetadataObject:
+    ss = new stringstream(binary_metadata)
+    reader = new DracoPy.MetadataReader(ss)
     geometry_metadata = GeometryMetadataObject()
     to_parse_metadatas = [geometry_metadata]
-    # parse attribute metadatas
+    # consider attribute metadatas
     attribute_metadatas_len = reader.read_uint()
     for _ in range(attribute_metadatas_len):
-        attribute_metadata = MetadataObject()
+        unique_id = reader.read_uint()
+        attribute_metadata = AttributeMetadataObject(unique_id)
         geometry_metadata.attribute_metadatas.append(attribute_metadata)
         to_parse_metadatas.append(attribute_metadata)
     # parse metadatas level by level
@@ -76,21 +47,50 @@ def _parse_binary_metadata(binary_metadata: bytes) -> MetadataObject:
         to_parse_metadata_next = []
         for metadata in to_parse_metadatas:
             # parse entries
-            attr_len = reader.read_uint()
-            for _ in range(attr_len):
-                name = reader.read_str()
+            entries_len = reader.read_uint()
+            for _ in range(entries_len):
+                name = reader.read_bytes()
                 value = reader.read_bytes()
                 metadata.entries[name] = value
             sub_metadatas_len = reader.read_uint()
+            # consider sub metadatas
             for _ in range(sub_metadatas_len):
-                name = reader.read_str()
+                name = reader.read_bytes()
                 sub_metadata = MetadataObject()
                 metadata.sub_metadatas[name] = sub_metadata
                 to_parse_metadata_next.append(sub_metadata)
         to_parse_metadatas = to_parse_metadata_next
-    if not reader.is_end():
-        raise Exception("not read bytes detected")
+    del reader
+    del ss
     return geometry_metadata
+
+def encode_metadata(geometry_metadata: GeometryMetadataObject) -> bytes:
+    ss = new stringstream(b"")
+    writer = new DracoPy.MetadataWriter(ss)
+    to_parse_metadata = [geometry_metadata]
+    # consider attribute metadatas
+    writer.write_uint(len(geometry_metadata.attribute_metadatas))
+    for attribute_metadata in geometry_metadata.attribute_metadatas:
+        writer.write_uint(attribute_metadata.unique_id)
+        to_parse_metadata.append(attribute_metadata)
+    # encode metadatas level by level
+    while to_parse_metadata:
+        to_parse_metadata_next = []
+        for draco_metadata in to_parse_metadata:
+            # encode entries
+            writer.write_uint(len(draco_metadata.entries))
+            for name, value in draco_metadata.entries.items():
+                writer.write_bytes_from_str(name)
+                writer.write_bytes_from_vec(value)
+            # consider sub metadatas
+            writer.write_uint(len(draco_metadata.sub_metadatas))
+            for name, draco_sub_metadata in draco_metadata.sub_metadatas.items():
+                writer.write_bytes_from_str(name)
+                to_parse_metadata_next.append(draco_sub_metadata)
+    del writer
+    s = ss.to_string()
+    del ss
+    return s
 
 
 class DracoPointCloud(object):
@@ -101,7 +101,7 @@ class DracoPointCloud(object):
                 data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
-        self.metadata = _parse_binary_metadata(data_struct["binary_metadata"])
+        self.metadata = decode_metadata(data_struct["binary_metadata"])
 
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
@@ -159,7 +159,10 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
+def encode_mesh_to_buffer(points, faces, metadata: GeometryMetadataObject = None,
+                          quantization_bits=14, compression_level=1,
+                          quantization_range=-1, quantization_origin=None,
+                          create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -169,6 +172,8 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
+    if metadata is None:
+        metadata = GeometryMetadataObject()
     cdef float* quant_origin = NULL
     try:
         num_dims = 3
@@ -176,7 +181,11 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encoded_mesh = DracoPy.encode_mesh(points, faces, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
+        binary_metadata = encode_metadata(metadata)
+        encoded_mesh = DracoPy.encode_mesh(points, faces, binary_metadata,
+                                           quantization_bits, compression_level,
+                                           quantization_range, quant_origin,
+                                           create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
@@ -190,7 +199,10 @@ def encode_mesh_to_buffer(points, faces, quantization_bits=14, compression_level
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")
 
-def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
+def encode_point_cloud_to_buffer(points, metadata: GeometryMetadataObject = None,
+                                 quantization_bits=14, compression_level=1,
+                                 quantization_range=-1, quantization_origin=None,
+                                 create_metadata=False):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -200,6 +212,8 @@ def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
+    if metadata is None:
+        metadata = GeometryMetadataObject()
     cdef float* quant_origin = NULL
     try:
         num_dims = 3
@@ -207,7 +221,10 @@ def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encoded_point_cloud = DracoPy.encode_point_cloud(points, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
+        binary_metadata = encode_metadata(metadata)
+        encoded_point_cloud = DracoPy.encode_point_cloud(
+            points, binary_metadata, quantization_bits, compression_level,
+            quantization_range, quant_origin, create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
