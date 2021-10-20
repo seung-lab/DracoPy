@@ -31,8 +31,7 @@ class GeometryMetadataObject(MetadataObject):
 
 
 def decode_metadata(binary_metadata: bytes) -> MetadataObject:
-    ss = new stringstream(binary_metadata)
-    reader = new DracoPy.MetadataReader(ss)
+    reader = new DracoPy.MetadataReader(binary_metadata)
     geometry_metadata = GeometryMetadataObject()
     to_parse_metadatas = [geometry_metadata]
     # consider attribute metadatas
@@ -61,12 +60,10 @@ def decode_metadata(binary_metadata: bytes) -> MetadataObject:
                 to_parse_metadata_next.append(sub_metadata)
         to_parse_metadatas = to_parse_metadata_next
     del reader
-    del ss
     return geometry_metadata
 
 def encode_metadata(geometry_metadata: GeometryMetadataObject) -> bytes:
-    ss = new stringstream(b"")
-    writer = new DracoPy.MetadataWriter(ss)
+    cdef DracoPy.MetadataWriter writer
     to_parse_metadata = [geometry_metadata]
     # consider attribute metadatas
     writer.write_uint(len(geometry_metadata.attribute_metadatas))
@@ -87,10 +84,7 @@ def encode_metadata(geometry_metadata: GeometryMetadataObject) -> bytes:
             for name, draco_sub_metadata in draco_metadata.sub_metadatas.items():
                 writer.write_bytes_from_str(name)
                 to_parse_metadata_next.append(draco_sub_metadata)
-    del writer
-    s = ss.to_string()
-    del ss
-    return s
+    return writer.get()
 
 
 class DracoPointCloud(object):

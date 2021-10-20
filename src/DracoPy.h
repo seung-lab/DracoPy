@@ -43,7 +43,7 @@ namespace DracoFunctions {
 
   class MetadataReader {
   public:
-    MetadataReader(std::stringstream* s): stream(*s) {}
+    MetadataReader(const std::string& s): stream(s) {}
 
     uint32_t read_uint() {
       uint32_t value;
@@ -68,13 +68,11 @@ namespace DracoFunctions {
     }
 
   private:
-    std::stringstream& stream;
+    std::stringstream stream;
   };
 
   class MetadataWriter {
   public:
-    MetadataWriter(std::stringstream* s): stream(*s) {}
-
     void write_uint(const uint32_t& value) {
       stream.write(reinterpret_cast<const char*>(&value), sizeof(uint32_t));
     }
@@ -93,13 +91,14 @@ namespace DracoFunctions {
         write_bytes(value);
     }
 
+    std::string get() { return stream.str(); }
+
   private:
-    std::stringstream& stream;
+    std::stringstream stream;
   };
 
   std::string encode_metadata(const GeometryMetadata& geometry_metadata) {
-    std::stringstream ss;
-    MetadataWriter writer(&ss);
+    MetadataWriter writer;
     std::vector<const Metadata*> to_parse_metadata =
             { {static_cast<const Metadata*>(&geometry_metadata)} };
     // consider attribute metadatas
@@ -131,13 +130,11 @@ namespace DracoFunctions {
         }
       }
     }
-    return ss.str();
+    return writer.get();
   }
 
   GeometryMetadata decode_metadata(const std::string& s) {
-
-    std::stringstream ss(s);
-    MetadataReader reader(&ss);
+    MetadataReader reader(s);
     GeometryMetadata geometry_metadata;
     std::vector<Metadata*> to_parse_metadata = {
             {static_cast<Metadata*>(&geometry_metadata)} };

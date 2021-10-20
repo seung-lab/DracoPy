@@ -49,21 +49,17 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[unsigned char] buffer
         encoding_status encode_status
 
-    cdef extern from "<sstream>" namespace "std" nogil:
-        cdef cppclass stringstream:
-            stringstream(const string&)
-            string to_string "str"() const
-
     cdef cppclass MetadataReader:
-        MetadataReader(stringstream* s) except +
+        MetadataReader(const string& s) except +
         uint32_t read_uint() except +
         string read_bytes() except +
 
     cdef cppclass MetadataWriter:
-        MetadataWriter(stringstream* s) except +
+        MetadataWriter() except +
         void write_uint(const uint32_t& value) except +
         void write_bytes_from_str(const string& value) except +
         void write_bytes_from_vec(const vector[uint8_t]& value) except +
+        string get() except +
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
 
