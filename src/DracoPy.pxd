@@ -15,15 +15,27 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         successful_encoding, failed_during_encoding
     
     cdef struct MetadataObject:
-        uint32_t unique_id
+        uint32_t tree_id
         unordered_map[string, string] entries
-        vector[uint32_t] sub_metadata_ids
+        unordered_map[string, uint32_t] sub_metadata_ids
+    
+    cdef struct AttributeMetadataObject:
+        uint32_t tree_id
+        unordered_map[string, string] entries
+        unordered_map[string, uint32_t] sub_metadata_ids
+        uint32_t unique_id
 
     cdef struct PointAttributeObject:
         unordered_map[uint32_t, string] data
         uint32_t element_size
         uint32_t dimension
         uint32_t unique_id
+    
+    cdef struct GeometryMetadataObject:
+        uint32_t tree_id
+        unordered_map[string, string] entries
+        unordered_map[string, uint32_t] sub_metadata_ids
+        vector[AttributeMetadataObject] attribute_metadatas
 
     cdef struct PointCloudObject:
         vector[float] points
@@ -38,7 +50,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         decoding_status decode_status
 
         vector[PointAttributeObject] attributes
-        vector[MetadataObject] metadatas
+        GeometryMetadataObject geometry_metadata
 
     cdef struct MeshObject:
         vector[float] points
@@ -57,7 +69,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         decoding_status decode_status
 
         vector[PointAttributeObject] attributes
-        vector[MetadataObject] metadatas
+        GeometryMetadataObject geometry_metadata
 
     cdef struct EncodedObject:
         vector[unsigned char] buffer
