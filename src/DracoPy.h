@@ -16,6 +16,19 @@ namespace DracoFunctions {
   enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
   enum encoding_status { successful_encoding, failed_during_encoding };
 
+  struct MetadataObject {
+    uint32_t unique_id;
+    std::unordered_map<std::string, std::string> entries;
+    std::vector<uint32_t> sub_metadata_ids;
+  };
+
+  struct PointAttributeObject {
+    std::unordered_map<uint32_t, std::string> data;
+    uint32_t element_size;
+    uint32_t dimension;
+    uint32_t unique_id;
+  };
+
   struct PointCloudObject {
     std::vector<float> points;
 
@@ -27,8 +40,8 @@ namespace DracoFunctions {
 
     decoding_status decode_status;
 
-    // not parsed metadata
-    std::string binary_metadata;
+    std::vector<PointAttributeObject> attributes;
+    std::vector<MetadataObject> metadatas;
   };
 
   struct MeshObject : PointCloudObject {
@@ -41,136 +54,154 @@ namespace DracoFunctions {
     encoding_status encode_status;
   };
 
-  class MetadataReader {
-  public:
-    MetadataReader(const std::string& s): stream(s) {}
+  // class MetadataReader {
+  // public:
+  //   MetadataReader(const std::string& s): stream(s) {}
 
-    uint32_t read_uint() {
-      uint32_t value;
-      stream.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
-      return value;
-    }
+  //   uint32_t read_uint() {
+  //     uint32_t value;
+  //     stream.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
+  //     return value;
+  //   }
 
-    std::string read_bytes() {
-      const auto str_len = read_uint();
-      std::string value;
-      value.resize(str_len);
-      stream.read(reinterpret_cast<char*>(value.data()), str_len);
-      return value;
-    }
+  //   std::string read_bytes() {
+  //     const auto str_len = read_uint();
+  //     std::string value;
+  //     value.resize(str_len);
+  //     stream.read(reinterpret_cast<char*>(value.data()), str_len);
+  //     return value;
+  //   }
 
-    std::vector<uint8_t> read_bytes_to_vec() {
-      const auto vec_len = read_uint();
-      std::vector<uint8_t> value;
-      value.resize(vec_len);
-      stream.read(reinterpret_cast<char*>(value.data()), vec_len);
-      return value;
-    }
+  //   std::vector<uint8_t> read_bytes_to_vec() {
+  //     const auto vec_len = read_uint();
+  //     std::vector<uint8_t> value;
+  //     value.resize(vec_len);
+  //     stream.read(reinterpret_cast<char*>(value.data()), vec_len);
+  //     return value;
+  //   }
 
-  private:
-    std::stringstream stream;
-  };
+  // private:
+  //   std::stringstream stream;
+  // };
 
-  class MetadataWriter {
-  public:
-    void write_uint(const uint32_t& value) {
-      stream.write(reinterpret_cast<const char*>(&value), sizeof(uint32_t));
-    }
+  // class MetadataWriter {
+  // public:
+  //   void write_uint(const uint32_t& value) {
+  //     stream.write(reinterpret_cast<const char*>(&value), sizeof(uint32_t));
+  //   }
 
-    template <class StdContainer>
-    void write_bytes(const StdContainer& value) {
-      write_uint(static_cast<uint32_t>(value.size()));
-      stream.write(reinterpret_cast<const char*>(value.data()), value.size());
-    }
+  //   template <class StdContainer>
+  //   void write_bytes(const StdContainer& value) {
+  //     write_uint(static_cast<uint32_t>(value.size()));
+  //     stream.write(reinterpret_cast<const char*>(value.data()), value.size());
+  //   }
 
-    void write_bytes_from_str(const std::string& value) {
-        write_bytes(value);
-    }
+  //   void write_bytes_from_str(const std::string& value) {
+  //       write_bytes(value);
+  //   }
 
-    void write_bytes_from_vec(const std::vector<uint8_t>& value) {
-        write_bytes(value);
-    }
+  //   void write_bytes_from_vec(const std::vector<uint8_t>& value) {
+  //       write_bytes(value);
+  //   }
 
-    std::string get() { return stream.str(); }
+  //   std::string get() { return stream.str(); }
 
-  private:
-    std::stringstream stream;
-  };
+  // private:
+  //   std::stringstream stream;
+  // };
 
-  std::string encode_metadata(const GeometryMetadata& geometry_metadata) {
-    MetadataWriter writer;
-    std::vector<const Metadata*> to_parse_metadata =
-            { {static_cast<const Metadata*>(&geometry_metadata)} };
-    // consider attribute metadatas
-    const auto& attribute_metadatas = geometry_metadata.attribute_metadatas();
-    writer.write_uint(static_cast<uint32_t>(attribute_metadatas.size()));
-    for (const auto& attribute_metadata: attribute_metadatas) {
-        writer.write_uint(attribute_metadata->att_unique_id());
-        to_parse_metadata.push_back(
-                static_cast<Metadata*>(attribute_metadata.get()));
-    }
-    // encode metadatas level by level
-    for (std::vector<const Metadata*> to_parse_metadatas_next;
-            !to_parse_metadata.empty();
-            to_parse_metadata = std::move(to_parse_metadatas_next)) {
-      for (const auto* draco_metadata: to_parse_metadata) {
-        // encode entries
-        const auto& entries = draco_metadata->entries();
-        writer.write_uint(static_cast<uint32_t>(entries.size()));
-        for (const auto& [name, value]: draco_metadata->entries()) {
-            writer.write_bytes(name);
-            writer.write_bytes(value.data());
-        }
-        // consider sub metadatas
-        const auto& sub_metadatas = draco_metadata->sub_metadatas();
-        writer.write_uint(static_cast<uint32_t>(sub_metadatas.size()));
-        for (const auto& [name, draco_sub_metadata]: sub_metadatas) {
-            writer.write_bytes(name);
-            to_parse_metadatas_next.push_back(draco_sub_metadata.get());
+  // std::string encode_metadata(const GeometryMetadata& geometry_metadata) {
+  //   MetadataWriter writer;
+  //   std::vector<const Metadata*> to_parse_metadata =
+  //           { {static_cast<const Metadata*>(&geometry_metadata)} };
+  //   // consider attribute metadatas
+  //   const auto& attribute_metadatas = geometry_metadata.attribute_metadatas();
+  //   writer.write_uint(static_cast<uint32_t>(attribute_metadatas.size()));
+  //   for (const auto& attribute_metadata: attribute_metadatas) {
+  //       writer.write_uint(attribute_metadata->att_unique_id());
+  //       to_parse_metadata.push_back(
+  //               static_cast<Metadata*>(attribute_metadata.get()));
+  //   }
+  //   // encode metadatas level by level
+  //   for (std::vector<const Metadata*> to_parse_metadatas_next;
+  //           !to_parse_metadata.empty();
+  //           to_parse_metadata = std::move(to_parse_metadatas_next)) {
+  //     for (const auto* draco_metadata: to_parse_metadata) {
+  //       // encode entries
+  //       const auto& entries = draco_metadata->entries();
+  //       writer.write_uint(static_cast<uint32_t>(entries.size()));
+  //       for (const auto& [name, value]: draco_metadata->entries()) {
+  //           writer.write_bytes(name);
+  //           writer.write_bytes(value.data());
+  //       }
+  //       // consider sub metadatas
+  //       const auto& sub_metadatas = draco_metadata->sub_metadatas();
+  //       writer.write_uint(static_cast<uint32_t>(sub_metadatas.size()));
+  //       for (const auto& [name, draco_sub_metadata]: sub_metadatas) {
+  //           writer.write_bytes(name);
+  //           to_parse_metadatas_next.push_back(draco_sub_metadata.get());
+  //       }
+  //     }
+  //   }
+  //   return writer.get();
+  // }
+
+  // GeometryMetadata decode_metadata(const std::string& s) {
+  //   MetadataReader reader(s);
+  //   GeometryMetadata geometry_metadata;
+  //   std::vector<Metadata*> to_parse_metadata = {
+  //           {static_cast<Metadata*>(&geometry_metadata)} };
+  //   // consider attribute metadatas
+  //   const auto attrbite_metadatas_len = reader.read_uint();
+  //   for (uint32_t i = 0; i < attrbite_metadatas_len; ++i) {
+  //       auto attribute_metadata = std::make_unique<AttributeMetadata>();
+  //       const auto unique_id = reader.read_uint();
+  //       attribute_metadata->set_att_unique_id(unique_id);
+  //       to_parse_metadata.push_back(attribute_metadata.get());
+  //       geometry_metadata.AddAttributeMetadata(std::move(attribute_metadata));
+  //   }
+  //   // parse metadatas level by level
+  //   for (std::vector<Metadata*> to_parse_metadatas_next;
+  //           !to_parse_metadata.empty();
+  //           to_parse_metadata = std::move(to_parse_metadatas_next)) {
+  //        for (auto* metadata: to_parse_metadata) {
+  //           // parse entries
+  //           const auto entries_len = reader.read_uint();
+  //           for (uint32_t i = 0; i < entries_len; ++i) {
+  //               std::string name = reader.read_bytes();
+  //               std::vector<uint8_t> value = reader.read_bytes_to_vec();
+  //               metadata->AddEntryBinary(name, value);
+  //           }
+  //           // consider sub metadatas
+  //           const auto sub_metadatas_len = reader.read_uint();
+  //           for (uint32_t i = 0; i < sub_metadatas_len; ++i) {
+  //               auto sub_metadata = std::make_unique<Metadata>();
+  //               to_parse_metadatas_next.push_back(sub_metadata.get());
+  //               std::string name = reader.read_bytes();
+  //               metadata->AddSubMetadata(name, std::move(sub_metadata));
+  //           }
+  //        }
+  //   }
+  //   return geometry_metadata;
+  // }
+  
+  std::vector<PointAttributeObject> decode_attributes(const PointCloud& pc) {
+    const int32_t attributes_len = pc.num_attributes();
+    std::vector<PointAttributeObject> attribute_objects(attributes_len);
+    for (int i = 0; i < attributes_len; ++i)
+      if (const auto* attribute = pc.attribute(i))
+      {
+        attribute_objects[i].dimension = attribute->num_components();
+        attribute_objects[i].element_size = attribute->byte_stride();
+        attribute_objects[i].unique_id = attribute->unique_id();
+        int value_size = attribute->num_components() * attribute->byte_stride();
+        for (PointIndex v(0); v < attribute->indices_map_size(); ++v) {
+          auto& value = attribute_objects[i].data[v.value()];
+          value.resize(value_size);
+          attribute->GetMappedValue(v, value.data());
         }
       }
-    }
-    return writer.get();
-  }
-
-  GeometryMetadata decode_metadata(const std::string& s) {
-    MetadataReader reader(s);
-    GeometryMetadata geometry_metadata;
-    std::vector<Metadata*> to_parse_metadata = {
-            {static_cast<Metadata*>(&geometry_metadata)} };
-    // consider attribute metadatas
-    const auto attrbite_metadatas_len = reader.read_uint();
-    for (uint32_t i = 0; i < attrbite_metadatas_len; ++i) {
-        auto attribute_metadata = std::make_unique<AttributeMetadata>();
-        const auto unique_id = reader.read_uint();
-        attribute_metadata->set_att_unique_id(unique_id);
-        to_parse_metadata.push_back(attribute_metadata.get());
-        geometry_metadata.AddAttributeMetadata(std::move(attribute_metadata));
-    }
-    // parse metadatas level by level
-    for (std::vector<Metadata*> to_parse_metadatas_next;
-            !to_parse_metadata.empty();
-            to_parse_metadata = std::move(to_parse_metadatas_next)) {
-         for (auto* metadata: to_parse_metadata) {
-            // parse entries
-            const auto entries_len = reader.read_uint();
-            for (uint32_t i = 0; i < entries_len; ++i) {
-                std::string name = reader.read_bytes();
-                std::vector<uint8_t> value = reader.read_bytes_to_vec();
-                metadata->AddEntryBinary(name, value);
-            }
-            // consider sub metadatas
-            const auto sub_metadatas_len = reader.read_uint();
-            for (uint32_t i = 0; i < sub_metadatas_len; ++i) {
-                auto sub_metadata = std::make_unique<Metadata>();
-                to_parse_metadatas_next.push_back(sub_metadata.get());
-                std::string name = reader.read_bytes();
-                metadata->AddSubMetadata(name, std::move(sub_metadata));
-            }
-         }
-    }
-    return geometry_metadata;
-
+    return attribute_objects;
   }
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
@@ -223,7 +254,7 @@ namespace DracoFunctions {
           metadata->GetEntryDoubleArray("quantization_origin", &(meshObject.quantization_origin))) {
           meshObject.encoding_options_set = true;
       }
-      meshObject.binary_metadata = encode_metadata(*metadata);
+      meshObject.attributes = decode_attributes(*mesh);
     }
     meshObject.decode_status = successful;
     return meshObject;
@@ -272,8 +303,8 @@ namespace DracoFunctions {
         metadata->GetEntryDoubleArray("quantization_origin", &(pointCloudObject.quantization_origin))) {
         pointCloudObject.encoding_options_set = true;
       }
-      pointCloudObject.binary_metadata = encode_metadata(*metadata);
     }
+    pointCloudObject.attributes = decode_attributes(*point_cloud);
     pointCloudObject.decode_status = successful;
     return pointCloudObject;
   }
@@ -303,7 +334,7 @@ namespace DracoFunctions {
   }
 
   EncodedObject encode_mesh(const std::vector<float> &points, const 
-  std::vector<unsigned int> &faces, const std::string& binary_metadata,
+  std::vector<unsigned int> &faces,
       int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
@@ -334,8 +365,7 @@ namespace DracoFunctions {
     return encodedMeshObject;
   }
 
-  EncodedObject encode_point_cloud(const std::vector<float> &points,
-   const std::string& binary_metadata, int quantization_bits,
+  EncodedObject encode_point_cloud(const std::vector<float> &points, int quantization_bits,
       int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     int num_points = points.size() / 3;
     PointCloudBuilder pcb;
