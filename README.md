@@ -25,7 +25,7 @@ with open('bunny_test.drc', 'rb') as test_file:
 
 DracoPy is a Python wrapper for Google's Draco mesh compression library.
 
-Available as a PyPI package: pip install DracoPy 
+## Installation
 
 Binary wheels are available for users with Python >= 3.6 and pip >= 20.
 
@@ -33,4 +33,9 @@ Installation from source requires Python >= 3.6, pip >= 10, and a C++ compiler t
 
 It supports Linux, OS X, and Windows. 
 
-An example of usage is given in example.py.
+```bash
+pip install DracoPy 
+```
+
+
+
