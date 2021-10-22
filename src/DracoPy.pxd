@@ -31,14 +31,11 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         successful_encoding, failed_during_encoding
     
     cdef struct MetadataObject:
-        uint32_t tree_id
         unordered_map[string, string] entries
         unordered_map[string, uint32_t] sub_metadata_ids
     
     cdef struct AttributeMetadataObject:
-        uint32_t tree_id
-        unordered_map[string, string] entries
-        unordered_map[string, uint32_t] sub_metadata_ids
+        uint32_t metadata_id  # reference to metadata object
         uint32_t unique_id
 
     cdef struct PointAttributeObject:
@@ -48,9 +45,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         uint32_t unique_id
     
     cdef struct GeometryMetadataObject:
-        uint32_t tree_id
-        unordered_map[string, string] entries
-        unordered_map[string, uint32_t] sub_metadata_ids
+        uint32_t metadata_id  # reference to metadata object
         vector[AttributeMetadataObject] attribute_metadatas
 
     cdef struct PointCloudObject:
@@ -67,6 +62,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         vector[PointAttributeObject] attributes
         GeometryMetadataObject geometry_metadata
+        vector[MetadataObject] metadatas
 
     cdef struct MeshObject:
         vector[float] points
@@ -86,6 +82,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         vector[PointAttributeObject] attributes
         GeometryMetadataObject geometry_metadata
+        vector[MetadataObject] metadatas
 
     cdef struct EncodedObject:
         vector[unsigned char] buffer
@@ -109,12 +106,13 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     EncodedObject encode_mesh(
             vector[float] points, vector[uint32_t] faces,
+            MeshObject mesh_object,
             int quantization_bits, int compression_level,
             float quantization_range, const float *quantization_origin,
             bool create_metadata) except +
     
     EncodedObject encode_point_cloud(
-            vector[float] points,
+            vector[float] points, PointCloudObject pco,
             int quantization_bits, int compression_level,
             float quantization_range, const float *quantization_origin,
             bool create_metadata) except +

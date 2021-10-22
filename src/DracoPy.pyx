@@ -40,6 +40,10 @@ class DracoPointCloud(object):
     def attributes(self) -> List['PointAttributeObject']:
         return self.data_struct['attributes']
 
+    @property
+    def metadatas(self) -> List['MetadataObject']:
+        return self.data_struct['metadatas']
+
 
 class DracoMesh(DracoPointCloud):
     @property
@@ -80,7 +84,7 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def encode_mesh_to_buffer(points, faces,
+def encode_mesh_to_buffer(points, faces, mesh_object,
                           quantization_bits=14, compression_level=1,
                           quantization_range=-1, quantization_origin=None,
                           create_metadata=False):
@@ -101,7 +105,7 @@ def encode_mesh_to_buffer(points, faces,
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
         # binary_metadata = encode_metadata(metadata)
-        encoded_mesh = DracoPy.encode_mesh(points, faces,
+        encoded_mesh = DracoPy.encode_mesh(points, faces, mesh_object,
                                            quantization_bits, compression_level,
                                            quantization_range, quant_origin,
                                            create_metadata)
@@ -118,7 +122,7 @@ def encode_mesh_to_buffer(points, faces,
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")
 
-def encode_point_cloud_to_buffer(points,
+def encode_point_cloud_to_buffer(points, point_cloud_object,
                                  quantization_bits=14, compression_level=1,
                                  quantization_range=-1, quantization_origin=None,
                                  create_metadata=False):
@@ -140,7 +144,7 @@ def encode_point_cloud_to_buffer(points,
                 quant_origin[dim] = quantization_origin[dim]
         # binary_metadata = encode_metadata(metadata)
         encoded_point_cloud = DracoPy.encode_point_cloud(
-            points, quantization_bits, compression_level,
+            points, point_cloud_object, quantization_bits, compression_level,
             quantization_range, quant_origin, create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
