@@ -1,5 +1,5 @@
-#include<vector>
-#include<cstddef>
+#include <vector>
+#include <cstddef>
 #include <string>
 #include <sstream>
 
@@ -11,8 +11,6 @@
 #include "draco/point_cloud/point_cloud_builder.h"
 
 namespace DracoFunctions {
-    using namespace draco;
-
   enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
   enum encoding_status { successful_encoding, failed_during_encoding };
 
@@ -28,7 +26,7 @@ namespace DracoFunctions {
 
   struct PointAttributeObject {
     std::unordered_map<uint32_t, std::string> data;
-    uint32_t element_size;
+    draco::DataType datatype;
     uint32_t dimension;
     uint32_t unique_id;
   };
@@ -62,17 +60,17 @@ namespace DracoFunctions {
     encoding_status encode_status;
   };
 
-  std::vector<PointAttributeObject> decode_attributes(const PointCloud& pc) {
+  std::vector<PointAttributeObject> decode_attributes(const draco::PointCloud& pc) {
     const int32_t attributes_len = pc.num_attributes();
     std::vector<PointAttributeObject> attribute_objects(attributes_len);
     for (int i = 0; i < attributes_len; ++i)
       if (const auto* attribute = pc.attribute(i))
       {
         attribute_objects[i].dimension = static_cast<uint32_t>(attribute->num_components());
-        attribute_objects[i].element_size = static_cast<uint32_t>(attribute->byte_stride());
+        attribute_objects[i].datatype = attribute->data_type();
         attribute_objects[i].unique_id = static_cast<uint32_t>(attribute->unique_id());
         const auto value_size = attribute->num_components() * attribute->byte_stride();
-        for (PointIndex v(0); v < attribute->indices_map_size(); ++v) {
+        for (draco::PointIndex v(0); v < attribute->indices_map_size(); ++v) {
           auto& value = attribute_objects[i].data[v.value()];
           value.resize(value_size);
           attribute->GetMappedValue(v, value.data());
@@ -81,9 +79,9 @@ namespace DracoFunctions {
     return attribute_objects;
   }
 
-  void decode_metadata(const Metadata& metadata, MetadataObject& main_metadata_object) {
+  void decode_metadata(const draco::Metadata& metadata, MetadataObject& main_metadata_object) {
     main_metadata_object.tree_id = 0;
-    using MetadataPair = std::pair<const Metadata*, MetadataObject*>;
+    using MetadataPair = std::pair<const draco::Metadata*, MetadataObject*>;
     std::vector<MetadataPair> to_parse_metadata = { {&metadata, &main_metadata_object} }; 
     std::vector<MetadataObject> metadata_objects;
     uint32_t metadata_idx = 0;
@@ -109,14 +107,14 @@ namespace DracoFunctions {
     }
   }
 
-  GeometryMetadataObject decode_geometry_metadata(const GeometryMetadata& geometry_metadata) {
+  GeometryMetadataObject decode_geometry_metadata(const draco::GeometryMetadata& geometry_metadata) {
     GeometryMetadataObject geometry_metadata_object;
-    decode_metadata(static_cast<const Metadata&>(geometry_metadata),
+    decode_metadata(static_cast<const draco::Metadata&>(geometry_metadata),
                     static_cast<MetadataObject&>(geometry_metadata_object));
     for (const auto& attribute_metadata: geometry_metadata.attribute_metadatas()) {
       AttributeMetadataObject attribute_metadata_object;
       attribute_metadata_object.unique_id = attribute_metadata->att_unique_id();
-      decode_metadata(static_cast<const Metadata&>(*attribute_metadata.get()),
+      decode_metadata(static_cast<const draco::Metadata&>(*attribute_metadata.get()),
                       static_cast<MetadataObject&>(attribute_metadata_object));
       geometry_metadata_object.attribute_metadatas.push_back(std::move(attribute_metadata_object));
     }
@@ -125,9 +123,9 @@ namespace DracoFunctions {
 
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len) {
     MeshObject meshObject;
-    DecoderBuffer decoderBuffer;
+    draco::DecoderBuffer decoderBuffer;
     decoderBuffer.Init(buffer, buffer_len);
-    Decoder decoder;
+    draco::Decoder decoder;
     auto statusor = decoder.DecodeMeshFromBuffer(&decoderBuffer);
     if (!statusor.ok()) {
       std::string status_string = statusor.status().error_msg_string();
@@ -139,9 +137,9 @@ namespace DracoFunctions {
       }
       return meshObject;
     }
-    std::unique_ptr<Mesh> in_mesh = std::move(statusor).value();
-    Mesh *mesh = in_mesh.get();
-    const int pos_att_id = mesh->GetNamedAttributeId(GeometryAttribute::POSITION);
+    std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
+    draco::Mesh *mesh = in_mesh.get();
+    const int pos_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::POSITION);
     if (pos_att_id < 0) {
       meshObject.decode_status = no_position_attribute;
       return meshObject;
@@ -150,7 +148,7 @@ namespace DracoFunctions {
     meshObject.faces.reserve(3 * mesh->num_faces());
     const auto *const pos_att = mesh->attribute(pos_att_id);
     std::array<float, 3> pos_val;
-    for (PointIndex v(0); v < mesh->num_points(); ++v) {
+    for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
       if (!pos_att->ConvertValue<float, 3>(pos_att->mapped_index(v), &pos_val[0])) {
         meshObject.decode_status = no_position_attribute;
         return meshObject;
@@ -159,13 +157,13 @@ namespace DracoFunctions {
       meshObject.points.push_back(pos_val[1]);
       meshObject.points.push_back(pos_val[2]);
     }
-    for (FaceIndex i(0); i < mesh->num_faces(); ++i) {
+    for (draco::FaceIndex i(0); i < mesh->num_faces(); ++i) {
       const auto &f = mesh->face(i);
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[0]))));
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[1]))));
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[2]))));
     }
-    const GeometryMetadata *metadata = mesh->GetMetadata();
+    const draco::GeometryMetadata *metadata = mesh->GetMetadata();
     meshObject.encoding_options_set = false;
     if (metadata) {
       metadata->GetEntryInt("quantization_bits", &(meshObject.quantization_bits));
@@ -182,9 +180,9 @@ namespace DracoFunctions {
 
   PointCloudObject decode_buffer_to_point_cloud(const char *buffer, std::size_t buffer_len) {
     PointCloudObject pointCloudObject;
-    DecoderBuffer decoderBuffer;
+    draco::DecoderBuffer decoderBuffer;
     decoderBuffer.Init(buffer, buffer_len);
-    Decoder decoder;
+    draco::Decoder decoder;
     auto statusor = decoder.DecodePointCloudFromBuffer(&decoderBuffer);
     if (!statusor.ok()) {
       std::string status_string = statusor.status().error_msg_string();
@@ -196,9 +194,9 @@ namespace DracoFunctions {
       }
       return pointCloudObject;
     }
-    std::unique_ptr<PointCloud> in_point_cloud = std::move(statusor).value();
-    PointCloud *point_cloud = in_point_cloud.get();
-    const int pos_att_id = point_cloud->GetNamedAttributeId(GeometryAttribute::POSITION);
+    std::unique_ptr<draco::PointCloud> in_point_cloud = std::move(statusor).value();
+    draco::PointCloud *point_cloud = in_point_cloud.get();
+    const int pos_att_id = point_cloud->GetNamedAttributeId(draco::GeometryAttribute::POSITION);
     if (pos_att_id < 0) {
       pointCloudObject.decode_status = no_position_attribute;
       return pointCloudObject;
@@ -206,7 +204,7 @@ namespace DracoFunctions {
     pointCloudObject.points.reserve(3 * point_cloud->num_points());
     const auto *const pos_att = point_cloud->attribute(pos_att_id);
     std::array<float, 3> pos_val;
-    for (PointIndex v(0); v < point_cloud->num_points(); ++v) {
+    for (draco::PointIndex v(0); v < point_cloud->num_points(); ++v) {
       if (!pos_att->ConvertValue<float, 3>(pos_att->mapped_index(v), &pos_val[0])) {
         pointCloudObject.decode_status = no_position_attribute;
         return pointCloudObject;
@@ -215,7 +213,7 @@ namespace DracoFunctions {
       pointCloudObject.points.push_back(pos_val[1]);
       pointCloudObject.points.push_back(pos_val[2]);
     }
-    const GeometryMetadata *metadata = point_cloud->GetMetadata();
+    const draco::GeometryMetadata *metadata = point_cloud->GetMetadata();
     pointCloudObject.encoding_options_set = false;
     if (metadata) {
       metadata->GetEntryInt("quantization_bits", &(pointCloudObject.quantization_bits));
@@ -230,15 +228,15 @@ namespace DracoFunctions {
     return pointCloudObject;
   }
 
-  void setup_encoder_and_metadata(PointCloud *point_cloud_or_mesh, Encoder &encoder, int compression_level, int quantization_bits, float quantization_range, const float *quantization_origin, bool create_metadata) {
+  void setup_encoder_and_metadata(draco::PointCloud *point_cloud_or_mesh, draco::Encoder &encoder, int compression_level, int quantization_bits, float quantization_range, const float *quantization_origin, bool create_metadata) {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
-    std::unique_ptr<GeometryMetadata> metadata = std::unique_ptr<GeometryMetadata>(new GeometryMetadata());
+    auto metadata = std::make_unique<draco::GeometryMetadata>();
     if (quantization_origin == NULL || quantization_range == -1) {
-      encoder.SetAttributeQuantization(GeometryAttribute::POSITION, quantization_bits);
+      encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
     } 
     else {
-      encoder.SetAttributeExplicitQuantization(GeometryAttribute::POSITION, quantization_bits, 3, quantization_origin, quantization_range);
+      encoder.SetAttributeExplicitQuantization(draco::GeometryAttribute::POSITION, quantization_bits, 3, quantization_origin, quantization_range);
       if (create_metadata) {
         metadata->AddEntryDouble("quantization_range", quantization_range);
         std::vector<double> quantization_origin_vec;
@@ -257,24 +255,27 @@ namespace DracoFunctions {
   EncodedObject encode_mesh(const std::vector<float> &points, const 
   std::vector<unsigned int> &faces,
       int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
-    TriangleSoupMeshBuilder mb;
+    draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
     const int pos_att_id =
-      mb.AddAttribute(GeometryAttribute::POSITION, 3, DataType::DT_FLOAT32);
+      mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
 
     for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
       auto point1Index = faces[i]*3;
       auto point2Index = faces[i+1]*3;
       auto point3Index = faces[i+2]*3;
-      mb.SetAttributeValuesForFace(pos_att_id, FaceIndex(i), Vector3f(points[point1Index], points[point1Index+1], points[point1Index+2]).data(), Vector3f(points[point2Index], points[point2Index+1], points[point2Index+2]).data(), Vector3f(points[point3Index], points[point3Index+1], points[point3Index+2]).data());
+      mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), 
+                                   draco::Vector3f(points[point1Index], points[point1Index+1], points[point1Index+2]).data(),
+                                   draco::Vector3f(points[point2Index], points[point2Index+1], points[point2Index+2]).data(),
+                                   draco::Vector3f(points[point3Index], points[point3Index+1], points[point3Index+2]).data());
     }
 
-    std::unique_ptr<Mesh> ptr_mesh = mb.Finalize();
-    Mesh *mesh = ptr_mesh.get();
-    Encoder encoder;
+    std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
+    draco::Mesh *mesh = ptr_mesh.get();
+    draco::Encoder encoder;
     setup_encoder_and_metadata(mesh, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
-    EncoderBuffer buffer;
-    const Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
+    draco::EncoderBuffer buffer;
+    const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
     EncodedObject encodedMeshObject;
     encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
     if (status.ok()) {
@@ -289,21 +290,21 @@ namespace DracoFunctions {
   EncodedObject encode_point_cloud(const std::vector<float> &points, int quantization_bits,
       int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
     int num_points = points.size() / 3;
-    PointCloudBuilder pcb;
+    draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
     const int pos_att_id =
-      pcb.AddAttribute(GeometryAttribute::POSITION, 3, DataType::DT_FLOAT32);
+      pcb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
 
-    for (PointIndex i(0); i < num_points; i++) {
+    for (draco::PointIndex i(0); i < num_points; i++) {
       pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());  
     }
 
-    std::unique_ptr<PointCloud> ptr_point_cloud = pcb.Finalize(true);
-    PointCloud *point_cloud = ptr_point_cloud.get();
-    Encoder encoder;
+    std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(true);
+    draco::PointCloud *point_cloud = ptr_point_cloud.get();
+    draco::Encoder encoder;
     setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
-    EncoderBuffer buffer;
-    const Status status = encoder.EncodePointCloudToBuffer(*point_cloud, &buffer);
+    draco::EncoderBuffer buffer;
+    const draco::Status status = encoder.EncodePointCloudToBuffer(*point_cloud, &buffer);
     EncodedObject encodedPointCloudObject;
     encodedPointCloudObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
     if (status.ok()) {
