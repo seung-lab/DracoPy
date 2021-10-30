@@ -29,25 +29,25 @@ class DracoPointCloud(object):
         return 3
 
     @property
-    def points(self):
+    def points(self) -> List[float]:
         return self.data_struct['points']
 
     @property
-    def geometry_metadata(self) -> 'GeometryMetadataObject':
+    def geometry_metadata(self) -> Dict:
         return self.data_struct['geometry_metadata']
+    #
+    # @property
+    # def attributes(self) -> List[Dict]:
+    #     return self.data_struct['attributes']
 
     @property
-    def attributes(self) -> List['PointAttributeObject']:
-        return self.data_struct['attributes']
-
-    @property
-    def metadatas(self) -> List['MetadataObject']:
+    def metadatas(self) -> List[Dict]:
         return self.data_struct['metadatas']
 
 
 class DracoMesh(DracoPointCloud):
     @property
-    def faces(self):
+    def faces(self) -> List[int]:
         return self.data_struct['faces']
 
     @property
@@ -84,7 +84,8 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def encode_mesh_to_buffer(points, faces, mesh_object,
+def encode_mesh_to_buffer(points, faces, metadatas,
+                          geometry_metadata,
                           quantization_bits=14, compression_level=1,
                           quantization_range=-1, quantization_origin=None,
                           create_metadata=False):
@@ -104,8 +105,8 @@ def encode_mesh_to_buffer(points, faces, mesh_object,
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        # binary_metadata = encode_metadata(metadata)
-        encoded_mesh = DracoPy.encode_mesh(points, faces, mesh_object,
+        encoded_mesh = DracoPy.encode_mesh(points, faces, metadatas,
+                                           geometry_metadata,
                                            quantization_bits, compression_level,
                                            quantization_range, quant_origin,
                                            create_metadata)
@@ -117,7 +118,9 @@ def encode_mesh_to_buffer(points, faces, mesh_object,
             raise EncodingFailedException('Invalid mesh')
     except EncodingFailedException:
         raise EncodingFailedException('Invalid mesh')
-    except:
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")

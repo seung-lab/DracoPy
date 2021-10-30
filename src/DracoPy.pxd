@@ -33,20 +33,16 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     cdef struct MetadataObject:
         unordered_map[string, string] entries
         unordered_map[string, uint32_t] sub_metadata_ids
-    
-    cdef struct AttributeMetadataObject:
-        uint32_t metadata_id  # reference to metadata object
-        uint32_t unique_id
 
     cdef struct PointAttributeObject:
         unordered_map[uint32_t, string] data
         DataType datatype
         uint32_t dimension
-        uint32_t unique_id
+        uint32_t metadata_id
     
     cdef struct GeometryMetadataObject:
         uint32_t metadata_id  # reference to metadata object
-        vector[AttributeMetadataObject] attribute_metadatas
+        vector[PointAttributeObject] generic_attributes
 
     cdef struct PointCloudObject:
         vector[float] points
@@ -60,7 +56,6 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         # Represents the decoding success or error message
         decoding_status decode_status
 
-        vector[PointAttributeObject] attributes
         GeometryMetadataObject geometry_metadata
         vector[MetadataObject] metadatas
 
@@ -80,7 +75,6 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         # Represents the decoding success or error message
         decoding_status decode_status
 
-        vector[PointAttributeObject] attributes
         GeometryMetadataObject geometry_metadata
         vector[MetadataObject] metadatas
 
@@ -105,8 +99,10 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
 
     EncodedObject encode_mesh(
-            vector[float] points, vector[uint32_t] faces,
-            MeshObject mesh_object,
+            vector[float] points,
+            vector[uint32_t] faces,
+            vector[MetadataObject] metadatas,
+            GeometryMetadataObject geometry_metadata,
             int quantization_bits, int compression_level,
             float quantization_range, const float *quantization_origin,
             bool create_metadata) except +
