@@ -170,15 +170,15 @@ def raise_decoding_error(decoding_status):
     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
         raise ValueError('DracoPy only supports meshes with position attributes')
 
-def decode_buffer_to_mesh(buffer):
-    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+def decode_buffer_to_mesh(buffer, deduplicate=False):
+    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer), deduplicate)
     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
         return DracoMesh(mesh_struct)
     else:
         raise_decoding_error(mesh_struct.decode_status)
 
-def decode_point_cloud_buffer(buffer):
-    point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
+def decode_point_cloud_buffer(buffer, deduplicate=False):
+    point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer), deduplicate)
     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
         return DracoPointCloud(point_cloud_struct)
     else:

@@ -94,9 +94,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         void write_bytes_from_vec(const vector[uint8_t]& value) except +
         string get() except +
 
-    MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
+    MeshObject decode_buffer(const char *buffer, size_t buffer_len, bool deduplicate) except +
 
-    PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
+    PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len, bool deduplicate) except +
 
     EncodedObject encode_mesh(
             vector[float] points,
