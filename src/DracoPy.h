@@ -225,6 +225,10 @@ namespace DracoFunctions {
     }
   }
 
+  ////////////////////////////////////////////////////
+  ///////// Decode/Encode functions //////////////////
+  ////////////////////////////////////////////////////
+
   MeshObject decode_buffer(const char *buffer, std::size_t buffer_len, bool
   deduplicate) {
     MeshObject meshObject;
@@ -387,10 +391,7 @@ namespace DracoFunctions {
 
     std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
     draco::Mesh *mesh = ptr_mesh.get();
-    
     encode_geometry_metadata(*mesh, metadatas, geometry_metadata_object);
-    
-
     draco::Encoder encoder;
     setup_encoder_and_metadata(mesh, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
     draco::EncoderBuffer buffer;
