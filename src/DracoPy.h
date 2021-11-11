@@ -50,9 +50,9 @@ namespace DracoFunctions {
 
     decoding_status decode_status;
 
-    // so far Geometry
+    // geometry metadata + attributes
     GeometryMetadataObject geometry_metadata;
-    // contains 
+    // contains all metadata here
     std::vector<MetadataObject> metadatas;
   };
 
@@ -406,9 +406,13 @@ namespace DracoFunctions {
     return encodedMeshObject;
   }
 
-  EncodedObject encode_point_cloud(const std::vector<float> &points, const PointCloudObject& pco,
-                                   int quantization_bits, int compression_level,
-                                   float quantization_range, const float *quantization_origin,
+  EncodedObject encode_point_cloud(const std::vector<float> &points,
+                                   const std::vector<MetadataObject>& metadatas,
+                                   const GeometryMetadataObject& geometry_metadata_object,
+                                   int quantization_bits,
+                                   int compression_level,
+                                   float quantization_range,
+                                    const float *quantization_origin,
                                     bool create_metadata) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
@@ -422,7 +426,7 @@ namespace DracoFunctions {
 
     std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(true);
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
-    encode_geometry_metadata(*point_cloud, pco.metadatas, pco.geometry_metadata);
+    encode_geometry_metadata(*point_cloud, metadatas, geometry_metadata_object);
 
     draco::Encoder encoder;
     setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);

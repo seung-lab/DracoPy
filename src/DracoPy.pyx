@@ -84,11 +84,20 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def encode_mesh_to_buffer(points, faces, metadatas,
-                          geometry_metadata,
+def create_empty_geometry_metadata() -> dict:
+    return {
+        "metadata_id": 0,
+        "generic_attributes": [],
+    }
+
+
+def encode_mesh_to_buffer(points, faces,
                           quantization_bits=14, compression_level=1,
                           quantization_range=-1, quantization_origin=None,
-                          create_metadata=False):
+                          create_metadata=False,
+                          metadatas = None,
+                          geometry_metadata = None,
+                          ):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -98,6 +107,10 @@ def encode_mesh_to_buffer(points, faces, metadatas,
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
+    if metadatas is None:
+        metadatas = []
+    if geometry_metadata is None:
+        geometry_metadata = create_empty_geometry_metadata()
     cdef float* quant_origin = NULL
     try:
         num_dims = 3
@@ -105,10 +118,14 @@ def encode_mesh_to_buffer(points, faces, metadatas,
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        encoded_mesh = DracoPy.encode_mesh(points, faces, metadatas,
+        encoded_mesh = DracoPy.encode_mesh(points,
+                                           faces,
+                                           metadatas,
                                            geometry_metadata,
-                                           quantization_bits, compression_level,
-                                           quantization_range, quant_origin,
+                                           quantization_bits,
+                                           compression_level,
+                                           quantization_range,
+                                           quant_origin,
                                            create_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
@@ -125,10 +142,15 @@ def encode_mesh_to_buffer(points, faces, metadatas,
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")
 
-def encode_point_cloud_to_buffer(points, point_cloud_object,
-                                 quantization_bits=14, compression_level=1,
-                                 quantization_range=-1, quantization_origin=None,
-                                 create_metadata=False):
+def encode_point_cloud_to_buffer(points,
+                                 quantization_bits=14,
+                                 compression_level=1,
+                                 quantization_range=-1,
+                                 quantization_origin=None,
+                                 create_metadata=False,
+                                 metadatas = None,
+                                 geometry_metadata = None,
+                                 ):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -138,6 +160,10 @@ def encode_point_cloud_to_buffer(points, point_cloud_object,
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
+    if metadatas is None:
+        metadatas = []
+    if geometry_metadata is None:
+        geometry_metadata = create_empty_geometry_metadata()
     cdef float* quant_origin = NULL
     try:
         num_dims = 3
@@ -145,10 +171,11 @@ def encode_point_cloud_to_buffer(points, point_cloud_object,
             quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
             for dim in range(num_dims):
                 quant_origin[dim] = quantization_origin[dim]
-        # binary_metadata = encode_metadata(metadata)
         encoded_point_cloud = DracoPy.encode_point_cloud(
-            points, point_cloud_object, quantization_bits, compression_level,
-            quantization_range, quant_origin, create_metadata)
+            points, metadatas, geometry_metadata,
+            quantization_bits, compression_level,
+            quantization_range, quant_origin, create_metadata,
+        )
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:

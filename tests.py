@@ -40,14 +40,6 @@ def create_tetrahedron() -> Tuple[List[float], List[int]]:
     ]
     return points, faces
 
-
-def create_empty_geometry_metadata() -> dict:
-    return {
-        "metadata_id": 0,
-        "attribute_metadatas": [],
-    }
-
-
 def create_points_map(in_points: List[int],
                       out_points: List[int]) -> Dict[int, int]:
     index_map = {
@@ -68,7 +60,6 @@ def create_points_map(in_points: List[int],
 ################ Tests itselves ###############
 ###############################################
 
-@pytest.mark.skip
 def test_decoding_and_encoding_mesh_file():
     expected_points = 104502
     expected_faces = 208353
@@ -78,8 +69,7 @@ def test_decoding_and_encoding_mesh_file():
         assert len(mesh_object.points) == expected_points
         assert len(mesh_object.faces) == expected_faces
         encoding_test = DracoPy.encode_mesh_to_buffer(
-            mesh_object.points, mesh_object.faces, mesh_object.data_struct,
-        )
+            mesh_object.points, mesh_object.faces)
         with open(os.path.join(testdata_directory, "bunny_test.drc"),
                   "wb") as test_file:
             test_file.write(encoding_test)
@@ -100,14 +90,13 @@ def test_decoding_improper_file():
         with pytest.raises(DracoPy.FileTypeException):
             DracoPy.decode_buffer_to_mesh(file_content)
 
-@pytest.mark.skip
+
 def test_metadata():
     with open(os.path.join(testdata_directory, "bunny.drc"),
               "rb") as draco_file:
         file_content = draco_file.read()
         mesh_object = DracoPy.decode_buffer_to_mesh(file_content)
         encoding_options = {
-            "mesh_object": mesh_object.data_struct,
             "quantization_bits": 12,
             "compression_level": 3,
             "quantization_range": 1000,
@@ -132,7 +121,7 @@ def test_metadata():
         assert (eo.quantization_range) == 1000
         assert (eo.quantization_origin) == [-100, -100, -100]
 
-@pytest.mark.skip
+
 def test_decoding_and_encoding_point_cloud_file():
     expected_points = 107841
     with open(
@@ -160,11 +149,10 @@ def test_decoding_and_encoding_point_cloud_file():
 
 def test_encode_decode_tetrahedron():
     points, faces = create_tetrahedron()
-    buffer = DracoPy.encode_mesh_to_buffer(points, faces, [],
-                                           create_empty_geometry_metadata(),
-                                           [])
+    buffer = DracoPy.encode_mesh_to_buffer(points, faces)
     mesh = DracoPy.decode_buffer_to_mesh(buffer)
     print(mesh)
+
 
 def test_encode_decode_geometry_attributes():
     # prepare input data
@@ -191,7 +179,7 @@ def test_encode_decode_geometry_attributes():
     }
     # encode - decode
     buffer = DracoPy.encode_mesh_to_buffer(
-        points, faces, metadatas, geometry_metadata)
+        points, faces, metadatas=metadatas, geometry_metadata=geometry_metadata)
     mesh = DracoPy.decode_buffer_to_mesh(buffer, True)
     points_map = create_points_map(points, mesh.points)
     # validate results
@@ -227,8 +215,9 @@ def test_encode_decode_metadata_entries():
         "generic_attributes": [],
     }
     # encode - decode
-    buffer = DracoPy.encode_mesh_to_buffer(points, faces, metadatas,
-                                           geometry_metadata_specific)
+    buffer = DracoPy.encode_mesh_to_buffer(
+        points, faces, metadatas=metadatas,
+        geometry_metadata=geometry_metadata_specific)
     mesh = DracoPy.decode_buffer_to_mesh(buffer)
     # validate results
     out_metadatas = mesh.metadatas

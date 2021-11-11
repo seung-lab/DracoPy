@@ -103,12 +103,20 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
             vector[uint32_t] faces,
             vector[MetadataObject] metadatas,
             GeometryMetadataObject geometry_metadata,
-            int quantization_bits, int compression_level,
-            float quantization_range, const float *quantization_origin,
-            bool create_metadata) except +
+            int quantization_bits,
+            int compression_level,
+            float quantization_range,
+            const float *quantization_origin,
+            bool create_metadata
+    ) except +
     
     EncodedObject encode_point_cloud(
-            vector[float] points, PointCloudObject pco,
-            int quantization_bits, int compression_level,
-            float quantization_range, const float *quantization_origin,
-            bool create_metadata) except +
+            vector[float] points,
+            vector[MetadataObject] metadatas,
+            GeometryMetadataObject geometry_metadata_object,
+            int quantization_bits,
+            int compression_level,
+            float quantization_range,
+            const float *quantization_origin,
+            bool create_metadata
+    ) except +
