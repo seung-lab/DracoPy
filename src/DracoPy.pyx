@@ -35,10 +35,6 @@ class DracoPointCloud(object):
     @property
     def geometry_metadata(self) -> Dict:
         return self.data_struct['geometry_metadata']
-    #
-    # @property
-    # def attributes(self) -> List[Dict]:
-    #     return self.data_struct['attributes']
 
     @property
     def metadatas(self) -> List[Dict]:
@@ -92,8 +88,10 @@ def create_empty_geometry_metadata() -> dict:
 
 
 def encode_mesh_to_buffer(points, faces,
-                          quantization_bits=14, compression_level=1,
-                          quantization_range=-1, quantization_origin=None,
+                          quantization_bits=14,
+                          compression_level=1,
+                          quantization_range=-1,
+                          quantization_origin=None,
                           create_metadata=False,
                           metadatas = None,
                           geometry_metadata = None,
@@ -135,9 +133,7 @@ def encode_mesh_to_buffer(points, faces,
             raise EncodingFailedException('Invalid mesh')
     except EncodingFailedException:
         raise EncodingFailedException('Invalid mesh')
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
+    except:
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         raise ValueError("Input invalid")

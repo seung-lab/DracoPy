@@ -11,6 +11,7 @@
 #include "draco/point_cloud/point_cloud_builder.h"
 
 namespace DracoFunctions {
+
   enum decoding_status { successful, not_draco_encoded, no_position_attribute, failed_during_decoding };
   enum encoding_status { successful_encoding, failed_during_encoding };
 
@@ -347,7 +348,7 @@ namespace DracoFunctions {
   void setup_encoder_and_metadata(draco::PointCloud *point_cloud_or_mesh, draco::Encoder &encoder, int compression_level, int quantization_bits, float quantization_range, const float *quantization_origin, bool create_metadata) {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
-    auto metadata = std::make_unique<draco::GeometryMetadata>();
+    std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
     if (quantization_origin == NULL || quantization_range == -1) {
       encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
     } 
@@ -443,4 +444,5 @@ namespace DracoFunctions {
     }
     return encodedPointCloudObject;
   }
+
 }

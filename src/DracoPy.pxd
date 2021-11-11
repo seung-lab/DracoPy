@@ -82,18 +82,6 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[unsigned char] buffer
         encoding_status encode_status
 
-    cdef cppclass MetadataReader:
-        MetadataReader(const string& s) except +
-        uint32_t read_uint() except +
-        string read_bytes() except +
-
-    cdef cppclass MetadataWriter:
-        MetadataWriter() except +
-        void write_uint(const uint32_t& value) except +
-        void write_bytes_from_str(const string& value) except +
-        void write_bytes_from_vec(const vector[uint8_t]& value) except +
-        string get() except +
-
     MeshObject decode_buffer(const char *buffer, size_t buffer_len, bool deduplicate) except +
 
     PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len, bool deduplicate) except +
