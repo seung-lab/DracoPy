@@ -13,7 +13,7 @@ testdata_directory = "testdata_files"
 
 def create_tetrahedron() -> Tuple[List[float], List[int]]:
     """
-       Tetrader
+       Tetrahedron
          (3)
           |
           |
