@@ -86,16 +86,22 @@ namespace DracoFunctions {
                                      to_parse_metadatas_next;
             !to_parse_metadata.empty();
             to_parse_metadata = std::move(to_parse_metadatas_next)) {
-        for (auto& [metadata, metadata_object_idx]: to_parse_metadata) {
+        for (auto& meta_pair: to_parse_metadata) {
+          const draco::Metadata* metadata = meta_pair.first;
+          const uint32_t metadata_object_idx = meta_pair.second;
           // consider entries
-          for (const auto& [name, vec_value]: metadata->entries()) {
+          for (const auto& entry_pair: metadata->entries()) {
+            const std::string& name = entry_pair.first;
+            const draco::EntryValue& vec_value = entry_pair.second;
             auto raw_value = reinterpret_cast<const char*>(vec_value.data().data());
             auto value_size = vec_value.data().size();
             std::string str_value(raw_value, raw_value + value_size);
             all_metadata_objects[metadata_object_idx].entries[name] = std::move(str_value);
           }
           // consider sub metadatas
-          for (const auto& [name, sub_metadata]: metadata->sub_metadatas()) {
+          for (const auto& sub_meta_pair: metadata->sub_metadatas()) {
+            const std::string& name = sub_meta_pair.first;
+            const std::unique_ptr<draco::Metadata>& sub_metadata = sub_meta_pair.second;
             const uint32_t sub_metadata_id = add_metadata_object(all_metadata_objects);
             all_metadata_objects[metadata_object_idx].sub_metadata_ids[name] = sub_metadata_id;
             to_parse_metadatas_next.push_back({sub_metadata.get(), sub_metadata_id});
@@ -128,7 +134,7 @@ namespace DracoFunctions {
             for (draco::PointIndex v(0); v < attribute->indices_map_size(); ++v) {
               auto& value = pao.data[v.value()];
               value.resize(value_size);
-              attribute->GetMappedValue(v, value.data());
+              attribute->GetMappedValue(v, &value[0]);
             }
             attribute_objects.push_back(std::move(pao));
           }
@@ -182,15 +188,21 @@ namespace DracoFunctions {
                                      to_parse_metadatas_next;
             !to_parse_metadata.empty(); 
             to_parse_metadata = std::move(to_parse_metadatas_next)) {
-        for (auto& [metadata, metadata_object]: to_parse_metadata) {
+        for (auto& meta_pair: to_parse_metadata) {
+          draco::Metadata* metadata = meta_pair.first;
+          const MetadataObject* metadata_object = meta_pair.second;
           // consider entries
-          for (const auto& [name, str_value]: metadata_object->entries) {
+          for (const auto& meta_pair: metadata_object->entries) {
+            const std::string& name = meta_pair.first;
+            const std::string str_value = meta_pair.second;
             std::vector<uint8_t> vec_value(str_value.size());
             memcpy(vec_value.data(), str_value.data(), str_value.size());
             metadata->AddEntryBinary(name, vec_value);
           }
           // consider sub metadatas
-          for (const auto& [name, metadata_id]: metadata_object->sub_metadata_ids) {
+          for (const auto& sub_meta_pair: metadata_object->sub_metadata_ids) {
+            const std::string& name = sub_meta_pair.first;
+            const uint32_t& metadata_id = sub_meta_pair.second;
             auto sub_metadata = std::make_unique<draco::Metadata>();
             to_parse_metadatas_next.push_back({sub_metadata.get(), &metadatas[metadata_id]});
             metadata->AddSubMetadata(name, std::move(sub_metadata));
