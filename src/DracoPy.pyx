@@ -1,5 +1,5 @@
 # distutils: language = c++
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
@@ -33,8 +33,8 @@ class DracoPointCloud(object):
         return self.data_struct['points']
 
     @property
-    def geometry_metadata(self) -> Dict:
-        return self.data_struct['geometry_metadata']
+    def geometry_metadata(self) -> Optional[Dict]:
+        return self.data_struct['geometry_metadata'] if self.metadatas else None
 
     @property
     def metadatas(self) -> List[Dict]:
@@ -97,13 +97,33 @@ def encode_mesh_to_buffer(points, faces,
                           geometry_metadata = None,
                           ):
     """
-    Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
-    Quantization bits should be an integer between 0 and 31
-    Compression level should be an integer between 0 and 10
-    Quantization_range is a float representing the size of the bounding cube for the mesh.
-    By default it is the range of the dimension of the input vertices with greatest range.
-    Quantization_origin is the point in space where the bounding box begins. By default it is
-    a point where each coordinate is the minimum of that coordinate among the input vertices.
+    Encode a list or numpy array of points/vertices (float) to a draco buffer.
+    :param List[float] points: vector of points coordination
+    :param int quantization_bits: integer between 0 and 31
+    :param int compression_level: integer between 0 and 10
+    :param float quantization_range: float representing the size
+    of the bounding cube for the mesh. By default it is the range of
+    the dimension of the input vertices with greatest range.
+    :param quantization_origin: point in space where the bounding box begins.
+    By default it is a point where each coordinate is the minimum
+    of that coordinate among the input vertices.
+    :param bool create_metadata: if True then it creates GeometryMetadata
+    :param List[dict] metadatas: list of metadatas each of them containing
+        "entries" - dictionary with strings (entry name) and binary data
+                    related to that entry
+        "sub_metadata_ids" - dictionary with strings (submetadata name) and
+                             related submetadata index in the list 'metadatas'
+    :param dict geometry_metadata: dict containing the following items:
+        "metadata_id" - index in the list 'metadatas' related to that metadata
+        "generic_attributes" - list of geometry attributes (dict) each of them contain:
+            "data" - dictionary with point index (not pure points index)
+                     from points list
+            "datatype" - type of the data item (see DataType enum)
+            "dimension" - integer that defines number of data items with type 'datatype'
+                          are placed per point
+            "metadata_id" - metadata index in 'metadatas'
+    NOTE: all 'metadata_id' indexes have to exists in 'metadatas' fields
+    :return bytes: encoded mesh
     """
     if metadatas is None:
         metadatas = []
@@ -149,17 +169,39 @@ def encode_point_cloud_to_buffer(points,
                                  ):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
-    Quantization bits should be an integer between 0 and 31
-    Compression level should be an integer between 0 and 10
-    Quantization_range is a float representing the size of the bounding cube for the mesh.
-    By default it is the range of the dimension of the input vertices with greatest range.
-    Quantization_origin is the point in space where the bounding box begins. By default it is
-    a point where each coordinate is the minimum of that coordinate among the input vertices.
+    :param List[float] points: vector of points coordination
+    :param int quantization_bits: integer between 0 and 31
+    :param int compression_level: integer between 0 and 10
+    :param float quantization_range: float representing the size
+    of the bounding cube for the mesh. By default it is the range of
+    the dimension of the input vertices with greatest range.
+    :param quantization_origin: point in space where the bounding box begins.
+    By default it is a point where each coordinate is the minimum
+    of that coordinate among the input vertices.
+    :param bool create_metadata: if True then it creates GeometryMetadata
+    :param List[dict] metadatas: list of metadatas each of them containing
+        "entries" - dictionary with strings (entry name) and binary data
+                    related to that entry
+        "sub_metadata_ids" - dictionary with strings (submetadata name) and
+                             related submetadata index in the list 'metadatas'
+    :param dict geometry_metadata: dict containing the following items:
+        "metadata_id" - index in the list 'metadatas' related to that metadata
+        "generic_attributes" - list of geometry attributes (dict) each of them contain:
+            "data" - dictionary with point index (not pure points index)
+                     from points list
+            "datatype" - type of the data item (see DataType enum)
+            "dimension" - integer that defines number of data items with type 'datatype'
+                          are placed per point
+            "metadata_id" - metadata index in 'metadatas'
+    NOTE: all 'metadata_id' indexes have to exists in 'metadatas' fields
+    :return bytes: encoded mesh
     """
     if metadatas is None:
         metadatas = []
     if geometry_metadata is None:
         geometry_metadata = create_empty_geometry_metadata()
+    if len(geometry_metadata["generic_attributes"]) > 0:
+        raise RuntimeError("generic attributes encoding/decoding is not supported")
     cdef float* quant_origin = NULL
     try:
         num_dims = 3
@@ -194,6 +236,12 @@ def raise_decoding_error(decoding_status):
         raise ValueError('DracoPy only supports meshes with position attributes')
 
 def decode_buffer_to_mesh(buffer, deduplicate=False):
+    """
+    Decode buffer to mesh
+    :param bytes buffer: encoded mesh
+    :param bool deduplicate: run Draco deduplcation functions
+    :return: mesh object
+    """
     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer), deduplicate)
     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
         return DracoMesh(mesh_struct)
@@ -201,6 +249,12 @@ def decode_buffer_to_mesh(buffer, deduplicate=False):
         raise_decoding_error(mesh_struct.decode_status)
 
 def decode_point_cloud_buffer(buffer, deduplicate=False):
+    """
+    Decode buffer to point cloud
+    :param bytes buffer: encoded point cloud
+    :param bool deduplicate: run Draco deduplcation functions
+    :return: point cloud object
+    """
     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer), deduplicate)
     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
         return DracoPointCloud(point_cloud_struct)

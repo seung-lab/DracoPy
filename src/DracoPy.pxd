@@ -5,20 +5,20 @@ from libc.stdint cimport uint32_t, uint8_t
 from libcpp cimport bool
 
 cdef extern from "DracoPy.h" namespace "draco":
-    cdef enum DataType:
-        DT_INVALID
-        DT_INT8
-        DT_UINT8
-        DT_INT16
-        DT_UINT16
-        DT_INT32
-        DT_UINT32
-        DT_INT64
-        DT_UINT64
-        DT_FLOAT32
-        DT_FLOAT64
-        DT_BOOL
-        DT_TYPES_COUNT
+    cpdef enum DataType:
+        DT_INVALID "draco::DataType::DT_INVALID",
+        DT_INT8 "draco::DataType::DT_INT8",
+        DT_UINT8 "draco::DataType::DT_UINT8",
+        DT_INT16 "draco::DataType::DT_INT16",
+        DT_UINT16 "draco::DataType::DT_UINT16",
+        DT_INT32 "draco::DataType::DT_INT32",
+        DT_UINT32 "draco::DataType::DT_UINT32",
+        DT_INT64 "draco::DataType::DT_INT64",
+        DT_UINT64 "draco::DataType::DT_UINT64",
+        DT_FLOAT32 "draco::DataType::DT_FLOAT32",
+        DT_FLOAT64 "draco::DataType::DT_FLOAT64",
+        DT_BOOL "draco::DataType::DT_BOOL",
+        DT_TYPES_COUNT "draco::DataType::DT_TYPES_COUNT"
 
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
