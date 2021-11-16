@@ -14,7 +14,6 @@ class DracoPointCloud(object):
                 data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
-        # self.metadata = decode_metadata(data_struct["binary_metadata"])
 
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
