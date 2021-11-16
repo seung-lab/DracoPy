@@ -189,7 +189,7 @@ def test_encode_decode_tetrahedron_point_cloud():
     buffer = DracoPy.encode_point_cloud_to_buffer(points)
     point_cloud = DracoPy.decode_point_cloud_buffer(buffer, deduplicate=False)
     points_map = create_points_map(points, point_cloud.points)
-    assert len(points) >= len(point_cloud.points)  # consider duplicated points
+    assert len(points) >= len(point_cloud.points)
     for j in range(len(point_cloud.points) // 3):
         i = points_map[j]
         assert point_cloud.points[j * 3:(j + 1) * 3] == points[i * 3:(i + 1) * 3]
@@ -201,8 +201,8 @@ def test_encode_decode_tetrahedron_with_deduplication_mesh():
     mesh = DracoPy.decode_buffer_to_mesh(buffer, deduplicate=True)
     points_map = create_points_map(points, mesh.points)
     faces_map = create_faces_map(faces, mesh.faces, points_map)
-    assert len(points) == len(mesh.points)  # consider duplicated points
-    assert len(faces) == len(mesh.faces)  # consider duplicated points
+    assert len(points) == len(mesh.points)
+    assert len(faces) == len(mesh.faces)
     for j in range(len(mesh.points) // 3):
         i = points_map[j]
         assert mesh.points[j * 3:(j + 1) * 3] == points[i * 3:(i + 1) * 3]
@@ -441,7 +441,6 @@ def test_no_metadata_exists_if_create_metadata_false_point_cloud():
 def test_data_type_enum():
     assert int(DracoPy.DataType.DT_INVALID) == 0
     assert int(DracoPy.DataType.DT_TYPES_COUNT) == len(DracoPy.DataType) - 1
-
     usual_values = list(range(0, len(DracoPy.DataType) - 1))
     assert int(DracoPy.DataType.DT_INT8) in usual_values
     assert int(DracoPy.DataType.DT_INT16) in usual_values
