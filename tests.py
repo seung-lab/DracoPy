@@ -166,7 +166,7 @@ def test_decoding_and_encoding_point_cloud_file():
 
 def test_encode_decode_tetrahedron_mesh():
     points, faces = create_tetrahedron()
-    buffer = DracoPy.encode_mesh_to_buffer(points, faces)
+    buffer = DracoPy.encode_to_buffer(points, faces)
     mesh = DracoPy.decode_buffer_to_mesh(buffer, deduplicate=False)
     points_map = create_points_map(points, mesh.points)
     faces_map = create_faces_map(faces, mesh.faces, points_map)
@@ -186,7 +186,7 @@ def test_encode_decode_tetrahedron_mesh():
 
 def test_encode_decode_tetrahedron_point_cloud():
     points, _ = create_tetrahedron()
-    buffer = DracoPy.encode_point_cloud_to_buffer(points)
+    buffer = DracoPy.encode_to_buffer(points)
     point_cloud = DracoPy.decode_point_cloud_buffer(buffer, deduplicate=False)
     points_map = create_points_map(points, point_cloud.points)
     assert len(points) >= len(point_cloud.points)
@@ -197,7 +197,7 @@ def test_encode_decode_tetrahedron_point_cloud():
 
 def test_encode_decode_tetrahedron_with_deduplication_mesh():
     points, faces = create_tetrahedron()
-    buffer = DracoPy.encode_mesh_to_buffer(points, faces)
+    buffer = DracoPy.encode_to_buffer(points, faces)
     mesh = DracoPy.decode_buffer_to_mesh(buffer, deduplicate=True)
     points_map = create_points_map(points, mesh.points)
     faces_map = create_faces_map(faces, mesh.faces, points_map)
@@ -217,7 +217,7 @@ def test_encode_decode_tetrahedron_with_deduplication_mesh():
 
 def test_encode_decode_tetrahedron_with_deduplication_point_cloud():
     points, _ = create_tetrahedron()
-    buffer = DracoPy.encode_point_cloud_to_buffer(points)
+    buffer = DracoPy.encode_to_buffer(points)
     point_cloud = DracoPy.decode_point_cloud_buffer(buffer, deduplicate=True)
     points_map = create_points_map(points, point_cloud.points)
     assert len(points) == len(point_cloud.points)  # consider duplicated points
@@ -250,9 +250,8 @@ def test_encode_decode_geometry_attributes_mesh():
         "generic_attributes": [attribute],
     }
     # encode - decode
-    buffer = DracoPy.encode_mesh_to_buffer(
+    buffer = DracoPy.encode_to_buffer(
         points, faces,
-        create_metadata=True,
         metadatas=metadatas,
         geometry_metadata=geometry_metadata,
     )
@@ -297,9 +296,8 @@ def test_encode_decode_geometry_attributes_point_cloud():
     }
     # encode - decode
     with pytest.raises(RuntimeError):
-        DracoPy.encode_point_cloud_to_buffer(
+        DracoPy.encode_to_buffer(
             points,
-            create_metadata=True,
             metadatas=metadatas,
             geometry_metadata=geometry_metadata)
 
@@ -324,15 +322,11 @@ def test_encode_decode_submetadata_entries_mesh():
         "generic_attributes": [],
     }
     # encode - decode
-    buffer = DracoPy.encode_mesh_to_buffer(
+    buffer = DracoPy.encode_to_buffer(
         points, faces,
-        create_metadata=True,
         metadatas=metadatas,
         geometry_metadata=geometry_metadata_specific)
     mesh = DracoPy.decode_buffer_to_mesh(buffer)
-    # add default value for quantization_bits
-    geometry_metadata["entries"][b"quantization_bits"] = int.to_bytes(
-        14, 4, sys.byteorder)
     # validate results
     out_metadatas = mesh.metadatas
     assert len(out_metadatas) == len(metadatas)
@@ -367,15 +361,11 @@ def test_encode_decode_submetadata_entries_point_cloud():
         "generic_attributes": [],
     }
     # encode - decode
-    buffer = DracoPy.encode_point_cloud_to_buffer(
+    buffer = DracoPy.encode_to_buffer(
         points,
-        create_metadata=True,
         metadatas=metadatas,
         geometry_metadata=geometry_metadata_specific)
     point_cloud = DracoPy.decode_point_cloud_buffer(buffer)
-    # add default value for quantization_bits
-    geometry_metadata["entries"][b"quantization_bits"] = int.to_bytes(
-        14, 4, sys.byteorder)
     # validate results
     out_metadatas = point_cloud.metadatas
     assert len(out_metadatas) == len(metadatas)
@@ -388,54 +378,6 @@ def test_encode_decode_submetadata_entries_point_cloud():
         b"custom_metadata_name"]
     custom_metadata = out_metadatas[custom_metadata_id]
     assert custom_metadata == metadatas[1]
-
-
-def test_no_metadata_exists_if_create_metadata_false_mesh():
-    points, faces = create_tetrahedron()
-    metadatas = [
-        {
-            "entries": {},
-            "sub_metadata_ids": {},
-        }
-    ]
-    geometry_metadata_specific = {
-        "metadata_id": 0,
-        "generic_attributes": [],
-    }
-    # encode - decode
-    buffer = DracoPy.encode_mesh_to_buffer(
-        points, faces,
-        create_metadata=False,
-        metadatas=metadatas,
-        geometry_metadata=geometry_metadata_specific)
-    mesh = DracoPy.decode_buffer_to_mesh(buffer)
-    # validate results
-    assert len(mesh.metadatas) == 0
-    assert mesh.geometry_metadata is None
-
-
-def test_no_metadata_exists_if_create_metadata_false_point_cloud():
-    points, _ = create_tetrahedron()
-    metadatas = [
-        {
-            "entries": {},
-            "sub_metadata_ids": {},
-        }
-    ]
-    geometry_metadata_specific = {
-        "metadata_id": 0,
-        "generic_attributes": [],
-    }
-    # encode - decode
-    buffer = DracoPy.encode_point_cloud_to_buffer(
-        points,
-        create_metadata=False,
-        metadatas=metadatas,
-        geometry_metadata=geometry_metadata_specific)
-    point_cloud = DracoPy.decode_point_cloud_buffer(buffer)
-    # validate results
-    assert len(point_cloud.metadatas) == 0
-    assert point_cloud.geometry_metadata is None
 
 
 def test_data_type_enum():

@@ -1,9 +1,39 @@
 # distutils: language = c++
+import struct
 from typing import Dict, List, Optional
-
+from libcpp.vector cimport vector
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
 from math import floor
+
+
+cdef class Encoder:
+    """
+    Python wrapper for draco::Encoder
+    Allow set up encoding options
+    """
+
+    cdef DracoPy.CppEncoder this_encoder
+
+    def __cinit__(self):
+        self.this_encoder = CppEncoder()
+
+    def SetSpeedOptions(self, encoding_speed: int, decoding_speed: int):
+        self.this_encoder.SetSpeedOptions(encoding_speed, decoding_speed)
+
+    def SetAttributeQuantization(self,
+                                 attr_type: GeometryAttributeType,
+                                 quantization_bits: int):
+        self.this_encoder.SetAttributeQuantization(attr_type, quantization_bits)
+
+    def SetAttributeExplicitQuantization(self,
+                                         attr_type: GeometryAttributeType,
+                                         quantization_bits: int,
+                                         quantization_range: float,
+                                         quantization_origin: vector[float]):
+        self.this_encoder.SetAttributeExplicitQuantization(
+            attr_type, quantization_bits, quantization_origin.size(),
+            &quantization_origin[0], quantization_range)
 
 
 class DracoPointCloud(object):
@@ -49,6 +79,7 @@ class DracoMesh(DracoPointCloud):
     def normals(self):
         return self.data_struct['normals']
 
+
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
         self.quantization_bits = quantization_bits
@@ -73,17 +104,61 @@ class EncodingOptions(object):
     def num_axes(self):
         return 3
 
+
 class FileTypeException(Exception):
     pass
+
 
 class EncodingFailedException(Exception):
     pass
 
-def create_empty_geometry_metadata() -> dict:
+
+def _create_empty_geometry_metadata() -> GeometryMetadataObject:
     return {
         "metadata_id": 0,
         "generic_attributes": [],
     }
+
+
+def _create_empty_metadata() -> MetadataObject:
+    return {
+        "entries": {},
+        "sub_metadata_ids": {}
+    }
+
+
+cdef Encoder _generate_encoder_and_update_metadata(
+        int quantization_bits,
+        int compression_level,
+        double quantization_range,
+        vector[double] quantization_origin,
+        vector[MetadataObject]& metadatas,
+        GeometryMetadataObject& geometry_metadata):
+    encoder = Encoder()
+    speed = 10 - compression_level
+    encoder.SetSpeedOptions(speed, speed)
+    to_create_quantization_metadata = not metadatas.empty()
+    cdef MetadataObject *metadata = NULL;
+    if to_create_quantization_metadata:
+        metadata = &metadatas[geometry_metadata.metadata_id]
+        metadata.entries["quantization_bits"] = struct.pack(
+            "=i", quantization_bits)
+    if quantization_origin.empty() or quantization_range == -1:
+        encoder.SetAttributeQuantization(
+            GeometryAttributeType.POSITION, quantization_bits)
+    else:
+        encoder.SetAttributeExplicitQuantization(
+            GeometryAttributeType.POSITION, quantization_bits,
+            quantization_range, quantization_origin)
+        if to_create_quantization_metadata:
+            metadata.entries["quantization_range"] = struct.pack(
+                "=d", quantization_range)
+            metadata.entries["quantization_origin"] = struct.pack(
+                "=ddd",
+                quantization_origin[0],
+                quantization_origin[1],
+                quantization_origin[2])
+    return encoder
 
 def encode_mesh_to_buffer(points, faces,
                           quantization_bits=14,
@@ -91,44 +166,17 @@ def encode_mesh_to_buffer(points, faces,
                           quantization_range=-1,
                           quantization_origin=None,
                           create_metadata=False,
-                          metadatas = None,
-                          geometry_metadata = None,
                           ):
-    return encode_to_buffer(points, faces, quantization_bits, compression_level,
-                            quantization_range, quantization_origin,
-                            create_metadata, metadatas, geometry_metadata)
-
-
-def encode_point_cloud_to_buffer(points,
-                                 quantization_bits=14,
-                                 compression_level=1,
-                                 quantization_range=-1,
-                                 quantization_origin=None,
-                                 create_metadata=False,
-                                 metadatas = None,
-                                 geometry_metadata = None,
-                                 ):
-    return encode_to_buffer(points, None, quantization_bits, compression_level,
-                            quantization_range, quantization_origin,
-                            create_metadata, metadatas, geometry_metadata)
-
-
-def encode_to_buffer(points: List[float],
-                     faces: List[int] = None,
-                     quantization_bits=14,
-                     compression_level=1,
-                     quantization_range=-1,
-                     quantization_origin=None,
-                     create_metadata=False,
-                     metadatas = None,
-                     geometry_metadata = None,
-                     ):
     """
-    Encode a list or numpy array of points/vertices (float) to a draco buffer.
+    Legacy version of 'encode_to_buffer' function
+    It allows:
+    * set up encoder
+    * save encoder settings into metadata
+    * serialize to buffer as mesh
+
     :param List[float] points: vector of points coordination
     :param Optional[List[int]] faces: vector of points indexes
-    (each triple means one face). If faces is None then point cloud
-    will be encoded, otherwise mesh will be encoded
+    (each triple means one face).
     :param int quantization_bits: integer between 0 and 31
     :param int compression_level: integer between 0 and 10
     :param float quantization_range: float representing the size
@@ -138,6 +186,76 @@ def encode_to_buffer(points: List[float],
     By default it is a point where each coordinate is the minimum
     of that coordinate among the input vertices.
     :param bool create_metadata: if True then it creates GeometryMetadata
+    :return bytes: encoded mesh
+    """
+    cdef GeometryMetadataObject geometry_metadata = _create_empty_geometry_metadata()
+    cdef vector[MetadataObject] metadatas
+    if create_metadata:
+        metadatas.push_back(_create_empty_metadata())
+    encoder = _generate_encoder_and_update_metadata(
+        quantization_bits,
+        compression_level,
+        quantization_range,
+        [] if quantization_origin is None else quantization_origin,
+        metadatas,
+        geometry_metadata,
+    )
+    return encode_to_buffer(points, faces, encoder, metadatas, geometry_metadata)
+
+
+def encode_point_cloud_to_buffer(points,
+                                 quantization_bits=14,
+                                 compression_level=1,
+                                 quantization_range=-1,
+                                 quantization_origin=None,
+                                 create_metadata=False
+                                 ):
+    """
+    Legacy version of 'encode_to_buffer' function
+    It allows:
+    * set up encoder
+    * save encoder settings into metadata
+    * serialize to buffer as point cloud
+
+    :param List[float] points: vector of points coordination
+    :param int quantization_bits: integer between 0 and 31
+    :param int compression_level: integer between 0 and 10
+    :param float quantization_range: float representing the size
+    of the bounding cube for the mesh. By default it is the range of
+    the dimension of the input vertices with greatest range.
+    :param quantization_origin: point in space where the bounding box begins.
+    By default it is a point where each coordinate is the minimum
+    of that coordinate among the input vertices.
+    :param bool create_metadata: if True then it creates GeometryMetadata
+    :return bytes: encoded point cloud
+    """
+    cdef GeometryMetadataObject geometry_metadata = _create_empty_geometry_metadata()
+    cdef vector[MetadataObject] metadatas
+    if create_metadata:
+        metadatas.push_back(_create_empty_metadata())
+    encoder = _generate_encoder_and_update_metadata(
+        quantization_bits,
+        compression_level,
+        quantization_range,
+        [] if quantization_origin is None else quantization_origin,
+        metadatas,
+        geometry_metadata,
+    )
+    return encode_to_buffer(points, None, encoder, metadatas, geometry_metadata)
+
+
+def encode_to_buffer(points: List[float],
+                     faces: List[int] = None,
+                     encoder: Encoder = Encoder(),
+                     metadatas = None,
+                     geometry_metadata = None,
+                     ):
+    """
+    Encode a list or numpy array of points/vertices (float) to a draco buffer.
+    :param List[float] points: vector of points coordination
+    :param Optional[List[int]] faces: vector of points indexes
+    (each triple means one face). If faces is None then point cloud
+    will be encoded, otherwise mesh will be encoded
     :param List[dict] metadatas: list of metadatas each of them containing
         "entries" - dictionary with strings (entry name) and binary data
                     related to that entry
@@ -162,33 +280,20 @@ def encode_to_buffer(points: List[float],
     if metadatas is None:
         metadatas = []
     if geometry_metadata is None:
-        geometry_metadata = create_empty_geometry_metadata()
+        geometry_metadata = _create_empty_geometry_metadata()
     cdef float* quant_origin = NULL
     try:
-        num_dims = 3
-        if quantization_origin is not None:
-            quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
-            for dim in range(num_dims):
-                quant_origin[dim] = quantization_origin[dim]
         if isinstance(faces, list):
             draco_encoded = DracoPy.encode_mesh(points,
                                                 faces,
+                                                encoder.this_encoder,
                                                 metadatas,
-                                                geometry_metadata,
-                                                quantization_bits,
-                                                compression_level,
-                                                quantization_range,
-                                                quant_origin,
-                                                create_metadata)
+                                                geometry_metadata)
         else:
             draco_encoded = DracoPy.encode_point_cloud(points,
+                                                       encoder.this_encoder,
                                                        metadatas,
-                                                       geometry_metadata,
-                                                       quantization_bits,
-                                                       compression_level,
-                                                       quantization_range,
-                                                       quant_origin,
-                                                       create_metadata)
+                                                       geometry_metadata)
         if quant_origin != NULL:
             PyMem_Free(quant_origin)
         if draco_encoded.encode_status == DracoPy.encoding_status.successful_encoding:

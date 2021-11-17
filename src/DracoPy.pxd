@@ -4,6 +4,18 @@ from libcpp.unordered_map cimport unordered_map
 from libc.stdint cimport uint32_t, uint8_t
 from libcpp cimport bool
 
+
+cdef extern from "DracoPy.h" namespace "draco::GeometryAttribute":
+    cpdef enum GeometryAttributeType "draco::GeometryAttribute::Type":
+        INVALID = -1
+        POSITION = 0
+        NORMAL
+        COLOR
+        TEX_COORD
+        GENERIC
+        NAMED_ATTRIBUTES_COUNT
+
+
 cdef extern from "DracoPy.h" namespace "draco":
     cpdef enum DataType:
         DT_INVALID "draco::DataType::DT_INVALID",
@@ -19,6 +31,14 @@ cdef extern from "DracoPy.h" namespace "draco":
         DT_FLOAT64 "draco::DataType::DT_FLOAT64",
         DT_BOOL "draco::DataType::DT_BOOL",
         DT_TYPES_COUNT "draco::DataType::DT_TYPES_COUNT"
+
+    cpdef cppclass CppEncoder "draco::Encoder":
+        CppEncoder() except +
+        void SetSpeedOptions(int encoding_speed, int decoding_speed) except +
+        void SetAttributeQuantization(GeometryAttributeType type, int quantization_bits) except +
+        void SetAttributeExplicitQuantization(GeometryAttributeType type, int quantization_bits,
+                                              int num_dims, const float *origin,
+                                              float range) except +
 
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
@@ -89,22 +109,14 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     EncodedObject encode_mesh(
             vector[float] points,
             vector[uint32_t] faces,
+            CppEncoder encoder,
             vector[MetadataObject] metadatas,
-            GeometryMetadataObject geometry_metadata,
-            int quantization_bits,
-            int compression_level,
-            float quantization_range,
-            const float *quantization_origin,
-            bool create_metadata
+            GeometryMetadataObject geometry_metadata
     ) except +
     
     EncodedObject encode_point_cloud(
             vector[float] points,
+            CppEncoder encoder,
             vector[MetadataObject] metadatas,
-            GeometryMetadataObject geometry_metadata_object,
-            int quantization_bits,
-            int compression_level,
-            float quantization_range,
-            const float *quantization_origin,
-            bool create_metadata
+            GeometryMetadataObject geometry_metadata_object
     ) except +
