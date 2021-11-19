@@ -270,10 +270,11 @@ def encode_to_buffer(points: List[float],
             "dimension" - integer that defines number of data items with type 'datatype'
                           are placed per point
             "metadata_id" - metadata index in 'metadatas'
-    NOTE: all 'metadata_id' indexes have to exists in 'metadatas' fields
+    NOTE: all 'metadata_id' indexes have to exist in 'metadatas'
     :return bytes: encoded mesh
     """
-    if faces is None and isinstance(geometry_metadata, dict) and \
+    is_mesh = faces is not None
+    if not is_mesh and isinstance(geometry_metadata, dict) and \
             len(geometry_metadata["generic_attributes"]) > 0:
         raise RuntimeError("generic attributes encoding/decoding "
                            "is not supported for point cloud")
@@ -283,7 +284,7 @@ def encode_to_buffer(points: List[float],
         geometry_metadata = _create_empty_geometry_metadata()
     cdef float* quant_origin = NULL
     try:
-        if isinstance(faces, list):
+        if is_mesh:
             draco_encoded = DracoPy.encode_mesh(points,
                                                 faces,
                                                 encoder.this_encoder,
