@@ -1,6 +1,6 @@
 name: Build Wheels
 
-on: [push] 
+on: [push, workflow_dispatch] 
 
 env:
   CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* pp27-* pp36-* pp37-*
