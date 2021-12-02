@@ -32,12 +32,21 @@ if sys.platform == 'darwin':
     plat_name = skbuild_plat_name()
     sep = [pos for pos, char in enumerate(plat_name) if char == '-']
     assert len(sep) == 2
-    cmake_args = ['-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING='+plat_name[sep[0]+1:sep[1]],'-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]]
-    library_link_args = ['-l{0}'.format(lib) for lib in ('dracoenc', 'draco', 'dracodec')]
+    cmake_args = [
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING='+plat_name[sep[0]+1:sep[1]],
+        '-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]
+    ]
+    library_link_args = [
+        f'-l{lib}' for lib in ('dracoenc', 'draco', 'dracodec')
+    ]
 elif sys.platform == 'win32':
-    library_link_args = ['{0}'.format(lib) for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')]
+    library_link_args = [ 
+        lib for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')
+    ]
 else:
-    library_link_args = ['-l:{0}'.format(lib) for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')]
+    library_link_args = [
+        f'-l:{lib}' for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')
+    ]
 
 if sys.platform == 'win32':
     extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
