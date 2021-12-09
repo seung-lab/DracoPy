@@ -141,7 +141,7 @@ cdef Encoder _generate_encoder_and_update_metadata(
     cdef MetadataObject *metadata = NULL;
     if to_create_quantization_metadata:
         metadata = &metadatas[geometry_metadata.metadata_id]
-        metadata.entries["quantization_bits"] = struct.pack(
+        metadata.entries[b"quantization_bits"] = struct.pack(
             "=i", quantization_bits)
     if quantization_origin.empty() or quantization_range == -1:
         encoder.SetAttributeQuantization(
@@ -151,9 +151,9 @@ cdef Encoder _generate_encoder_and_update_metadata(
             GeometryAttributeType.POSITION, quantization_bits,
             quantization_range, quantization_origin)
         if to_create_quantization_metadata:
-            metadata.entries["quantization_range"] = struct.pack(
+            metadata.entries[b"quantization_range"] = struct.pack(
                 "=d", quantization_range)
-            metadata.entries["quantization_origin"] = struct.pack(
+            metadata.entries[b"quantization_origin"] = struct.pack(
                 "=ddd",
                 quantization_origin[0],
                 quantization_origin[1],
