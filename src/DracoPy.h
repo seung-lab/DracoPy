@@ -161,12 +161,26 @@ namespace DracoFunctions {
     }
   }
 
-  EncodedObject encode_mesh(const std::vector<float> &points, const std::vector<unsigned int> &faces,
-      int quantization_bits, int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
+  EncodedObject encode_mesh(
+    const std::vector<float> &points, 
+    const std::vector<unsigned int> &faces,
+    const int quantization_bits, 
+    const int compression_level, 
+    const float quantization_range, 
+    const float *quantization_origin, 
+    const bool create_metadata,
+    const bool integer_positions = false
+  ) {
     draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
-    const int pos_att_id =
-      mb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
+
+    auto dtype = integer_positions 
+      ? draco::DataType::DT_UINT32
+      : draco::DataType::DT_FLOAT32;
+
+    const int pos_att_id = mb.AddAttribute(
+      draco::GeometryAttribute::POSITION, 3, dtype
+    );
 
     for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
       auto point1Index = faces[i]*3;
