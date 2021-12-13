@@ -86,7 +86,10 @@ setup(
             sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
-            include_dirs = [ os.path.join(CMAKE_INSTALL_DIR(), 'include/')],
+            include_dirs = [ 
+                np.get_include(),
+                os.path.join(CMAKE_INSTALL_DIR(), 'include/'),
+            ],
             extra_compile_args=extra_compile_args,
             extra_link_args=extra_link_args
         )
