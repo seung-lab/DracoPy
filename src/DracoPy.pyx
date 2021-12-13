@@ -6,7 +6,10 @@ import struct
 from math import floor
 from libc.string cimport memcmp
 
-class DracoPointCloud(object):
+cimport numpy as np
+import numpy as np
+
+class DracoPointCloud:
     def __init__(self, data_struct):
         self.data_struct = data_struct
         if data_struct['encoding_options_set']:
@@ -74,7 +77,7 @@ def encode_mesh_to_buffer(
     points, faces, 
     quantization_bits=14, compression_level=1, 
     quantization_range=-1, quantization_origin=None, 
-    create_metadata=False, integer_positions=False
+    create_metadata=False
 ):
     """
     Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
@@ -85,32 +88,36 @@ def encode_mesh_to_buffer(
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
-    cdef float* quant_origin = NULL
-    try:
-        num_dims = 3
-        if quantization_origin is not None:
-            quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
-            for dim in range(num_dims):
-                quant_origin[dim] = quantization_origin[dim]
-        encoded_mesh = DracoPy.encode_mesh(
-            points, faces, quantization_bits, compression_level, 
-            quantization_range, quant_origin, create_metadata,
-            integer_positions
-        )
-        if quant_origin != NULL:
-            PyMem_Free(quant_origin)
-        if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
-            return bytes(encoded_mesh.buffer)
-        elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
-            raise EncodingFailedException('Invalid mesh')
-    except EncodingFailedException:
-        raise EncodingFailedException('Invalid mesh')
-    except:
-        if quant_origin != NULL:
-            PyMem_Free(quant_origin)
-        raise ValueError("Input invalid")
+    if not isinstance(points, np.ndarray):
+        points = np.array(points) 
 
-def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level=1, quantization_range=-1, quantization_origin=None, create_metadata=False):
+    integer_positions = np.issubdtype(points.dtype, np.integer)
+
+    cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
+    cdef float[:] quant_origin = qorigin
+
+    if quantization_origin is not None:
+        qorigin[:] = quantization_origin[:]
+    else:
+        qorigin[:] = np.min(points, axis=0)
+
+    encoded_mesh = DracoPy.encode_mesh(
+        points, faces, quantization_bits, compression_level, 
+        quantization_range, &quant_origin[0], create_metadata,
+        integer_positions
+    )
+
+    if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
+        return bytes(encoded_mesh.buffer)
+    elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+        raise EncodingFailedException('Invalid mesh')
+
+
+def encode_point_cloud_to_buffer(
+    points, quantization_bits=14, 
+    compression_level=1, quantization_range=-1, 
+    quantization_origin=None, create_metadata=False
+):
     """
     Encode a list or numpy array of points/vertices (float) to a draco buffer.
     Quantization bits should be an integer between 0 and 31
@@ -120,26 +127,24 @@ def encode_point_cloud_to_buffer(points, quantization_bits=14, compression_level
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
-    cdef float* quant_origin = NULL
-    try:
-        num_dims = 3
-        if quantization_origin is not None:
-            quant_origin = <float *>PyMem_Malloc(sizeof(float) * num_dims)
-            for dim in range(num_dims):
-                quant_origin[dim] = quantization_origin[dim]
-        encoded_point_cloud = DracoPy.encode_point_cloud(points, quantization_bits, compression_level, quantization_range, quant_origin, create_metadata)
-        if quant_origin != NULL:
-            PyMem_Free(quant_origin)
-        if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
-            return bytes(encoded_point_cloud.buffer)
-        elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
-            raise EncodingFailedException('Invalid point cloud')
-    except EncodingFailedException:
-        raise EncodingFailedException('Invalid point cloud')
-    except:
-        if quant_origin != NULL:
-            PyMem_Free(quant_origin)
-        raise ValueError("Input invalid")
+
+    cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
+    cdef float[:] quant_origin = qorigin
+
+    if quantization_origin is not None:
+        qorigin[:] = quantization_origin[:]
+    else:
+        qorigin[:] = np.min(points, axis=0)
+
+    encoded_point_cloud = DracoPy.encode_point_cloud(
+        points, quantization_bits, compression_level, 
+        quantization_range, <float*>&quant_origin[0], create_metadata
+    )
+
+    if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
+        return bytes(encoded_point_cloud.buffer)
+    elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
+        raise EncodingFailedException('Invalid mesh')
 
 def raise_decoding_error(decoding_status):
     if decoding_status == DracoPy.decoding_status.not_draco_encoded:

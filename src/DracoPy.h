@@ -182,27 +182,59 @@ namespace DracoFunctions {
       draco::GeometryAttribute::POSITION, 3, dtype
     );
 
-    for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
-      auto point1Index = faces[i]*3;
-      auto point2Index = faces[i+1]*3;
-      auto point3Index = faces[i+2]*3;
-      mb.SetAttributeValuesForFace(pos_att_id, draco::FaceIndex(i), draco::Vector3f(points[point1Index], points[point1Index+1], points[point1Index+2]).data(), draco::Vector3f(points[point2Index], points[point2Index+1], points[point2Index+2]).data(), draco::Vector3f(points[point3Index], points[point3Index+1], points[point3Index+2]).data());
+    if (integer_positions) {
+      for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
+        auto p1 = faces[i]*3;
+        auto p2 = faces[i+1]*3;
+        auto p3 = faces[i+2]*3;
+
+        mb.SetAttributeValuesForFace(
+          pos_att_id, draco::FaceIndex(i), 
+          draco::Vector3ui(points[p1], points[p1+1], points[p1+2]).data(), 
+          draco::Vector3ui(points[p2], points[p2+1], points[p2+2]).data(), 
+          draco::Vector3ui(points[p3], points[p3+1], points[p3+2]).data()
+        );
+      }
+    }
+    else {
+      for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
+        auto p1 = faces[i]*3;
+        auto p2 = faces[i+1]*3;
+        auto p3 = faces[i+2]*3;
+
+        mb.SetAttributeValuesForFace(
+          pos_att_id, draco::FaceIndex(i), 
+          draco::Vector3f(points[p1], points[p1+1], points[p1+2]).data(), 
+          draco::Vector3f(points[p2], points[p2+1], points[p2+2]).data(), 
+          draco::Vector3f(points[p3], points[p3+1], points[p3+2]).data()
+        );
+      }
     }
 
     std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
     draco::Mesh *mesh = ptr_mesh.get();
     draco::Encoder encoder;
-    setup_encoder_and_metadata(mesh, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
+    setup_encoder_and_metadata(
+      mesh, encoder, compression_level, 
+      quantization_bits, quantization_range, 
+      quantization_origin, create_metadata
+    );
+  
+
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
     EncodedObject encodedMeshObject;
     encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
+  
+
     if (status.ok()) {
       encodedMeshObject.encode_status = successful_encoding;
-    } else {
-      std::cout << "Draco encoding error: " << status.error_msg_string() << std::endl;
+    } 
+    else {
+      std::cerr << "Draco encoding error: " << status.error_msg_string() << std::endl;
       encodedMeshObject.encode_status = failed_during_encoding;
     }
+
     return encodedMeshObject;
   }
 

@@ -2,6 +2,9 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 from libcpp cimport bool
 
+cimport numpy
+import numpy as np
+
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     cdef enum decoding_status:
