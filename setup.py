@@ -57,14 +57,13 @@ else:
 if sys.platform == 'win32':
     extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
-              '/std:c++17','-O3'
-            ]
+      '/std:c++17', '/O2',
+    ]
 else:
     extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
-              '-std=c++11','-O3'
-            ]
-
+      '-std=c++11','-O3'
+    ]
 
 setup(
     name='DracoPy',
