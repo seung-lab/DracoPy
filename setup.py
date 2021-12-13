@@ -7,6 +7,12 @@ from packaging.version import LegacyVersion
 from skbuild.exceptions import SKBuildError
 from skbuild.cmaker import get_cmake_version
 
+import numpy as np
+import multiprocessing as mp
+
+if not "CMAKE_BUILD_PARALLEL_LEVEL" in os.environ:
+    os.environ["CMAKE_BUILD_PARALLEL_LEVEL"] = str(mp.cpu_count())
+
 def read(fname):
   with open(os.path.join(os.path.dirname(__file__), fname), 'rt') as f:
     return f.read()
