@@ -6,14 +6,16 @@ import numpy as np
 
 testdata_directory = "testdata_files"
 
+EXPECTED_POINTS_BUNNY_MESH = 104502 // 3
+EXPECTED_POINTS_BUNNY_PTC = 107841 // 3
+EXPECTED_FACES_BUNNY = 208353 // 3
+
 def test_decoding_and_encoding_mesh_file():
-    expected_points = 104502
-    expected_faces = 208353
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         file_content = draco_file.read()
         mesh_object = DracoPy.decode_buffer_to_mesh(file_content)
-        assert len(mesh_object.points) == expected_points
-        assert len(mesh_object.faces) == expected_faces
+        assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
+        assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
 
         encoding_test = DracoPy.encode_mesh_to_buffer(
             mesh_object.points, mesh_object.faces, 
@@ -25,17 +27,15 @@ def test_decoding_and_encoding_mesh_file():
         file_content = test_file.read()
         mesh_object = DracoPy.decode_buffer_to_mesh(file_content)
         assert (mesh_object.encoding_options) is None
-        assert len(mesh_object.points) == expected_points
-        assert len(mesh_object.faces) == expected_faces
+        assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
+        assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
 
 def test_decoding_and_encoding_mesh_file_integer_positions():
-    expected_points = 104502
-    expected_faces = 208353
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         file_content = draco_file.read()
         mesh_object = DracoPy.decode_buffer_to_mesh(file_content)
-        assert len(mesh_object.points) == expected_points
-        assert len(mesh_object.faces) == expected_faces
+        assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
+        assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
 
     points = np.array(mesh_object.points)
     points = points.astype(np.float64)
@@ -63,8 +63,8 @@ def test_decoding_and_encoding_mesh_file_integer_positions():
 
     mesh_object = DracoPy.decode_buffer_to_mesh(encoding_test)
 
-    assert len(mesh_object.points) == expected_points
-    assert len(mesh_object.faces) == expected_faces
+    assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
+    assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
 
     pts_f = np.array(mesh_object.points)
     pts_f = np.sort(pts_f, axis=0)
@@ -108,13 +108,12 @@ def test_metadata():
 
 
 def test_decoding_and_encoding_point_cloud_file():
-    expected_points = 107841
     with open(
         os.path.join(testdata_directory, "point_cloud_bunny.drc"), "rb"
     ) as draco_file:
         file_content = draco_file.read()
         point_cloud_object = DracoPy.decode_point_cloud_buffer(file_content)
-        assert len(point_cloud_object.points) == expected_points
+        assert len(point_cloud_object.points) == EXPECTED_POINTS_BUNNY_PTC
         encoding_test = DracoPy.encode_point_cloud_to_buffer(point_cloud_object.points)
         with open(
             os.path.join(testdata_directory, "point_cloud_bunny_test.drc"), "wb"
@@ -127,4 +126,4 @@ def test_decoding_and_encoding_point_cloud_file():
         file_content = test_file.read()
         point_cloud_object = DracoPy.decode_point_cloud_buffer(file_content)
         assert (point_cloud_object.encoding_options) is None
-        assert len(point_cloud_object.points) == expected_points
+        assert len(point_cloud_object.points) == EXPECTED_POINTS_BUNNY_PTC

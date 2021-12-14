@@ -5,6 +5,10 @@ cimport DracoPy
 import struct
 from math import floor
 from libc.string cimport memcmp
+from libc.stdint cimport (
+  int8_t, int16_t, int32_t, int64_t,
+  uint8_t, uint16_t, uint32_t, uint64_t,
+)
 
 cimport numpy as np
 import numpy as np
@@ -32,16 +36,20 @@ class DracoPointCloud:
 
     @property
     def points(self):
-        return self.data_struct['points']
+        points = self.data_struct['points']
+        N = len(points) // 3
+        return np.array(points).reshape((N, 3))
 
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
-        return self.data_struct['faces']
+        faces = self.data_struct['faces']
+        N = len(faces) // 3
+        return np.array(faces).reshape((N, 3))
 
     @property
     def normals(self):
-        return self.data_struct['normals']
+        return np.array(self.data_struct['normals'])
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -73,6 +81,13 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
+def format_array(arr):
+    if not isinstance(arr, np.ndarray):
+        arr = np.array(arr)
+    if arr.ndim == 1:
+        arr = arr.reshape((len(arr), 3))
+    return arr
+
 def encode_mesh_to_buffer(
     points, faces, 
     quantization_bits=14, compression_level=1, 
@@ -88,8 +103,8 @@ def encode_mesh_to_buffer(
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
-    if not isinstance(points, np.ndarray):
-        points = np.array(points) 
+    points = format_array(points)
+    faces = format_array(faces)
 
     integer_positions = np.issubdtype(points.dtype, np.integer)
 
@@ -101,10 +116,14 @@ def encode_mesh_to_buffer(
     else:
         qorigin[:] = np.min(points, axis=0)
 
+    cdef vector[float] pointsview = points.reshape((points.size,))
+    cdef vector[uint32_t] facesview = faces.reshape((faces.size,))
+
     encoded_mesh = DracoPy.encode_mesh(
-        points, faces, quantization_bits, compression_level, 
-        quantization_range, &quant_origin[0], create_metadata,
-        integer_positions
+        pointsview, facesview, 
+        quantization_bits, compression_level, 
+        quantization_range, &quant_origin[0], 
+        create_metadata, integer_positions
     )
 
     if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
@@ -127,6 +146,7 @@ def encode_point_cloud_to_buffer(
     Quantization_origin is the point in space where the bounding box begins. By default it is
     a point where each coordinate is the minimum of that coordinate among the input vertices.
     """
+    points = format_array(points)
 
     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
     cdef float[:] quant_origin = qorigin
@@ -136,8 +156,10 @@ def encode_point_cloud_to_buffer(
     else:
         qorigin[:] = np.min(points, axis=0)
 
+    cdef vector[float] pointsview = points.reshape((points.size,))
+
     encoded_point_cloud = DracoPy.encode_point_cloud(
-        points, quantization_bits, compression_level, 
+        pointsview, quantization_bits, compression_level, 
         quantization_range, <float*>&quant_origin[0], create_metadata
     )
 
