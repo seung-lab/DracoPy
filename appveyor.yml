@@ -14,7 +14,7 @@ environment:
 install:
   # We need wheel installed to build wheels
   - "git submodule update --init --recursive"
-  - "%PYTHON%\\python.exe -m pip install wheel scikit-build"
+  - "%PYTHON%\\python.exe -m pip install wheel scikit-build  oldest-supported-numpy"
 
 build: off
 

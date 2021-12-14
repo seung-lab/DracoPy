@@ -2,6 +2,9 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 from libcpp cimport bool
 
+cimport numpy
+import numpy as np
+
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     cdef enum decoding_status:
@@ -47,8 +50,23 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
 
-    EncodedObject encode_mesh(vector[float] points, vector[uint32_t] faces, int quantization_bits,
-        int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
+    EncodedObject encode_mesh(
+        const vector[float] points, 
+        const vector[uint32_t] faces, 
+        const int quantization_bits,
+        const int compression_level, 
+        const float quantization_range, 
+        const float *quantization_origin, 
+        const bool create_metadata,
+        const bool integer_positions
+    ) except +
     
-    EncodedObject encode_point_cloud(vector[float] points, int quantization_bits,
-        int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
+    EncodedObject encode_point_cloud(
+        const vector[float] points, 
+        const int quantization_bits,
+        const int compression_level, 
+        const float quantization_range, 
+        const const float *quantization_origin, 
+        const bool create_metadata,
+        const bool integer_positions
+    ) except +

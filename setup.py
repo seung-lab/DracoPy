@@ -7,6 +7,12 @@ from packaging.version import LegacyVersion
 from skbuild.exceptions import SKBuildError
 from skbuild.cmaker import get_cmake_version
 
+import numpy as np
+import multiprocessing as mp
+
+if not "CMAKE_BUILD_PARALLEL_LEVEL" in os.environ:
+    os.environ["CMAKE_BUILD_PARALLEL_LEVEL"] = str(mp.cpu_count())
+
 def read(fname):
   with open(os.path.join(os.path.dirname(__file__), fname), 'rt') as f:
     return f.read()
@@ -51,21 +57,20 @@ else:
 if sys.platform == 'win32':
     extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
-              '/std:c++17','-O3'
-            ]
+      '/std:c++17', '/O2',
+    ]
 else:
     extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
-              '-std=c++11','-O3'
-            ]
-
+      '-std=c++11','-O3'
+    ]
 
 setup(
     name='DracoPy',
     version='0.0.19',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
-    author = 'Manuel Castro',
-    author_email = 'macastro@princeton.edu',
+    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez',
+    author_email = 'macastro@princeton.edu, ws9@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
@@ -80,7 +85,10 @@ setup(
             sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
-            include_dirs = [ os.path.join(CMAKE_INSTALL_DIR(), 'include/')],
+            include_dirs = [ 
+                np.get_include(),
+                os.path.join(CMAKE_INSTALL_DIR(), 'include/'),
+            ],
             extra_compile_args=extra_compile_args,
             extra_link_args=extra_link_args
         )
