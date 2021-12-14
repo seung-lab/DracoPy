@@ -53,10 +53,10 @@ if is_macos:
     library_link_args = [
         f'-l{lib}' for lib in ('dracoenc', 'draco', 'dracodec')
     ]
-elif is_windows:
-    library_link_args = [ 
-        lib for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')
-    ]
+# elif is_windows:
+#     library_link_args = [ 
+#         lib for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')
+#     ]
 else: # linux
     library_link_args = [
         f'-l:{lib}' for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')
