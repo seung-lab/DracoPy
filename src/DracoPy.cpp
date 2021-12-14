@@ -6628,7 +6628,7 @@ static PyObject *__pyx_pf_7DracoPy_10encode_point_cloud_to_buffer(CYTHON_UNUSED 
 /* "DracoPy.pyx":206
  *     )
  * 
- * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return decode(buffer)
  */
@@ -6660,11 +6660,11 @@ static PyObject *__pyx_pf_7DracoPy_12decode_buffer_to_mesh(CYTHON_UNUSED PyObjec
   __Pyx_RefNannySetupContext("decode_buffer_to_mesh", 0);
 
   /* "DracoPy.pyx":208
- * def decode_buffer_to_mesh(buffer) -> DracoMesh:
+ * def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
  *     """Provided for backwards compatibility. Use decode."""
  *     return decode(buffer)             # <<<<<<<<<<<<<<
  * 
- * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+ * def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_decode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
@@ -6691,7 +6691,7 @@ static PyObject *__pyx_pf_7DracoPy_12decode_buffer_to_mesh(CYTHON_UNUSED PyObjec
   /* "DracoPy.pyx":206
  *     )
  * 
- * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return decode(buffer)
  */
@@ -6712,7 +6712,7 @@ static PyObject *__pyx_pf_7DracoPy_12decode_buffer_to_mesh(CYTHON_UNUSED PyObjec
 /* "DracoPy.pyx":210
  *     return decode(buffer)
  * 
- * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return cast(decode(buffer), DracoPointCloud)
  */
@@ -6747,7 +6747,7 @@ static PyObject *__pyx_pf_7DracoPy_14decode_buffer_to_point_cloud(CYTHON_UNUSED 
   __Pyx_RefNannySetupContext("decode_buffer_to_point_cloud", 0);
 
   /* "DracoPy.pyx":212
- * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+ * def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:
  *     """Provided for backwards compatibility. Use decode."""
  *     return cast(decode(buffer), DracoPointCloud)             # <<<<<<<<<<<<<<
  * 
@@ -6831,7 +6831,7 @@ static PyObject *__pyx_pf_7DracoPy_14decode_buffer_to_point_cloud(CYTHON_UNUSED 
   /* "DracoPy.pyx":210
  *     return decode(buffer)
  * 
- * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return cast(decode(buffer), DracoPointCloud)
  */
@@ -22820,7 +22820,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "DracoPy.pyx":206
  *     )
  * 
- * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return decode(buffer)
  */
@@ -23765,7 +23765,7 @@ if (!__Pyx_RefNanny) {
   /* "DracoPy.pyx":206
  *     )
  * 
- * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ * def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
  *     """Provided for backwards compatibility. Use decode."""
  *     return decode(buffer)
  */

@@ -203,11 +203,11 @@ def encode_point_cloud_to_buffer(
         create_metadata=create_metadata,
     )
  
-def decode_buffer_to_mesh(buffer) -> DracoMesh:
+def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
     """Provided for backwards compatibility. Use decode."""
     return decode(buffer)
 
-def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:
     """Provided for backwards compatibility. Use decode."""
     return cast(decode(buffer), DracoPointCloud)
 
