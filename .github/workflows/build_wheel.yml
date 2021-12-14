@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up QEMU
+        if:  ${{ matrix.arch == 'aarch64' }}
+        uses: docker/setup-qemu-action@v1
+
       - name: Build wheels
         uses: joerick/cibuildwheel@v2.3.0
         # to supply options, put them in 'env', like:
