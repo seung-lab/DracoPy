@@ -99,6 +99,13 @@ def encode(
     create_metadata=False
 ) -> bytes:
     """
+    bytes encode(
+        points, faces=None, 
+        quantization_bits=14, compression_level=1, 
+        quantization_range=-1, quantization_origin=None, 
+        create_metadata=False
+    )
+
     Encode a list or numpy array of points/vertices (float) and faces 
     (unsigned int) to a draco buffer. If faces is None, then a point
     cloud file will be generated, otherwise a mesh file.
@@ -159,6 +166,8 @@ def raise_decoding_error(decoding_status):
 
 def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
     """
+    (DracoMesh|DracoPointCloud) decode(bytes buffer)
+
     Decodes a binary draco file into either a DracoPointCloud
     or a DracoMesh.
     """
