@@ -1,6 +1,8 @@
 import setuptools
 import os
+import platform
 import sys
+
 from skbuild import setup
 from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
 from packaging.version import LegacyVersion
@@ -34,7 +36,13 @@ except SKBuildError:
 src_dir = './src'
 lib_dir = os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib/'))
 cmake_args = []
-if sys.platform == 'darwin':
+
+operating_system = platform.system().lower()
+
+is_macos = sys.platform == 'darwin' or operating_system == "darwin"
+is_windows = sys.platform == 'win32' or operating_system == "windows"
+
+if is_macos:
     plat_name = skbuild_plat_name()
     sep = [pos for pos, char in enumerate(plat_name) if char == '-']
     assert len(sep) == 2
@@ -45,16 +53,16 @@ if sys.platform == 'darwin':
     library_link_args = [
         f'-l{lib}' for lib in ('dracoenc', 'draco', 'dracodec')
     ]
-elif sys.platform == 'win32':
+elif is_windows:
     library_link_args = [ 
         lib for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')
     ]
-else:
+else: # linux
     library_link_args = [
         f'-l:{lib}' for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')
     ]
 
-if sys.platform == 'win32':
+if is_windows:
     extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
     extra_compile_args = [
       '/std:c++17', '/O2',
