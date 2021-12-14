@@ -61,5 +61,12 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const bool integer_positions
     ) except +
     
-    EncodedObject encode_point_cloud(vector[float] points, int quantization_bits,
-        int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) except +
+    EncodedObject encode_point_cloud(
+        const vector[float] points, 
+        const int quantization_bits,
+        const int compression_level, 
+        const float quantization_range, 
+        const const float *quantization_origin, 
+        const bool create_metadata,
+        const bool integer_positions
+    ) except +

@@ -12,23 +12,28 @@ EXPECTED_FACES_BUNNY = 208353 // 3
 
 def test_decoding_and_encoding_mesh_file():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
-        file_content = draco_file.read()
-        mesh_object = DracoPy.decode(file_content)
-        assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
-        assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
+        mesh = DracoPy.decode(draco_file.read())
+    
+    assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
+    assert len(mesh.faces) == EXPECTED_FACES_BUNNY
+    assert len(mesh.normals) == 0
 
-        encoding_test = DracoPy.encode(
-            mesh_object.points, mesh_object.faces, 
-        )
-        with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
-            test_file.write(encoding_test)
+    with open(os.path.join(testdata_directory, "bunny_normals.drc"), "rb") as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+    
+    assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
+    assert len(mesh.faces) == EXPECTED_FACES_BUNNY
+    assert len(mesh.normals) == EXPECTED_POINTS_BUNNY_MESH
+
+    encoding_test = DracoPy.encode(mesh.points, mesh.faces)
+    with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
+        test_file.write(encoding_test)
 
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "rb") as test_file:
-        file_content = test_file.read()
-        mesh_object = DracoPy.decode(file_content)
-        assert (mesh_object.encoding_options) is None
-        assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
-        assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
+        mesh = DracoPy.decode(test_file.read())
+        assert (mesh.encoding_options) is None
+        assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
+        assert len(mesh.faces) == EXPECTED_FACES_BUNNY
 
 def test_decoding_and_encoding_mesh_file_integer_positions():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:

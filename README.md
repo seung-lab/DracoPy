@@ -12,6 +12,7 @@ with open('bunny.drc', 'rb') as draco_file:
 
 print(f"number of points: {len(mesh.points)}")
 print(f"number of faces: {len(mesh.faces)}")
+print(f"number of normals: {len(mesh.normals)}")
 
 # Note: If mesh.points is an integer numpy array,
 # it will be encoded as an integer attribute. Otherwise,

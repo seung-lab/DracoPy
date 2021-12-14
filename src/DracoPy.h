@@ -18,6 +18,7 @@ namespace DracoFunctions {
     successful, 
     not_draco_encoded, 
     no_position_attribute, 
+    no_normal_coord_attribute,
     failed_during_decoding 
   };
   enum encoding_status { 
@@ -142,6 +143,25 @@ namespace DracoFunctions {
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[2]))));
     }
 
+    const int normal_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::NORMAL);
+    if (normal_att_id < 0) {  // No normal values are present.
+      meshObject.decode_status = successful;
+      return meshObject;
+    }
+
+    const auto *const normal_att = mesh->attribute(normal_att_id);
+    meshObject.normals.reserve(3 * normal_att->size());
+
+    std::array<float, 3> normal_val;
+    for (draco::PointIndex v(0); v < normal_att->size(); ++v){
+      if (!normal_att->ConvertValue<float, 3>(normal_att->mapped_index(v), &normal_val[0])){
+        meshObject.decode_status = no_normal_coord_attribute;
+      }
+      meshObject.normals.push_back(normal_val[0]);
+      meshObject.normals.push_back(normal_val[1]);
+      meshObject.normals.push_back(normal_val[3]);
+    }
+
     meshObject.decode_status = successful;
     return meshObject;
   }
@@ -247,13 +267,23 @@ namespace DracoFunctions {
     return encodedMeshObject;
   }
 
-  EncodedObject encode_point_cloud(const std::vector<float> &points, int quantization_bits,
-      int compression_level, float quantization_range, const float *quantization_origin, bool create_metadata) {
+  EncodedObject encode_point_cloud(
+    const std::vector<float> &points, const int quantization_bits,
+    const int compression_level, const float quantization_range, 
+    const float *quantization_origin, const bool create_metadata,
+    const bool integer_positions = false
+  ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
-    const int pos_att_id =
-      pcb.AddAttribute(draco::GeometryAttribute::POSITION, 3, draco::DataType::DT_FLOAT32);
+
+    auto dtype = integer_positions 
+      ? draco::DataType::DT_UINT32
+      : draco::DataType::DT_FLOAT32;
+
+    const int pos_att_id = pcb.AddAttribute(
+      draco::GeometryAttribute::POSITION, 3, dtype
+    );
 
     for (draco::PointIndex i(0); i < num_points; i++) {
       pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());  
@@ -263,16 +293,20 @@ namespace DracoFunctions {
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
     draco::Encoder encoder;
     setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
+    
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodePointCloudToBuffer(*point_cloud, &buffer);
+    
     EncodedObject encodedPointCloudObject;
     encodedPointCloudObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
     if (status.ok()) {
       encodedPointCloudObject.encode_status = successful_encoding;
-    } else {
-      std::cout << "Draco encoding error: " << status.error_msg_string() << std::endl;
+    } 
+    else {
+      std::cerr << "Draco encoding error: " << status.error_msg_string() << std::endl;
       encodedPointCloudObject.encode_status = failed_during_encoding;
     }
+
     return encodedPointCloudObject;
   }
 

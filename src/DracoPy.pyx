@@ -44,13 +44,15 @@ class DracoPointCloud:
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
-        faces = self.data_struct['faces']
-        N = len(faces) // 3
-        return np.array(faces).reshape((N, 3))
+        faces_ = self.data_struct['faces']
+        N = len(faces_) // 3
+        return np.array(faces_).reshape((N, 3))
 
     @property
     def normals(self):
-        return np.array(self.data_struct['normals'])
+        normals_ = self.data_struct['normals']
+        N = len(normals_) // 3
+        return np.array(normals_).reshape((N,3))
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -142,7 +144,7 @@ def encode(
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level, 
             quantization_range, <float*>&quant_origin[0], 
-            create_metadata
+            create_metadata, integer_positions
         )
     else:
         facesview = faces.reshape((faces.size,))
