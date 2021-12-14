@@ -113,13 +113,15 @@ def encode(
     Quantization bits should be an integer between 0 and 31
     Compression level should be an integer between 0 and 10
     Quantization_range is a float representing the size of the 
-        bounding cube for the mesh.
-    By default it is the range of the dimension of the input vertices 
-        with greatest range.
+        bounding cube for the mesh. By default it is the range 
+        of the dimension of the input vertices with greatest range.
     Quantization_origin is the point in space where the bounding box begins. 
         By default it is a point where each coordinate is the minimum of 
         that coordinate among the input vertices.
     """
+    assert 0 <= compression_level <= 10, "Compression level must be in range [0,10]"
+    assert 0 <= quantization_bits <= 31, "Compression level must be in range [0,31]"
+
     points = format_array(points)
     faces = format_array(faces)
 
