@@ -1,4 +1,5 @@
 # distutils: language = c++
+from typing import Union, cast
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
@@ -82,26 +83,35 @@ class EncodingFailedException(Exception):
     pass
 
 def format_array(arr):
+    if arr is None:
+        return None
+
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     if arr.ndim == 1:
         arr = arr.reshape((len(arr), 3))
     return arr
 
-def encode_mesh_to_buffer(
-    points, faces, 
+def encode(
+    points, faces=None, 
     quantization_bits=14, compression_level=1, 
     quantization_range=-1, quantization_origin=None, 
     create_metadata=False
-):
+) -> bytes:
     """
-    Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.
+    Encode a list or numpy array of points/vertices (float) and faces 
+    (unsigned int) to a draco buffer. If faces is None, then a point
+    cloud file will be generated, otherwise a mesh file.
+
     Quantization bits should be an integer between 0 and 31
     Compression level should be an integer between 0 and 10
-    Quantization_range is a float representing the size of the bounding cube for the mesh.
-    By default it is the range of the dimension of the input vertices with greatest range.
-    Quantization_origin is the point in space where the bounding box begins. By default it is
-    a point where each coordinate is the minimum of that coordinate among the input vertices.
+    Quantization_range is a float representing the size of the 
+        bounding cube for the mesh.
+    By default it is the range of the dimension of the input vertices 
+        with greatest range.
+    Quantization_origin is the point in space where the bounding box begins. 
+        By default it is a point where each coordinate is the minimum of 
+        that coordinate among the input vertices.
     """
     points = format_array(points)
     faces = format_array(faces)
@@ -117,55 +127,26 @@ def encode_mesh_to_buffer(
         qorigin[:] = np.min(points, axis=0)
 
     cdef vector[float] pointsview = points.reshape((points.size,))
-    cdef vector[uint32_t] facesview = faces.reshape((faces.size,))
+    cdef vector[uint32_t] facesview
 
-    encoded_mesh = DracoPy.encode_mesh(
-        pointsview, facesview, 
-        quantization_bits, compression_level, 
-        quantization_range, &quant_origin[0], 
-        create_metadata, integer_positions
-    )
-
-    if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
-        return bytes(encoded_mesh.buffer)
-    elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
-        raise EncodingFailedException('Invalid mesh')
-
-
-def encode_point_cloud_to_buffer(
-    points, quantization_bits=14, 
-    compression_level=1, quantization_range=-1, 
-    quantization_origin=None, create_metadata=False
-):
-    """
-    Encode a list or numpy array of points/vertices (float) to a draco buffer.
-    Quantization bits should be an integer between 0 and 31
-    Compression level should be an integer between 0 and 10
-    Quantization_range is a float representing the size of the bounding cube for the mesh.
-    By default it is the range of the dimension of the input vertices with greatest range.
-    Quantization_origin is the point in space where the bounding box begins. By default it is
-    a point where each coordinate is the minimum of that coordinate among the input vertices.
-    """
-    points = format_array(points)
-
-    cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
-    cdef float[:] quant_origin = qorigin
-
-    if quantization_origin is not None:
-        qorigin[:] = quantization_origin[:]
+    if faces is None:
+        encoded = DracoPy.encode_point_cloud(
+            pointsview, quantization_bits, compression_level, 
+            quantization_range, <float*>&quant_origin[0], 
+            create_metadata
+        )
     else:
-        qorigin[:] = np.min(points, axis=0)
+        facesview = faces.reshape((faces.size,))
+        encoded = DracoPy.encode_mesh(
+            pointsview, facesview, 
+            quantization_bits, compression_level, 
+            quantization_range, &quant_origin[0], 
+            create_metadata, integer_positions
+        )
 
-    cdef vector[float] pointsview = points.reshape((points.size,))
-
-    encoded_point_cloud = DracoPy.encode_point_cloud(
-        pointsview, quantization_bits, compression_level, 
-        quantization_range, <float*>&quant_origin[0], create_metadata
-    )
-
-    if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
-        return bytes(encoded_point_cloud.buffer)
-    elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
+    if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
+        return bytes(encoded.buffer)
+    elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
         raise EncodingFailedException('Invalid mesh')
 
 def raise_decoding_error(decoding_status):
@@ -176,16 +157,48 @@ def raise_decoding_error(decoding_status):
     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
         raise ValueError('DracoPy only supports meshes with position attributes')
 
-def decode_buffer_to_mesh(buffer):
+def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
+    """
+    Decodes a binary draco file into either a DracoPointCloud
+    or a DracoMesh.
+    """
     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
-    if mesh_struct.decode_status == DracoPy.decoding_status.successful:
-        return DracoMesh(mesh_struct)
-    else:
+    if mesh_struct.decode_status != DracoPy.decoding_status.successful:
         raise_decoding_error(mesh_struct.decode_status)
 
-def decode_point_cloud_buffer(buffer):
-    point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
-    if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
-        return DracoPointCloud(point_cloud_struct)
-    else:
-        raise_decoding_error(point_cloud_struct.decode_status)
+    if len(mesh_struct.faces) > 0:
+        return DracoMesh(mesh_struct)
+    return DracoPointCloud(mesh_struct)
+
+# FOR BACKWARDS COMPATIBILITY
+
+def encode_mesh_to_buffer(*args, **kwargs) -> bytes:
+    """Provided for backwards compatibility. Use encode."""
+    return encode(*args, **kwargs)
+
+def encode_point_cloud_to_buffer(
+    points, quantization_bits=14, compression_level=1, 
+    quantization_range=-1, quantization_origin=None, 
+    create_metadata=False
+) -> bytes:
+    """Provided for backwards compatibility. Use encode."""
+    return encode(
+        points=points, 
+        faces=None, 
+        quantization_bits=quantization_bits, 
+        compression_level=compression_level,
+        quantization_range=quantization_range, 
+        quantization_origin=quantization_origin, 
+        create_metadata=create_metadata,
+    )
+ 
+def decode_buffer_to_mesh(buffer) -> DracoMesh:
+    """Provided for backwards compatibility. Use decode."""
+    return decode(buffer)
+
+def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+    """Provided for backwards compatibility. Use decode."""
+    return cast(decode(buffer), DracoPointCloud)
+
+
+

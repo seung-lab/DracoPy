@@ -1809,6 +1809,15 @@ static CYTHON_INLINE int __pyx_sub_acquisition_count_locked(
 static CYTHON_INLINE void __Pyx_INC_MEMVIEW(__Pyx_memviewslice *, int, int);
 static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *, int, int);
 
+/* ArgTypeTest.proto */
+#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
+    ((likely((Py_TYPE(obj) == type) | (none_allowed && (obj == Py_None)))) ? 1 :\
+        __Pyx__ArgTypeTest(obj, type, name, exact))
+static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
+
+/* KeywordStringCheck.proto */
+static int __Pyx_CheckKeywordStrings(PyObject *kwdict, const char* function_name, int kw_allowed);
+
 /* GetTopmostException.proto */
 #if CYTHON_USE_EXC_INFO_STACK
 static _PyErr_StackItem * __Pyx_PyErr_GetTopmostException(PyThreadState *tstate);
@@ -1857,12 +1866,6 @@ static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
 #else
 #define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
-
-/* ArgTypeTest.proto */
-#define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
-    ((likely((Py_TYPE(obj) == type) | (none_allowed && (obj == Py_None)))) ? 1 :\
-        __Pyx__ArgTypeTest(obj, type, name, exact))
-static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
 /* IncludeStringH.proto */
 #include <string.h>
@@ -2221,7 +2224,6 @@ static void __Pyx_CppExn2PyErr() {
 #endif
 
 static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(struct DracoFunctions::MeshObject s);
-static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_PointCloudObject(struct DracoFunctions::PointCloudObject s);
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -2328,10 +2330,10 @@ __pyx_memoryview_copy_new_contig(const __Pyx_memviewslice *from_mvs,
                                  int dtype_is_object);
 
 /* CIntFromPy.proto */
-static CYTHON_INLINE uint32_t __Pyx_PyInt_As_uint32_t(PyObject *);
+static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntFromPy.proto */
-static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
+static CYTHON_INLINE uint32_t __Pyx_PyInt_As_uint32_t(PyObject *);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_char(unsigned char value);
@@ -2433,8 +2435,8 @@ static PyThread_type_lock __pyx_memoryview_thread_locks[8];
 static std::vector<float>  __pyx_convert_vector_from_py_float(PyObject *); /*proto*/
 static std::vector<uint32_t>  __pyx_convert_vector_from_py_uint32_t(PyObject *); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_unsigned_char(const std::vector<unsigned char>  &); /*proto*/
-static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsigned int>  &); /*proto*/
+static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_double(const std::vector<double>  &); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -2496,8 +2498,10 @@ static const char __pyx_k_doc[] = "__doc__";
 static const char __pyx_k_min[] = "min";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
+static const char __pyx_k_args[] = "args";
 static const char __pyx_k_axis[] = "axis";
 static const char __pyx_k_base[] = "base";
+static const char __pyx_k_cast[] = "cast";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_init[] = "__init__";
 static const char __pyx_k_main[] = "__main__";
@@ -2512,6 +2516,7 @@ static const char __pyx_k_step[] = "step";
 static const char __pyx_k_stop[] = "stop";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_ASCII[] = "ASCII";
+static const char __pyx_k_Union[] = "Union";
 static const char __pyx_k_array[] = "array";
 static const char __pyx_k_class[] = "__class__";
 static const char __pyx_k_dtype[] = "dtype";
@@ -2527,9 +2532,11 @@ static const char __pyx_k_start[] = "start";
 static const char __pyx_k_value[] = "value";
 static const char __pyx_k_zeros[] = "zeros";
 static const char __pyx_k_buffer[] = "buffer";
+static const char __pyx_k_decode[] = "decode";
 static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
+static const char __pyx_k_kwargs[] = "kwargs";
 static const char __pyx_k_module[] = "__module__";
 static const char __pyx_k_name_2[] = "__name__";
 static const char __pyx_k_object[] = "object";
@@ -2537,9 +2544,11 @@ static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_points[] = "points";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_struct[] = "struct";
+static const char __pyx_k_typing[] = "typing";
 static const char __pyx_k_unpack[] = "unpack";
 static const char __pyx_k_update[] = "update";
 static const char __pyx_k_DracoPy[] = "DracoPy";
+static const char __pyx_k_encoded[] = "encoded";
 static const char __pyx_k_float32[] = "float32";
 static const char __pyx_k_fortran[] = "fortran";
 static const char __pyx_k_memview[] = "memview";
@@ -2575,7 +2584,6 @@ static const char __pyx_k_PickleError[] = "PickleError";
 static const char __pyx_k_data_struct[] = "data_struct";
 static const char __pyx_k_mesh_struct[] = "mesh_struct";
 static const char __pyx_k_Invalid_mesh[] = "Invalid mesh";
-static const char __pyx_k_encoded_mesh[] = "encoded_mesh";
 static const char __pyx_k_format_array[] = "format_array";
 static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_quant_origin[] = "quant_origin";
@@ -2606,10 +2614,8 @@ static const char __pyx_k_integer_positions[] = "integer_positions";
 static const char __pyx_k_pyx_unpickle_Enum[] = "__pyx_unpickle_Enum";
 static const char __pyx_k_quantization_bits[] = "quantization_bits";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
-static const char __pyx_k_point_cloud_struct[] = "point_cloud_struct";
 static const char __pyx_k_quantization_range[] = "quantization_range";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
-static const char __pyx_k_encoded_point_cloud[] = "encoded_point_cloud";
 static const char __pyx_k_quantization_origin[] = "quantization_origin";
 static const char __pyx_k_encoding_options_set[] = "encoding_options_set";
 static const char __pyx_k_raise_decoding_error[] = "raise_decoding_error";
@@ -2629,7 +2635,6 @@ static const char __pyx_k_Cannot_index_with_type_s[] = "Cannot index with type '
 static const char __pyx_k_DracoPointCloud_num_axes[] = "DracoPointCloud.num_axes";
 static const char __pyx_k_EncodingOptions_num_axes[] = "EncodingOptions.num_axes";
 static const char __pyx_k_Invalid_shape_in_axis_d_d[] = "Invalid shape in axis %d: %d.";
-static const char __pyx_k_decode_point_cloud_buffer[] = "decode_point_cloud_buffer";
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
 static const char __pyx_k_encode_point_cloud_to_buffer[] = "encode_point_cloud_to_buffer";
 static const char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate array data.";
@@ -2702,9 +2707,11 @@ static PyObject *__pyx_n_s_PickleError;
 static PyObject *__pyx_kp_u_Specified_value_out_of_encoded_r;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
+static PyObject *__pyx_n_s_Union;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_View_MemoryView;
 static PyObject *__pyx_n_s_allocate_buffer;
+static PyObject *__pyx_n_s_args;
 static PyObject *__pyx_n_s_arr;
 static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_axis;
@@ -2712,6 +2719,7 @@ static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_buffer;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
+static PyObject *__pyx_n_s_cast;
 static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_compression_level;
@@ -2719,8 +2727,8 @@ static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
 static PyObject *__pyx_n_s_create_metadata;
 static PyObject *__pyx_n_s_data_struct;
+static PyObject *__pyx_n_s_decode;
 static PyObject *__pyx_n_s_decode_buffer_to_mesh;
-static PyObject *__pyx_n_s_decode_point_cloud_buffer;
 static PyObject *__pyx_n_s_decode_status;
 static PyObject *__pyx_n_s_decoding_status;
 static PyObject *__pyx_n_s_dict;
@@ -2731,9 +2739,8 @@ static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_encode_mesh_to_buffer;
 static PyObject *__pyx_n_s_encode_point_cloud_to_buffer;
-static PyObject *__pyx_n_s_encoded_mesh;
+static PyObject *__pyx_n_s_encoded;
 static PyObject *__pyx_n_s_encoded_point;
-static PyObject *__pyx_n_s_encoded_point_cloud;
 static PyObject *__pyx_n_s_encoding_options;
 static PyObject *__pyx_n_s_encoding_options_set;
 static PyObject *__pyx_n_u_encoding_options_set;
@@ -2761,6 +2768,7 @@ static PyObject *__pyx_n_s_inverse_alpha;
 static PyObject *__pyx_n_s_issubdtype;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
+static PyObject *__pyx_n_s_kwargs;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_math;
 static PyObject *__pyx_n_s_memview;
@@ -2786,7 +2794,6 @@ static PyObject *__pyx_n_s_object;
 static PyObject *__pyx_n_s_pack;
 static PyObject *__pyx_n_s_pickle;
 static PyObject *__pyx_n_s_point;
-static PyObject *__pyx_n_s_point_cloud_struct;
 static PyObject *__pyx_n_s_points;
 static PyObject *__pyx_n_u_points;
 static PyObject *__pyx_n_s_pointsview;
@@ -2831,6 +2838,7 @@ static PyObject *__pyx_kp_s_strided_and_indirect;
 static PyObject *__pyx_kp_s_stringsource;
 static PyObject *__pyx_n_s_struct;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_n_s_typing;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
@@ -2849,11 +2857,13 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
 static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_point); /* proto */
 static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_6num_axes(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_arr); /* proto */
-static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_faces, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata); /* proto */
-static PyObject *__pyx_pf_7DracoPy_4encode_point_cloud_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata); /* proto */
-static PyObject *__pyx_pf_7DracoPy_6raise_decoding_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_decoding_status); /* proto */
-static PyObject *__pyx_pf_7DracoPy_8decode_buffer_to_mesh(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer); /* proto */
-static PyObject *__pyx_pf_7DracoPy_10decode_point_cloud_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer); /* proto */
+static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_faces, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata); /* proto */
+static PyObject *__pyx_pf_7DracoPy_4raise_decoding_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_decoding_status); /* proto */
+static PyObject *__pyx_pf_7DracoPy_6decode(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer); /* proto */
+static PyObject *__pyx_pf_7DracoPy_8encode_mesh_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs); /* proto */
+static PyObject *__pyx_pf_7DracoPy_10encode_point_cloud_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata); /* proto */
+static PyObject *__pyx_pf_7DracoPy_12decode_buffer_to_mesh(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer); /* proto */
+static PyObject *__pyx_pf_7DracoPy_14decode_buffer_to_point_cloud(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -2952,11 +2962,12 @@ static PyObject *__pyx_tuple__55;
 static PyObject *__pyx_tuple__57;
 static PyObject *__pyx_tuple__59;
 static PyObject *__pyx_tuple__61;
-static PyObject *__pyx_tuple__62;
 static PyObject *__pyx_tuple__63;
 static PyObject *__pyx_tuple__64;
 static PyObject *__pyx_tuple__65;
 static PyObject *__pyx_tuple__66;
+static PyObject *__pyx_tuple__67;
+static PyObject *__pyx_tuple__68;
 static PyObject *__pyx_codeobj__27;
 static PyObject *__pyx_codeobj__29;
 static PyObject *__pyx_codeobj__31;
@@ -2974,10 +2985,11 @@ static PyObject *__pyx_codeobj__54;
 static PyObject *__pyx_codeobj__56;
 static PyObject *__pyx_codeobj__58;
 static PyObject *__pyx_codeobj__60;
-static PyObject *__pyx_codeobj__67;
+static PyObject *__pyx_codeobj__62;
+static PyObject *__pyx_codeobj__69;
 /* Late includes */
 
-/* "DracoPy.pyx":17
+/* "DracoPy.pyx":18
  * 
  * class DracoPointCloud:
  *     def __init__(self, data_struct):             # <<<<<<<<<<<<<<
@@ -3020,11 +3032,11 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_1__init__(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data_struct)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(0, 17, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(0, 18, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 17, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 18, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3037,7 +3049,7 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_1__init__(PyObject *__pyx_s
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 17, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 18, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.DracoPointCloud.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3067,50 +3079,50 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "DracoPy.pyx":18
+  /* "DracoPy.pyx":19
  * class DracoPointCloud:
  *     def __init__(self, data_struct):
  *         self.data_struct = data_struct             # <<<<<<<<<<<<<<
  *         if data_struct['encoding_options_set']:
  *             self.encoding_options = EncodingOptions(data_struct['quantization_bits'],
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_data_struct, __pyx_v_data_struct) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_data_struct, __pyx_v_data_struct) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
 
-  /* "DracoPy.pyx":19
+  /* "DracoPy.pyx":20
  *     def __init__(self, data_struct):
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:             # <<<<<<<<<<<<<<
  *             self.encoding_options = EncodingOptions(data_struct['quantization_bits'],
  *                 data_struct['quantization_range'], data_struct['quantization_origin'])
  */
-  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_encoding_options_set); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_encoding_options_set); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_2) {
 
-    /* "DracoPy.pyx":20
+    /* "DracoPy.pyx":21
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:
  *             self.encoding_options = EncodingOptions(data_struct['quantization_bits'],             # <<<<<<<<<<<<<<
  *                 data_struct['quantization_range'], data_struct['quantization_origin'])
  *         else:
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_EncodingOptions); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 20, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_EncodingOptions); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_bits); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 20, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_bits); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
 
-    /* "DracoPy.pyx":21
+    /* "DracoPy.pyx":22
  *         if data_struct['encoding_options_set']:
  *             self.encoding_options = EncodingOptions(data_struct['quantization_bits'],
  *                 data_struct['quantization_range'], data_struct['quantization_origin'])             # <<<<<<<<<<<<<<
  *         else:
  *             self.encoding_options = None
  */
-    __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_range); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_range); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 22, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_origin); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 21, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Dict_GetItem(__pyx_v_data_struct, __pyx_n_u_quantization_origin); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 22, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     __pyx_t_8 = 0;
@@ -3127,7 +3139,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -3138,7 +3150,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -3147,7 +3159,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
     } else
     #endif
     {
-      __pyx_t_9 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 20, __pyx_L1_error)
+      __pyx_t_9 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 21, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       if (__pyx_t_7) {
         __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -3161,23 +3173,23 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
       __pyx_t_4 = 0;
       __pyx_t_5 = 0;
       __pyx_t_6 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     }
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "DracoPy.pyx":20
+    /* "DracoPy.pyx":21
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:
  *             self.encoding_options = EncodingOptions(data_struct['quantization_bits'],             # <<<<<<<<<<<<<<
  *                 data_struct['quantization_range'], data_struct['quantization_origin'])
  *         else:
  */
-    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options, __pyx_t_1) < 0) __PYX_ERR(0, 20, __pyx_L1_error)
+    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options, __pyx_t_1) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "DracoPy.pyx":19
+    /* "DracoPy.pyx":20
  *     def __init__(self, data_struct):
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:             # <<<<<<<<<<<<<<
@@ -3187,7 +3199,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
     goto __pyx_L3;
   }
 
-  /* "DracoPy.pyx":23
+  /* "DracoPy.pyx":24
  *                 data_struct['quantization_range'], data_struct['quantization_origin'])
  *         else:
  *             self.encoding_options = None             # <<<<<<<<<<<<<<
@@ -3195,11 +3207,11 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
  *     def get_encoded_coordinate(self, value, axis):
  */
   /*else*/ {
-    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options, Py_None) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
+    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options, Py_None) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
   }
   __pyx_L3:;
 
-  /* "DracoPy.pyx":17
+  /* "DracoPy.pyx":18
  * 
  * class DracoPointCloud:
  *     def __init__(self, data_struct):             # <<<<<<<<<<<<<<
@@ -3226,7 +3238,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud___init__(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":25
+/* "DracoPy.pyx":26
  *             self.encoding_options = None
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
@@ -3272,17 +3284,17 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_3get_encoded_coordinate(PyO
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 1); __PYX_ERR(0, 25, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 1); __PYX_ERR(0, 26, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_axis)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 2); __PYX_ERR(0, 25, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 2); __PYX_ERR(0, 26, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_coordinate") < 0)) __PYX_ERR(0, 25, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_coordinate") < 0)) __PYX_ERR(0, 26, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3297,7 +3309,7 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_3get_encoded_coordinate(PyO
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 25, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 26, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.DracoPointCloud.get_encoded_coordinate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3325,21 +3337,21 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_encoded_coordinate", 0);
 
-  /* "DracoPy.pyx":26
+  /* "DracoPy.pyx":27
  * 
  *     def get_encoded_coordinate(self, value, axis):
  *         if self.encoding_options is not None:             # <<<<<<<<<<<<<<
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = (__pyx_t_1 != Py_None);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "DracoPy.pyx":27
+    /* "DracoPy.pyx":28
  *     def get_encoded_coordinate(self, value, axis):
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_coordinate(value, axis)             # <<<<<<<<<<<<<<
@@ -3347,9 +3359,9 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
  *     def get_encoded_point(self, point):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 27, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_get_encoded_coordinate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_get_encoded_coordinate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -3367,7 +3379,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_value, __pyx_v_axis};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -3375,13 +3387,13 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_value, __pyx_v_axis};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 27, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 28, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       if (__pyx_t_4) {
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -3392,7 +3404,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
       __Pyx_INCREF(__pyx_v_axis);
       __Pyx_GIVEREF(__pyx_v_axis);
       PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_v_axis);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 27, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 28, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -3401,7 +3413,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "DracoPy.pyx":26
+    /* "DracoPy.pyx":27
  * 
  *     def get_encoded_coordinate(self, value, axis):
  *         if self.encoding_options is not None:             # <<<<<<<<<<<<<<
@@ -3410,7 +3422,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
  */
   }
 
-  /* "DracoPy.pyx":25
+  /* "DracoPy.pyx":26
  *             self.encoding_options = None
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
@@ -3434,7 +3446,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_2get_encoded_coordinate(CYT
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":29
+/* "DracoPy.pyx":30
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
@@ -3477,11 +3489,11 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_5get_encoded_point(PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_point)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, 1); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, 1); __PYX_ERR(0, 30, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_point") < 0)) __PYX_ERR(0, 29, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_point") < 0)) __PYX_ERR(0, 30, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3494,7 +3506,7 @@ static PyObject *__pyx_pw_7DracoPy_15DracoPointCloud_5get_encoded_point(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 29, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 30, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.DracoPointCloud.get_encoded_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3520,21 +3532,21 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_4get_encoded_point(CYTHON_U
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_encoded_point", 0);
 
-  /* "DracoPy.pyx":30
+  /* "DracoPy.pyx":31
  * 
  *     def get_encoded_point(self, point):
  *         if self.encoding_options is not None:             # <<<<<<<<<<<<<<
  *             return self.encoding_options.get_encoded_point(point)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = (__pyx_t_1 != Py_None);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_3 = (__pyx_t_2 != 0);
   if (__pyx_t_3) {
 
-    /* "DracoPy.pyx":31
+    /* "DracoPy.pyx":32
  *     def get_encoded_point(self, point):
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_point(point)             # <<<<<<<<<<<<<<
@@ -3542,9 +3554,9 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_4get_encoded_point(CYTHON_U
  *     @property
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 31, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_encoding_options); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_get_encoded_point); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_get_encoded_point); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -3559,14 +3571,14 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_4get_encoded_point(CYTHON_U
     }
     __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_4, __pyx_v_point) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_point);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "DracoPy.pyx":30
+    /* "DracoPy.pyx":31
  * 
  *     def get_encoded_point(self, point):
  *         if self.encoding_options is not None:             # <<<<<<<<<<<<<<
@@ -3575,7 +3587,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_4get_encoded_point(CYTHON_U
  */
   }
 
-  /* "DracoPy.pyx":29
+  /* "DracoPy.pyx":30
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
@@ -3598,7 +3610,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_4get_encoded_point(CYTHON_U
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":34
+/* "DracoPy.pyx":35
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
@@ -3625,7 +3637,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_6num_axes(CYTHON_UNUSED PyO
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("num_axes", 0);
 
-  /* "DracoPy.pyx":35
+  /* "DracoPy.pyx":36
  *     @property
  *     def num_axes(self):
  *         return 3             # <<<<<<<<<<<<<<
@@ -3637,7 +3649,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_6num_axes(CYTHON_UNUSED PyO
   __pyx_r = __pyx_int_3;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":34
+  /* "DracoPy.pyx":35
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
@@ -3652,7 +3664,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_6num_axes(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":38
+/* "DracoPy.pyx":39
  * 
  *     @property
  *     def points(self):             # <<<<<<<<<<<<<<
@@ -3689,32 +3701,32 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_8points(CYTHON_UNUSED PyObj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("points", 0);
 
-  /* "DracoPy.pyx":39
+  /* "DracoPy.pyx":40
  *     @property
  *     def points(self):
  *         points = self.data_struct['points']             # <<<<<<<<<<<<<<
  *         N = len(points) // 3
  *         return np.array(points).reshape((N, 3))
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_points); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_points); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_points = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":40
+  /* "DracoPy.pyx":41
  *     def points(self):
  *         points = self.data_struct['points']
  *         N = len(points) // 3             # <<<<<<<<<<<<<<
  *         return np.array(points).reshape((N, 3))
  * 
  */
-  __pyx_t_3 = PyObject_Length(__pyx_v_points); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(__pyx_v_points); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 41, __pyx_L1_error)
   __pyx_v_N = __Pyx_div_Py_ssize_t(__pyx_t_3, 3);
 
-  /* "DracoPy.pyx":41
+  /* "DracoPy.pyx":42
  *         points = self.data_struct['points']
  *         N = len(points) // 3
  *         return np.array(points).reshape((N, 3))             # <<<<<<<<<<<<<<
@@ -3722,9 +3734,9 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_8points(CYTHON_UNUSED PyObj
  * class DracoMesh(DracoPointCloud):
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -3739,15 +3751,15 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_8points(CYTHON_UNUSED PyObj
   }
   __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_4, __pyx_v_points) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_points);
   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -3768,14 +3780,14 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_8points(CYTHON_UNUSED PyObj
   __pyx_t_2 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_1, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":38
+  /* "DracoPy.pyx":39
  * 
  *     @property
  *     def points(self):             # <<<<<<<<<<<<<<
@@ -3798,7 +3810,7 @@ static PyObject *__pyx_pf_7DracoPy_15DracoPointCloud_8points(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":45
+/* "DracoPy.pyx":46
  * class DracoMesh(DracoPointCloud):
  *     @property
  *     def faces(self):             # <<<<<<<<<<<<<<
@@ -3835,32 +3847,32 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_faces(CYTHON_UNUSED PyObject *__py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("faces", 0);
 
-  /* "DracoPy.pyx":46
+  /* "DracoPy.pyx":47
  *     @property
  *     def faces(self):
  *         faces = self.data_struct['faces']             # <<<<<<<<<<<<<<
  *         N = len(faces) // 3
  *         return np.array(faces).reshape((N, 3))
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_faces); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_faces); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_faces = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":47
+  /* "DracoPy.pyx":48
  *     def faces(self):
  *         faces = self.data_struct['faces']
  *         N = len(faces) // 3             # <<<<<<<<<<<<<<
  *         return np.array(faces).reshape((N, 3))
  * 
  */
-  __pyx_t_3 = PyObject_Length(__pyx_v_faces); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(__pyx_v_faces); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 48, __pyx_L1_error)
   __pyx_v_N = __Pyx_div_Py_ssize_t(__pyx_t_3, 3);
 
-  /* "DracoPy.pyx":48
+  /* "DracoPy.pyx":49
  *         faces = self.data_struct['faces']
  *         N = len(faces) // 3
  *         return np.array(faces).reshape((N, 3))             # <<<<<<<<<<<<<<
@@ -3868,9 +3880,9 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_faces(CYTHON_UNUSED PyObject *__py
  *     @property
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -3885,15 +3897,15 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_faces(CYTHON_UNUSED PyObject *__py
   }
   __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_4, __pyx_v_faces) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_faces);
   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_reshape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_v_N); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -3914,14 +3926,14 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_faces(CYTHON_UNUSED PyObject *__py
   __pyx_t_2 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_1, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4);
   __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":45
+  /* "DracoPy.pyx":46
  * class DracoMesh(DracoPointCloud):
  *     @property
  *     def faces(self):             # <<<<<<<<<<<<<<
@@ -3944,7 +3956,7 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_faces(CYTHON_UNUSED PyObject *__py
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":51
+/* "DracoPy.pyx":52
  * 
  *     @property
  *     def normals(self):             # <<<<<<<<<<<<<<
@@ -3978,7 +3990,7 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_2normals(CYTHON_UNUSED PyObject *_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("normals", 0);
 
-  /* "DracoPy.pyx":52
+  /* "DracoPy.pyx":53
  *     @property
  *     def normals(self):
  *         return np.array(self.data_struct['normals'])             # <<<<<<<<<<<<<<
@@ -3986,14 +3998,14 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_2normals(CYTHON_UNUSED PyObject *_
  * class EncodingOptions(object):
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_u_normals); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_2, __pyx_n_u_normals); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -4009,14 +4021,14 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_2normals(CYTHON_UNUSED PyObject *_
   __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
   __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":51
+  /* "DracoPy.pyx":52
  * 
  *     @property
  *     def normals(self):             # <<<<<<<<<<<<<<
@@ -4038,7 +4050,7 @@ static PyObject *__pyx_pf_7DracoPy_9DracoMesh_2normals(CYTHON_UNUSED PyObject *_
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":55
+/* "DracoPy.pyx":56
  * 
  * class EncodingOptions(object):
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):             # <<<<<<<<<<<<<<
@@ -4087,23 +4099,23 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_1__init__(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_quantization_bits)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(0, 55, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_quantization_range)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(0, 55, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(0, 56, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_quantization_origin)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(0, 55, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(0, 56, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 55, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -4120,7 +4132,7 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_1__init__(PyObject *__pyx_s
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 55, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 56, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.EncodingOptions.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4143,52 +4155,52 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions___init__(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "DracoPy.pyx":56
+  /* "DracoPy.pyx":57
  * class EncodingOptions(object):
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):
  *         self.quantization_bits = quantization_bits             # <<<<<<<<<<<<<<
  *         self.quantization_range = quantization_range
  *         self.quantization_origin = quantization_origin
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_bits, __pyx_v_quantization_bits) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_bits, __pyx_v_quantization_bits) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
 
-  /* "DracoPy.pyx":57
+  /* "DracoPy.pyx":58
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):
  *         self.quantization_bits = quantization_bits
  *         self.quantization_range = quantization_range             # <<<<<<<<<<<<<<
  *         self.quantization_origin = quantization_origin
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_range, __pyx_v_quantization_range) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_range, __pyx_v_quantization_range) < 0) __PYX_ERR(0, 58, __pyx_L1_error)
 
-  /* "DracoPy.pyx":58
+  /* "DracoPy.pyx":59
  *         self.quantization_bits = quantization_bits
  *         self.quantization_range = quantization_range
  *         self.quantization_origin = quantization_origin             # <<<<<<<<<<<<<<
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin, __pyx_v_quantization_origin) < 0) __PYX_ERR(0, 58, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin, __pyx_v_quantization_origin) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
 
-  /* "DracoPy.pyx":59
+  /* "DracoPy.pyx":60
  *         self.quantization_range = quantization_range
  *         self.quantization_origin = quantization_origin
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)             # <<<<<<<<<<<<<<
  * 
  *     def get_encoded_coordinate(self, value, axis):
  */
-  __pyx_t_1 = __Pyx_PyNumber_PowerOf2(__pyx_int_2, __pyx_v_quantization_bits, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_PowerOf2(__pyx_int_2, __pyx_v_quantization_bits, Py_None); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_SubtractObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_SubtractObjC(__pyx_t_1, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_v_quantization_range, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_v_quantization_range, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha, __pyx_t_1) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha, __pyx_t_1) < 0) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":55
+  /* "DracoPy.pyx":56
  * 
  * class EncodingOptions(object):
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):             # <<<<<<<<<<<<<<
@@ -4210,7 +4222,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions___init__(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":61
+/* "DracoPy.pyx":62
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
@@ -4256,17 +4268,17 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_3get_encoded_coordinate(PyO
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_value)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 1); __PYX_ERR(0, 61, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 1); __PYX_ERR(0, 62, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_axis)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 2); __PYX_ERR(0, 61, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, 2); __PYX_ERR(0, 62, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_coordinate") < 0)) __PYX_ERR(0, 61, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_coordinate") < 0)) __PYX_ERR(0, 62, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -4281,7 +4293,7 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_3get_encoded_coordinate(PyO
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 61, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_encoded_coordinate", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 62, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.EncodingOptions.get_encoded_coordinate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4310,60 +4322,60 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_encoded_coordinate", 0);
 
-  /* "DracoPy.pyx":62
+  /* "DracoPy.pyx":63
  * 
  *     def get_encoded_coordinate(self, value, axis):
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):             # <<<<<<<<<<<<<<
  *             raise ValueError('Specified value out of encoded range')
  *         difference = value - self.quantization_origin[axis]
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyObject_RichCompare(__pyx_v_value, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_v_value, __pyx_t_3, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (!__pyx_t_4) {
   } else {
     __pyx_t_1 = __pyx_t_4;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_range); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_range); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyNumber_Add(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Add(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyObject_RichCompare(__pyx_v_value, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_v_value, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_1 = __pyx_t_4;
   __pyx_L4_bool_binop_done:;
   if (unlikely(__pyx_t_1)) {
 
-    /* "DracoPy.pyx":63
+    /* "DracoPy.pyx":64
  *     def get_encoded_coordinate(self, value, axis):
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
  *             raise ValueError('Specified value out of encoded range')             # <<<<<<<<<<<<<<
  *         difference = value - self.quantization_origin[axis]
  *         quantized_index = floor((difference / self.inverse_alpha) + 0.5)
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 63, __pyx_L1_error)
+    __PYX_ERR(0, 64, __pyx_L1_error)
 
-    /* "DracoPy.pyx":62
+    /* "DracoPy.pyx":63
  * 
  *     def get_encoded_coordinate(self, value, axis):
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):             # <<<<<<<<<<<<<<
@@ -4372,39 +4384,39 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
  */
   }
 
-  /* "DracoPy.pyx":64
+  /* "DracoPy.pyx":65
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
  *             raise ValueError('Specified value out of encoded range')
  *         difference = value - self.quantization_origin[axis]             # <<<<<<<<<<<<<<
  *         quantized_index = floor((difference / self.inverse_alpha) + 0.5)
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Subtract(__pyx_v_value, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Subtract(__pyx_v_value, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_difference = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":65
+  /* "DracoPy.pyx":66
  *             raise ValueError('Specified value out of encoded range')
  *         difference = value - self.quantization_origin[axis]
  *         quantized_index = floor((difference / self.inverse_alpha) + 0.5)             # <<<<<<<<<<<<<<
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_floor); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_floor); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_v_difference, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_v_difference, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyFloat_AddObjC(__pyx_t_6, __pyx_float_0_5, 0.5, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyFloat_AddObjC(__pyx_t_6, __pyx_float_0_5, 0.5, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_t_6 = NULL;
@@ -4420,13 +4432,13 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
   __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_6, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_3);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_quantized_index = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":66
+  /* "DracoPy.pyx":67
  *         difference = value - self.quantization_origin[axis]
  *         quantized_index = floor((difference / self.inverse_alpha) + 0.5)
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)             # <<<<<<<<<<<<<<
@@ -4434,17 +4446,17 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
  *     def get_encoded_point(self, point):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_axis); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_inverse_alpha); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_v_quantized_index, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_v_quantized_index, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyNumber_Add(__pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Add(__pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 67, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -4452,7 +4464,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":61
+  /* "DracoPy.pyx":62
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
@@ -4476,7 +4488,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_2get_encoded_coordinate(CYT
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":68
+/* "DracoPy.pyx":69
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
@@ -4519,11 +4531,11 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_5get_encoded_point(PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_point)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, 1); __PYX_ERR(0, 68, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, 1); __PYX_ERR(0, 69, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_point") < 0)) __PYX_ERR(0, 68, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_encoded_point") < 0)) __PYX_ERR(0, 69, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4536,7 +4548,7 @@ static PyObject *__pyx_pw_7DracoPy_15EncodingOptions_5get_encoded_point(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 68, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_encoded_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 69, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.EncodingOptions.get_encoded_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4569,37 +4581,37 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("get_encoded_point", 0);
 
-  /* "DracoPy.pyx":69
+  /* "DracoPy.pyx":70
  * 
  *     def get_encoded_point(self, point):
  *         encoded_point = []             # <<<<<<<<<<<<<<
  *         for axis in range(self.num_axes):
  *             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_encoded_point = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":70
+  /* "DracoPy.pyx":71
  *     def get_encoded_point(self, point):
  *         encoded_point = []
  *         for axis in range(self.num_axes):             # <<<<<<<<<<<<<<
  *             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))
  *         return encoded_point
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_num_axes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_num_axes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (likely(PyList_CheckExact(__pyx_t_2)) || PyTuple_CheckExact(__pyx_t_2)) {
     __pyx_t_1 = __pyx_t_2; __Pyx_INCREF(__pyx_t_1); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
   } else {
-    __pyx_t_3 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_3 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_4 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   for (;;) {
@@ -4607,17 +4619,17 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
       if (likely(PyList_CheckExact(__pyx_t_1))) {
         if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+        __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       } else {
         if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+        __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
         #else
-        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 70, __pyx_L1_error)
+        __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         #endif
       }
@@ -4627,7 +4639,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 70, __pyx_L1_error)
+          else __PYX_ERR(0, 71, __pyx_L1_error)
         }
         break;
       }
@@ -4636,16 +4648,16 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
     __Pyx_XDECREF_SET(__pyx_v_axis, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "DracoPy.pyx":71
+    /* "DracoPy.pyx":72
  *         encoded_point = []
  *         for axis in range(self.num_axes):
  *             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))             # <<<<<<<<<<<<<<
  *         return encoded_point
  * 
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_encoded_coordinate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_encoded_coordinate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyObject_GetItem(__pyx_v_point, __pyx_v_axis); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetItem(__pyx_v_point, __pyx_v_axis); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     __pyx_t_8 = 0;
@@ -4662,7 +4674,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_t_6, __pyx_v_axis};
-      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -4671,14 +4683,14 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_7, __pyx_t_6, __pyx_v_axis};
-      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_8, 2+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else
     #endif
     {
-      __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_9 = PyTuple_New(2+__pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 72, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       if (__pyx_t_7) {
         __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -4689,15 +4701,15 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
       __Pyx_GIVEREF(__pyx_v_axis);
       PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_8, __pyx_v_axis);
       __pyx_t_6 = 0;
-      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_encoded_point, __pyx_t_2); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_encoded_point, __pyx_t_2); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 72, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "DracoPy.pyx":70
+    /* "DracoPy.pyx":71
  *     def get_encoded_point(self, point):
  *         encoded_point = []
  *         for axis in range(self.num_axes):             # <<<<<<<<<<<<<<
@@ -4707,7 +4719,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":72
+  /* "DracoPy.pyx":73
  *         for axis in range(self.num_axes):
  *             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))
  *         return encoded_point             # <<<<<<<<<<<<<<
@@ -4719,7 +4731,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
   __pyx_r = __pyx_v_encoded_point;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":68
+  /* "DracoPy.pyx":69
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
@@ -4745,7 +4757,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_4get_encoded_point(CYTHON_U
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":75
+/* "DracoPy.pyx":76
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
@@ -4772,7 +4784,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_6num_axes(CYTHON_UNUSED PyO
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("num_axes", 0);
 
-  /* "DracoPy.pyx":76
+  /* "DracoPy.pyx":77
  *     @property
  *     def num_axes(self):
  *         return 3             # <<<<<<<<<<<<<<
@@ -4784,7 +4796,7 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_6num_axes(CYTHON_UNUSED PyO
   __pyx_r = __pyx_int_3;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":75
+  /* "DracoPy.pyx":76
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
@@ -4799,12 +4811,12 @@ static PyObject *__pyx_pf_7DracoPy_15EncodingOptions_6num_axes(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":84
+/* "DracoPy.pyx":85
  *     pass
  * 
  * def format_array(arr):             # <<<<<<<<<<<<<<
- *     if not isinstance(arr, np.ndarray):
- *         arr = np.array(arr)
+ *     if arr is None:
+ *         return None
  */
 
 /* Python wrapper */
@@ -4837,27 +4849,58 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
   __Pyx_RefNannySetupContext("format_array", 0);
   __Pyx_INCREF(__pyx_v_arr);
 
-  /* "DracoPy.pyx":85
+  /* "DracoPy.pyx":86
  * 
  * def format_array(arr):
+ *     if arr is None:             # <<<<<<<<<<<<<<
+ *         return None
+ * 
+ */
+  __pyx_t_1 = (__pyx_v_arr == Py_None);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "DracoPy.pyx":87
+ * def format_array(arr):
+ *     if arr is None:
+ *         return None             # <<<<<<<<<<<<<<
+ * 
+ *     if not isinstance(arr, np.ndarray):
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+    goto __pyx_L0;
+
+    /* "DracoPy.pyx":86
+ * 
+ * def format_array(arr):
+ *     if arr is None:             # <<<<<<<<<<<<<<
+ *         return None
+ * 
+ */
+  }
+
+  /* "DracoPy.pyx":89
+ *         return None
+ * 
  *     if not isinstance(arr, np.ndarray):             # <<<<<<<<<<<<<<
  *         arr = np.array(arr)
  *     if arr.ndim == 1:
  */
-  __pyx_t_1 = __Pyx_TypeCheck(__pyx_v_arr, __pyx_ptype_5numpy_ndarray); 
-  __pyx_t_2 = ((!(__pyx_t_1 != 0)) != 0);
-  if (__pyx_t_2) {
+  __pyx_t_2 = __Pyx_TypeCheck(__pyx_v_arr, __pyx_ptype_5numpy_ndarray); 
+  __pyx_t_1 = ((!(__pyx_t_2 != 0)) != 0);
+  if (__pyx_t_1) {
 
-    /* "DracoPy.pyx":86
- * def format_array(arr):
+    /* "DracoPy.pyx":90
+ * 
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)             # <<<<<<<<<<<<<<
  *     if arr.ndim == 1:
  *         arr = arr.reshape((len(arr), 3))
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 90, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 90, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -4872,50 +4915,50 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
     }
     __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_4, __pyx_v_arr) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_arr);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 90, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF_SET(__pyx_v_arr, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "DracoPy.pyx":85
+    /* "DracoPy.pyx":89
+ *         return None
  * 
- * def format_array(arr):
  *     if not isinstance(arr, np.ndarray):             # <<<<<<<<<<<<<<
  *         arr = np.array(arr)
  *     if arr.ndim == 1:
  */
   }
 
-  /* "DracoPy.pyx":87
+  /* "DracoPy.pyx":91
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)
  *     if arr.ndim == 1:             # <<<<<<<<<<<<<<
  *         arr = arr.reshape((len(arr), 3))
  *     return arr
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_ndim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_ndim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_t_3, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_t_3, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (__pyx_t_2) {
+  if (__pyx_t_1) {
 
-    /* "DracoPy.pyx":88
+    /* "DracoPy.pyx":92
  *         arr = np.array(arr)
  *     if arr.ndim == 1:
  *         arr = arr.reshape((len(arr), 3))             # <<<<<<<<<<<<<<
  *     return arr
  * 
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_6 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 88, __pyx_L1_error)
-    __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_6 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 92, __pyx_L1_error)
+    __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
@@ -4936,13 +4979,13 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
     __pyx_t_5 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_7);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 88, __pyx_L1_error)
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_arr, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "DracoPy.pyx":87
+    /* "DracoPy.pyx":91
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)
  *     if arr.ndim == 1:             # <<<<<<<<<<<<<<
@@ -4951,24 +4994,24 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
  */
   }
 
-  /* "DracoPy.pyx":89
+  /* "DracoPy.pyx":93
  *     if arr.ndim == 1:
  *         arr = arr.reshape((len(arr), 3))
  *     return arr             # <<<<<<<<<<<<<<
  * 
- * def encode_mesh_to_buffer(
+ * def encode(
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v_arr);
   __pyx_r = __pyx_v_arr;
   goto __pyx_L0;
 
-  /* "DracoPy.pyx":84
+  /* "DracoPy.pyx":85
  *     pass
  * 
  * def format_array(arr):             # <<<<<<<<<<<<<<
- *     if not isinstance(arr, np.ndarray):
- *         arr = np.array(arr)
+ *     if arr is None:
+ *         return None
  */
 
   /* function exit code */
@@ -4986,19 +5029,19 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":91
+/* "DracoPy.pyx":95
  *     return arr
  * 
- * def encode_mesh_to_buffer(             # <<<<<<<<<<<<<<
- *     points, faces,
+ * def encode(             # <<<<<<<<<<<<<<
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7DracoPy_2encode_mesh_to_buffer[] = "\n    Encode a list or numpy array of points/vertices (float) and faces (unsigned int) to a draco buffer.\n    Quantization bits should be an integer between 0 and 31\n    Compression level should be an integer between 0 and 10\n    Quantization_range is a float representing the size of the bounding cube for the mesh.\n    By default it is the range of the dimension of the input vertices with greatest range.\n    Quantization_origin is the point in space where the bounding box begins. By default it is\n    a point where each coordinate is the minimum of that coordinate among the input vertices.\n    ";
-static PyMethodDef __pyx_mdef_7DracoPy_3encode_mesh_to_buffer = {"encode_mesh_to_buffer", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7DracoPy_3encode_mesh_to_buffer, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7DracoPy_2encode_mesh_to_buffer};
-static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7DracoPy_3encode(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7DracoPy_2encode[] = "\n    Encode a list or numpy array of points/vertices (float) and faces \n    (unsigned int) to a draco buffer. If faces is None, then a point\n    cloud file will be generated, otherwise a mesh file.\n\n    Quantization bits should be an integer between 0 and 31\n    Compression level should be an integer between 0 and 10\n    Quantization_range is a float representing the size of the \n        bounding cube for the mesh.\n    By default it is the range of the dimension of the input vertices \n        with greatest range.\n    Quantization_origin is the point in space where the bounding box begins. \n        By default it is a point where each coordinate is the minimum of \n        that coordinate among the input vertices.\n    ";
+static PyMethodDef __pyx_mdef_7DracoPy_3encode = {"encode", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7DracoPy_3encode, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7DracoPy_2encode};
+static PyObject *__pyx_pw_7DracoPy_3encode(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_points = 0;
   PyObject *__pyx_v_faces = 0;
   PyObject *__pyx_v_quantization_bits = 0;
@@ -5011,28 +5054,37 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("encode_mesh_to_buffer (wrapper)", 0);
+  __Pyx_RefNannySetupContext("encode (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_points,&__pyx_n_s_faces,&__pyx_n_s_quantization_bits,&__pyx_n_s_compression_level,&__pyx_n_s_quantization_range,&__pyx_n_s_quantization_origin,&__pyx_n_s_create_metadata,0};
     PyObject* values[7] = {0,0,0,0,0,0,0};
+
+    /* "DracoPy.pyx":96
+ * 
+ * def encode(
+ *     points, faces=None,             # <<<<<<<<<<<<<<
+ *     quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
+ */
+    values[1] = ((PyObject *)Py_None);
     values[2] = ((PyObject *)__pyx_int_14);
     values[3] = ((PyObject *)__pyx_int_1);
     values[4] = ((PyObject *)__pyx_int_neg_1);
 
-    /* "DracoPy.pyx":94
- *     points, faces,
+    /* "DracoPy.pyx":98
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  *     quantization_range=-1, quantization_origin=None,             # <<<<<<<<<<<<<<
  *     create_metadata=False
- * ):
+ * ) -> bytes:
  */
     values[5] = ((PyObject *)Py_None);
 
-    /* "DracoPy.pyx":95
+    /* "DracoPy.pyx":99
  *     quantization_bits=14, compression_level=1,
  *     quantization_range=-1, quantization_origin=None,
  *     create_metadata=False             # <<<<<<<<<<<<<<
- * ):
+ * ) -> bytes:
  *     """
  */
     values[6] = ((PyObject *)Py_False);
@@ -5064,9 +5116,9 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_faces)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("encode_mesh_to_buffer", 0, 2, 7, 1); __PYX_ERR(0, 91, __pyx_L3_error)
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_faces);
+          if (value) { values[1] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5100,7 +5152,7 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode_mesh_to_buffer") < 0)) __PYX_ERR(0, 91, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode") < 0)) __PYX_ERR(0, 95, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5115,7 +5167,8 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         break;
         default: goto __pyx_L5_argtuple_error;
       }
@@ -5130,19 +5183,19 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("encode_mesh_to_buffer", 0, 2, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 91, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("encode", 0, 1, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 95, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("DracoPy.encode_mesh_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("DracoPy.encode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7DracoPy_2encode_mesh_to_buffer(__pyx_self, __pyx_v_points, __pyx_v_faces, __pyx_v_quantization_bits, __pyx_v_compression_level, __pyx_v_quantization_range, __pyx_v_quantization_origin, __pyx_v_create_metadata);
+  __pyx_r = __pyx_pf_7DracoPy_2encode(__pyx_self, __pyx_v_points, __pyx_v_faces, __pyx_v_quantization_bits, __pyx_v_compression_level, __pyx_v_quantization_range, __pyx_v_quantization_origin, __pyx_v_create_metadata);
 
-  /* "DracoPy.pyx":91
+  /* "DracoPy.pyx":95
  *     return arr
  * 
- * def encode_mesh_to_buffer(             # <<<<<<<<<<<<<<
- *     points, faces,
+ * def encode(             # <<<<<<<<<<<<<<
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  */
 
@@ -5151,13 +5204,13 @@ static PyObject *__pyx_pw_7DracoPy_3encode_mesh_to_buffer(PyObject *__pyx_self, 
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_faces, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata) {
+static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_faces, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata) {
   PyObject *__pyx_v_integer_positions = NULL;
   PyArrayObject *__pyx_v_qorigin = 0;
   __Pyx_memviewslice __pyx_v_quant_origin = { 0, 0, { 0 }, { 0 }, { 0 } };
   std::vector<float>  __pyx_v_pointsview;
   std::vector<uint32_t>  __pyx_v_facesview;
-  struct DracoFunctions::EncodedObject __pyx_v_encoded_mesh;
+  struct DracoFunctions::EncodedObject __pyx_v_encoded;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_qorigin;
   __Pyx_Buffer __pyx_pybuffer_qorigin;
   PyObject *__pyx_r = NULL;
@@ -5173,18 +5226,18 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   int __pyx_t_9;
   int __pyx_t_10;
   std::vector<float>  __pyx_t_11;
-  std::vector<uint32_t>  __pyx_t_12;
-  int __pyx_t_13;
-  float __pyx_t_14;
-  Py_ssize_t __pyx_t_15;
-  int __pyx_t_16;
-  bool __pyx_t_17;
-  bool __pyx_t_18;
-  struct DracoFunctions::EncodedObject __pyx_t_19;
+  int __pyx_t_12;
+  float __pyx_t_13;
+  Py_ssize_t __pyx_t_14;
+  int __pyx_t_15;
+  bool __pyx_t_16;
+  struct DracoFunctions::EncodedObject __pyx_t_17;
+  std::vector<uint32_t>  __pyx_t_18;
+  bool __pyx_t_19;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("encode_mesh_to_buffer", 0);
+  __Pyx_RefNannySetupContext("encode", 0);
   __Pyx_INCREF(__pyx_v_points);
   __Pyx_INCREF(__pyx_v_faces);
   __pyx_pybuffer_qorigin.pybuffer.buf = NULL;
@@ -5192,14 +5245,14 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   __pyx_pybuffernd_qorigin.data = NULL;
   __pyx_pybuffernd_qorigin.rcbuffer = &__pyx_pybuffer_qorigin;
 
-  /* "DracoPy.pyx":106
- *     a point where each coordinate is the minimum of that coordinate among the input vertices.
+  /* "DracoPy.pyx":116
+ *         that coordinate among the input vertices.
  *     """
  *     points = format_array(points)             # <<<<<<<<<<<<<<
  *     faces = format_array(faces)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_format_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_format_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -5213,20 +5266,20 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_points) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_points);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 116, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_points, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":107
+  /* "DracoPy.pyx":117
  *     """
  *     points = format_array(points)
  *     faces = format_array(faces)             # <<<<<<<<<<<<<<
  * 
  *     integer_positions = np.issubdtype(points.dtype, np.integer)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_format_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 107, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_format_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -5240,25 +5293,25 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_faces) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_faces);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF_SET(__pyx_v_faces, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":109
+  /* "DracoPy.pyx":119
  *     faces = format_array(faces)
  * 
  *     integer_positions = np.issubdtype(points.dtype, np.integer)             # <<<<<<<<<<<<<<
  * 
  *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_issubdtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_issubdtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_dtype); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_dtype); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   __pyx_t_5 = 0;
@@ -5275,7 +5328,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_2, ((PyObject *)__pyx_ptype_5numpy_integer)};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5284,14 +5337,14 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_2, ((PyObject *)__pyx_ptype_5numpy_integer)};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else
   #endif
   {
-    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     if (__pyx_t_4) {
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -5302,7 +5355,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
     __Pyx_GIVEREF(((PyObject *)__pyx_ptype_5numpy_integer));
     PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, ((PyObject *)__pyx_ptype_5numpy_integer));
     __pyx_t_2 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
@@ -5310,38 +5363,38 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   __pyx_v_integer_positions = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":111
+  /* "DracoPy.pyx":121
  *     integer_positions = np.issubdtype(points.dtype, np.integer)
  * 
  *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)             # <<<<<<<<<<<<<<
  *     cdef float[:] quant_origin = qorigin
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float32); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float32); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_2) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_2) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__3, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 111, __pyx_L1_error)
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 121, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_qorigin.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_float, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_qorigin = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 111, __pyx_L1_error)
+      __PYX_ERR(0, 121, __pyx_L1_error)
     } else {__pyx_pybuffernd_qorigin.diminfo[0].strides = __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_qorigin.diminfo[0].shape = __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -5349,19 +5402,19 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   __pyx_v_qorigin = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":112
+  /* "DracoPy.pyx":122
  * 
  *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
  *     cdef float[:] quant_origin = qorigin             # <<<<<<<<<<<<<<
  * 
  *     if quantization_origin is not None:
  */
-  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_float(((PyObject *)__pyx_v_qorigin), PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_float(((PyObject *)__pyx_v_qorigin), PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 122, __pyx_L1_error)
   __pyx_v_quant_origin = __pyx_t_8;
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "DracoPy.pyx":114
+  /* "DracoPy.pyx":124
  *     cdef float[:] quant_origin = qorigin
  * 
  *     if quantization_origin is not None:             # <<<<<<<<<<<<<<
@@ -5372,19 +5425,19 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   __pyx_t_10 = (__pyx_t_9 != 0);
   if (__pyx_t_10) {
 
-    /* "DracoPy.pyx":115
+    /* "DracoPy.pyx":125
  * 
  *     if quantization_origin is not None:
  *         qorigin[:] = quantization_origin[:]             # <<<<<<<<<<<<<<
  *     else:
  *         qorigin[:] = np.min(points, axis=0)
  */
-    __pyx_t_2 = __Pyx_PyObject_GetSlice(__pyx_v_quantization_origin, 0, 0, NULL, NULL, &__pyx_slice__4, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetSlice(__pyx_v_quantization_origin, 0, 0, NULL, NULL, &__pyx_slice__4, 0, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_2) < 0)) __PYX_ERR(0, 115, __pyx_L1_error)
+    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_2) < 0)) __PYX_ERR(0, 125, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "DracoPy.pyx":114
+    /* "DracoPy.pyx":124
  *     cdef float[:] quant_origin = qorigin
  * 
  *     if quantization_origin is not None:             # <<<<<<<<<<<<<<
@@ -5394,7 +5447,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
     goto __pyx_L3;
   }
 
-  /* "DracoPy.pyx":117
+  /* "DracoPy.pyx":127
  *         qorigin[:] = quantization_origin[:]
  *     else:
  *         qorigin[:] = np.min(points, axis=0)             # <<<<<<<<<<<<<<
@@ -5402,41 +5455,41 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
  *     cdef vector[float] pointsview = points.reshape((points.size,))
  */
   /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_min); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_min); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_v_points);
     __Pyx_GIVEREF(__pyx_v_points);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_points);
-    __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_axis, __pyx_int_0) < 0) __PYX_ERR(0, 117, __pyx_L1_error)
-    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 117, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_axis, __pyx_int_0) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_6) < 0)) __PYX_ERR(0, 117, __pyx_L1_error)
+    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_6) < 0)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __pyx_L3:;
 
-  /* "DracoPy.pyx":119
+  /* "DracoPy.pyx":129
  *         qorigin[:] = np.min(points, axis=0)
  * 
  *     cdef vector[float] pointsview = points.reshape((points.size,))             # <<<<<<<<<<<<<<
- *     cdef vector[uint32_t] facesview = faces.reshape((faces.size,))
+ *     cdef vector[uint32_t] facesview
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
@@ -5454,148 +5507,225 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   __pyx_t_6 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 119, __pyx_L1_error)
+  if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_11 = __pyx_convert_vector_from_py_float(__pyx_t_6); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_11 = __pyx_convert_vector_from_py_float(__pyx_t_6); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_pointsview = __pyx_t_11;
 
-  /* "DracoPy.pyx":120
+  /* "DracoPy.pyx":132
+ *     cdef vector[uint32_t] facesview
  * 
- *     cdef vector[float] pointsview = points.reshape((points.size,))
- *     cdef vector[uint32_t] facesview = faces.reshape((faces.size,))             # <<<<<<<<<<<<<<
- * 
- *     encoded_mesh = DracoPy.encode_mesh(
+ *     if faces is None:             # <<<<<<<<<<<<<<
+ *         encoded = DracoPy.encode_point_cloud(
+ *             pointsview, quantization_bits, compression_level,
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_faces, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_faces, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-  __pyx_t_1 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_1)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_1);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
+  __pyx_t_10 = (__pyx_v_faces == Py_None);
+  __pyx_t_9 = (__pyx_t_10 != 0);
+  if (__pyx_t_9) {
+
+    /* "DracoPy.pyx":134
+ *     if faces is None:
+ *         encoded = DracoPy.encode_point_cloud(
+ *             pointsview, quantization_bits, compression_level,             # <<<<<<<<<<<<<<
+ *             quantization_range, <float*>&quant_origin[0],
+ *             create_metadata
+ */
+    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_quantization_bits); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 134, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyInt_As_int(__pyx_v_compression_level); if (unlikely((__pyx_t_12 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 134, __pyx_L1_error)
+
+    /* "DracoPy.pyx":135
+ *         encoded = DracoPy.encode_point_cloud(
+ *             pointsview, quantization_bits, compression_level,
+ *             quantization_range, <float*>&quant_origin[0],             # <<<<<<<<<<<<<<
+ *             create_metadata
+ *         )
+ */
+    __pyx_t_13 = __pyx_PyFloat_AsFloat(__pyx_v_quantization_range); if (unlikely((__pyx_t_13 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_14 = 0;
+    __pyx_t_15 = -1;
+    if (__pyx_t_14 < 0) {
+      __pyx_t_14 += __pyx_v_quant_origin.shape[0];
+      if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 0;
+    } else if (unlikely(__pyx_t_14 >= __pyx_v_quant_origin.shape[0])) __pyx_t_15 = 0;
+    if (unlikely(__pyx_t_15 != -1)) {
+      __Pyx_RaiseBufferIndexError(__pyx_t_15);
+      __PYX_ERR(0, 135, __pyx_L1_error)
     }
-  }
-  __pyx_t_6 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 120, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_12 = __pyx_convert_vector_from_py_uint32_t(__pyx_t_6); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_v_facesview = __pyx_t_12;
 
-  /* "DracoPy.pyx":124
- *     encoded_mesh = DracoPy.encode_mesh(
- *         pointsview, facesview,
- *         quantization_bits, compression_level,             # <<<<<<<<<<<<<<
- *         quantization_range, &quant_origin[0],
- *         create_metadata, integer_positions
+    /* "DracoPy.pyx":136
+ *             pointsview, quantization_bits, compression_level,
+ *             quantization_range, <float*>&quant_origin[0],
+ *             create_metadata             # <<<<<<<<<<<<<<
+ *         )
+ *     else:
  */
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_quantization_bits); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 124, __pyx_L1_error)
-  __pyx_t_13 = __Pyx_PyInt_As_int(__pyx_v_compression_level); if (unlikely((__pyx_t_13 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 124, __pyx_L1_error)
+    __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_create_metadata); if (unlikely((__pyx_t_16 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L1_error)
 
-  /* "DracoPy.pyx":125
- *         pointsview, facesview,
- *         quantization_bits, compression_level,
- *         quantization_range, &quant_origin[0],             # <<<<<<<<<<<<<<
- *         create_metadata, integer_positions
- *     )
+    /* "DracoPy.pyx":133
+ * 
+ *     if faces is None:
+ *         encoded = DracoPy.encode_point_cloud(             # <<<<<<<<<<<<<<
+ *             pointsview, quantization_bits, compression_level,
+ *             quantization_range, <float*>&quant_origin[0],
  */
-  __pyx_t_14 = __pyx_PyFloat_AsFloat(__pyx_v_quantization_range); if (unlikely((__pyx_t_14 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L1_error)
-  __pyx_t_15 = 0;
-  __pyx_t_16 = -1;
-  if (__pyx_t_15 < 0) {
-    __pyx_t_15 += __pyx_v_quant_origin.shape[0];
-    if (unlikely(__pyx_t_15 < 0)) __pyx_t_16 = 0;
-  } else if (unlikely(__pyx_t_15 >= __pyx_v_quant_origin.shape[0])) __pyx_t_16 = 0;
-  if (unlikely(__pyx_t_16 != -1)) {
-    __Pyx_RaiseBufferIndexError(__pyx_t_16);
-    __PYX_ERR(0, 125, __pyx_L1_error)
+    try {
+      __pyx_t_17 = DracoFunctions::encode_point_cloud(__pyx_v_pointsview, __pyx_t_5, __pyx_t_12, __pyx_t_13, ((float *)(&(*((float *) ( /* dim=0 */ (__pyx_v_quant_origin.data + __pyx_t_14 * __pyx_v_quant_origin.strides[0]) ))))), __pyx_t_16);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 133, __pyx_L1_error)
+    }
+    __pyx_v_encoded = __pyx_t_17;
+
+    /* "DracoPy.pyx":132
+ *     cdef vector[uint32_t] facesview
+ * 
+ *     if faces is None:             # <<<<<<<<<<<<<<
+ *         encoded = DracoPy.encode_point_cloud(
+ *             pointsview, quantization_bits, compression_level,
+ */
+    goto __pyx_L4;
   }
 
-  /* "DracoPy.pyx":126
- *         quantization_bits, compression_level,
- *         quantization_range, &quant_origin[0],
- *         create_metadata, integer_positions             # <<<<<<<<<<<<<<
- *     )
- * 
+  /* "DracoPy.pyx":139
+ *         )
+ *     else:
+ *         facesview = faces.reshape((faces.size,))             # <<<<<<<<<<<<<<
+ *         encoded = DracoPy.encode_mesh(
+ *             pointsview, facesview,
  */
-  __pyx_t_17 = __Pyx_PyObject_IsTrue(__pyx_v_create_metadata); if (unlikely((__pyx_t_17 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
-  __pyx_t_18 = __Pyx_PyObject_IsTrue(__pyx_v_integer_positions); if (unlikely((__pyx_t_18 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
+  /*else*/ {
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_faces, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 139, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_faces, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 139, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 139, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+    __pyx_t_1 = 0;
+    __pyx_t_1 = NULL;
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+      __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_3);
+      if (likely(__pyx_t_1)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+        __Pyx_INCREF(__pyx_t_1);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_3, function);
+      }
+    }
+    __pyx_t_6 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
+    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 139, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_18 = __pyx_convert_vector_from_py_uint32_t(__pyx_t_6); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 139, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_v_facesview = __pyx_t_18;
 
-  /* "DracoPy.pyx":122
- *     cdef vector[uint32_t] facesview = faces.reshape((faces.size,))
- * 
- *     encoded_mesh = DracoPy.encode_mesh(             # <<<<<<<<<<<<<<
- *         pointsview, facesview,
- *         quantization_bits, compression_level,
+    /* "DracoPy.pyx":142
+ *         encoded = DracoPy.encode_mesh(
+ *             pointsview, facesview,
+ *             quantization_bits, compression_level,             # <<<<<<<<<<<<<<
+ *             quantization_range, &quant_origin[0],
+ *             create_metadata, integer_positions
  */
-  try {
-    __pyx_t_19 = DracoFunctions::encode_mesh(__pyx_v_pointsview, __pyx_v_facesview, __pyx_t_5, __pyx_t_13, __pyx_t_14, (&(*((float *) ( /* dim=0 */ (__pyx_v_quant_origin.data + __pyx_t_15 * __pyx_v_quant_origin.strides[0]) )))), __pyx_t_17, __pyx_t_18);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 122, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyInt_As_int(__pyx_v_quantization_bits); if (unlikely((__pyx_t_12 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_compression_level); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L1_error)
+
+    /* "DracoPy.pyx":143
+ *             pointsview, facesview,
+ *             quantization_bits, compression_level,
+ *             quantization_range, &quant_origin[0],             # <<<<<<<<<<<<<<
+ *             create_metadata, integer_positions
+ *         )
+ */
+    __pyx_t_13 = __pyx_PyFloat_AsFloat(__pyx_v_quantization_range); if (unlikely((__pyx_t_13 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L1_error)
+    __pyx_t_14 = 0;
+    __pyx_t_15 = -1;
+    if (__pyx_t_14 < 0) {
+      __pyx_t_14 += __pyx_v_quant_origin.shape[0];
+      if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 0;
+    } else if (unlikely(__pyx_t_14 >= __pyx_v_quant_origin.shape[0])) __pyx_t_15 = 0;
+    if (unlikely(__pyx_t_15 != -1)) {
+      __Pyx_RaiseBufferIndexError(__pyx_t_15);
+      __PYX_ERR(0, 143, __pyx_L1_error)
+    }
+
+    /* "DracoPy.pyx":144
+ *             quantization_bits, compression_level,
+ *             quantization_range, &quant_origin[0],
+ *             create_metadata, integer_positions             # <<<<<<<<<<<<<<
+ *         )
+ * 
+ */
+    __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_create_metadata); if (unlikely((__pyx_t_16 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 144, __pyx_L1_error)
+    __pyx_t_19 = __Pyx_PyObject_IsTrue(__pyx_v_integer_positions); if (unlikely((__pyx_t_19 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 144, __pyx_L1_error)
+
+    /* "DracoPy.pyx":140
+ *     else:
+ *         facesview = faces.reshape((faces.size,))
+ *         encoded = DracoPy.encode_mesh(             # <<<<<<<<<<<<<<
+ *             pointsview, facesview,
+ *             quantization_bits, compression_level,
+ */
+    try {
+      __pyx_t_17 = DracoFunctions::encode_mesh(__pyx_v_pointsview, __pyx_v_facesview, __pyx_t_12, __pyx_t_5, __pyx_t_13, (&(*((float *) ( /* dim=0 */ (__pyx_v_quant_origin.data + __pyx_t_14 * __pyx_v_quant_origin.strides[0]) )))), __pyx_t_16, __pyx_t_19);
+    } catch(...) {
+      __Pyx_CppExn2PyErr();
+      __PYX_ERR(0, 140, __pyx_L1_error)
+    }
+    __pyx_v_encoded = __pyx_t_17;
   }
-  __pyx_v_encoded_mesh = __pyx_t_19;
+  __pyx_L4:;
 
-  /* "DracoPy.pyx":129
- *     )
+  /* "DracoPy.pyx":147
+ *         )
  * 
- *     if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
- *         return bytes(encoded_mesh.buffer)
- *     elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+ *     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
+ *         return bytes(encoded.buffer)
+ *     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
  */
-  switch (__pyx_v_encoded_mesh.encode_status) {
+  switch (__pyx_v_encoded.encode_status) {
     case DracoFunctions::successful_encoding:
 
-    /* "DracoPy.pyx":130
+    /* "DracoPy.pyx":148
  * 
- *     if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
- *         return bytes(encoded_mesh.buffer)             # <<<<<<<<<<<<<<
- *     elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+ *     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
+ *         return bytes(encoded.buffer)             # <<<<<<<<<<<<<<
+ *     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
  *         raise EncodingFailedException('Invalid mesh')
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_6 = __pyx_convert_vector_to_py_unsigned_char(__pyx_v_encoded_mesh.buffer); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __pyx_t_6 = __pyx_convert_vector_to_py_unsigned_char(__pyx_v_encoded.buffer); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 148, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyBytes_Type)), __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyBytes_Type)), __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 148, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_r = __pyx_t_3;
+    __pyx_r = ((PyObject*)__pyx_t_3);
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "DracoPy.pyx":129
- *     )
+    /* "DracoPy.pyx":147
+ *         )
  * 
- *     if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
- *         return bytes(encoded_mesh.buffer)
- *     elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+ *     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
+ *         return bytes(encoded.buffer)
+ *     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
  */
     break;
     case DracoFunctions::failed_during_encoding:
 
-    /* "DracoPy.pyx":132
- *         return bytes(encoded_mesh.buffer)
- *     elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:
+    /* "DracoPy.pyx":150
+ *         return bytes(encoded.buffer)
+ *     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
  *         raise EncodingFailedException('Invalid mesh')             # <<<<<<<<<<<<<<
  * 
- * 
+ * def raise_decoding_error(decoding_status):
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_EncodingFailedException); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 132, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_EncodingFailedException); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 150, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_2 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -5609,17 +5739,17 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
     }
     __pyx_t_3 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_2, __pyx_kp_u_Invalid_mesh) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_kp_u_Invalid_mesh);
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 132, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 150, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 132, __pyx_L1_error)
+    __PYX_ERR(0, 150, __pyx_L1_error)
 
-    /* "DracoPy.pyx":131
- *     if encoded_mesh.encode_status == DracoPy.encoding_status.successful_encoding:
- *         return bytes(encoded_mesh.buffer)
- *     elif encoded_mesh.encode_status == DracoPy.encoding_status.failed_during_encoding:             # <<<<<<<<<<<<<<
+    /* "DracoPy.pyx":149
+ *     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
+ *         return bytes(encoded.buffer)
+ *     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:             # <<<<<<<<<<<<<<
  *         raise EncodingFailedException('Invalid mesh')
  * 
  */
@@ -5627,16 +5757,16 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
     default: break;
   }
 
-  /* "DracoPy.pyx":91
+  /* "DracoPy.pyx":95
  *     return arr
  * 
- * def encode_mesh_to_buffer(             # <<<<<<<<<<<<<<
- *     points, faces,
+ * def encode(             # <<<<<<<<<<<<<<
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __pyx_r = ((PyObject*)Py_None); __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
@@ -5651,7 +5781,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_qorigin.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("DracoPy.encode_mesh_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("DracoPy.encode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -5667,19 +5797,517 @@ static PyObject *__pyx_pf_7DracoPy_2encode_mesh_to_buffer(CYTHON_UNUSED PyObject
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":135
+/* "DracoPy.pyx":152
+ *         raise EncodingFailedException('Invalid mesh')
  * 
- * 
- * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
+ * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+ *         raise FileTypeException('Input mesh is not draco encoded')
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7DracoPy_4encode_point_cloud_to_buffer[] = "\n    Encode a list or numpy array of points/vertices (float) to a draco buffer.\n    Quantization bits should be an integer between 0 and 31\n    Compression level should be an integer between 0 and 10\n    Quantization_range is a float representing the size of the bounding cube for the mesh.\n    By default it is the range of the dimension of the input vertices with greatest range.\n    Quantization_origin is the point in space where the bounding box begins. By default it is\n    a point where each coordinate is the minimum of that coordinate among the input vertices.\n    ";
-static PyMethodDef __pyx_mdef_7DracoPy_5encode_point_cloud_to_buffer = {"encode_point_cloud_to_buffer", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7DracoPy_4encode_point_cloud_to_buffer};
-static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7DracoPy_5raise_decoding_error(PyObject *__pyx_self, PyObject *__pyx_v_decoding_status); /*proto*/
+static PyMethodDef __pyx_mdef_7DracoPy_5raise_decoding_error = {"raise_decoding_error", (PyCFunction)__pyx_pw_7DracoPy_5raise_decoding_error, METH_O, 0};
+static PyObject *__pyx_pw_7DracoPy_5raise_decoding_error(PyObject *__pyx_self, PyObject *__pyx_v_decoding_status) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("raise_decoding_error (wrapper)", 0);
+  __pyx_r = __pyx_pf_7DracoPy_4raise_decoding_error(__pyx_self, ((PyObject *)__pyx_v_decoding_status));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7DracoPy_4raise_decoding_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_decoding_status) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
+  PyObject *__pyx_t_4 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("raise_decoding_error", 0);
+
+  /* "DracoPy.pyx":153
+ * 
+ * def raise_decoding_error(decoding_status):
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:             # <<<<<<<<<<<<<<
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ */
+  __pyx_t_1 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::not_draco_encoded); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(__pyx_t_3)) {
+
+    /* "DracoPy.pyx":154
+ * def raise_decoding_error(decoding_status):
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+ *         raise FileTypeException('Input mesh is not draco encoded')             # <<<<<<<<<<<<<<
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ */
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_FileTypeException); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_4 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
+      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_1);
+      if (likely(__pyx_t_4)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+        __Pyx_INCREF(__pyx_t_4);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_1, function);
+      }
+    }
+    __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_4, __pyx_kp_u_Input_mesh_is_not_draco_encoded) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_kp_u_Input_mesh_is_not_draco_encoded);
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __PYX_ERR(0, 154, __pyx_L1_error)
+
+    /* "DracoPy.pyx":153
+ * 
+ * def raise_decoding_error(decoding_status):
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:             # <<<<<<<<<<<<<<
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ */
+  }
+
+  /* "DracoPy.pyx":155
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:             # <<<<<<<<<<<<<<
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
+ */
+  __pyx_t_2 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::failed_during_decoding); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (unlikely(__pyx_t_3)) {
+
+    /* "DracoPy.pyx":156
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')             # <<<<<<<<<<<<<<
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
+ *         raise ValueError('DracoPy only supports meshes with position attributes')
+ */
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_Raise(__pyx_t_1, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __PYX_ERR(0, 156, __pyx_L1_error)
+
+    /* "DracoPy.pyx":155
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:             # <<<<<<<<<<<<<<
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
+ */
+  }
+
+  /* "DracoPy.pyx":157
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:             # <<<<<<<<<<<<<<
+ *         raise ValueError('DracoPy only supports meshes with position attributes')
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::no_position_attribute); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(__pyx_t_3)) {
+
+    /* "DracoPy.pyx":158
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
+ *         raise ValueError('DracoPy only supports meshes with position attributes')             # <<<<<<<<<<<<<<
+ * 
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
+ */
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 158, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __PYX_ERR(0, 158, __pyx_L1_error)
+
+    /* "DracoPy.pyx":157
+ *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
+ *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
+ *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:             # <<<<<<<<<<<<<<
+ *         raise ValueError('DracoPy only supports meshes with position attributes')
+ * 
+ */
+  }
+
+  /* "DracoPy.pyx":152
+ *         raise EncodingFailedException('Invalid mesh')
+ * 
+ * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
+ *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
+ *         raise FileTypeException('Input mesh is not draco encoded')
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("DracoPy.raise_decoding_error", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "DracoPy.pyx":160
+ *         raise ValueError('DracoPy only supports meshes with position attributes')
+ * 
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
+ *     """
+ *     Decodes a binary draco file into either a DracoPointCloud
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7DracoPy_7decode(PyObject *__pyx_self, PyObject *__pyx_v_buffer); /*proto*/
+static char __pyx_doc_7DracoPy_6decode[] = "\n    Decodes a binary draco file into either a DracoPointCloud\n    or a DracoMesh.\n    ";
+static PyMethodDef __pyx_mdef_7DracoPy_7decode = {"decode", (PyCFunction)__pyx_pw_7DracoPy_7decode, METH_O, __pyx_doc_7DracoPy_6decode};
+static PyObject *__pyx_pw_7DracoPy_7decode(PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("decode (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_buffer), (&PyBytes_Type), 1, "buffer", 1))) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_r = __pyx_pf_7DracoPy_6decode(__pyx_self, ((PyObject*)__pyx_v_buffer));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7DracoPy_6decode(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
+  struct DracoFunctions::MeshObject __pyx_v_mesh_struct;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  char const *__pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  struct DracoFunctions::MeshObject __pyx_t_3;
+  int __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("decode", 0);
+
+  /* "DracoPy.pyx":165
+ *     or a DracoMesh.
+ *     """
+ *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))             # <<<<<<<<<<<<<<
+ *     if mesh_struct.decode_status != DracoPy.decoding_status.successful:
+ *         raise_decoding_error(mesh_struct.decode_status)
+ */
+  if (unlikely(__pyx_v_buffer == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
+    __PYX_ERR(0, 165, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_PyBytes_AsString(__pyx_v_buffer); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 165, __pyx_L1_error)
+  if (unlikely(__pyx_v_buffer == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
+    __PYX_ERR(0, 165, __pyx_L1_error)
+  }
+  __pyx_t_2 = PyBytes_GET_SIZE(__pyx_v_buffer); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 165, __pyx_L1_error)
+  try {
+    __pyx_t_3 = DracoFunctions::decode_buffer(__pyx_t_1, __pyx_t_2);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    __PYX_ERR(0, 165, __pyx_L1_error)
+  }
+  __pyx_v_mesh_struct = __pyx_t_3;
+
+  /* "DracoPy.pyx":166
+ *     """
+ *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+ *     if mesh_struct.decode_status != DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
+ *         raise_decoding_error(mesh_struct.decode_status)
+ * 
+ */
+  __pyx_t_4 = ((__pyx_v_mesh_struct.decode_status != DracoFunctions::successful) != 0);
+  if (__pyx_t_4) {
+
+    /* "DracoPy.pyx":167
+ *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+ *     if mesh_struct.decode_status != DracoPy.decoding_status.successful:
+ *         raise_decoding_error(mesh_struct.decode_status)             # <<<<<<<<<<<<<<
+ * 
+ *     if len(mesh_struct.faces) > 0:
+ */
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_raise_decoding_error); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_7 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(__pyx_v_mesh_struct.decode_status); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __pyx_t_8 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_8)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_8);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+      }
+    }
+    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+
+    /* "DracoPy.pyx":166
+ *     """
+ *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+ *     if mesh_struct.decode_status != DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
+ *         raise_decoding_error(mesh_struct.decode_status)
+ * 
+ */
+  }
+
+  /* "DracoPy.pyx":169
+ *         raise_decoding_error(mesh_struct.decode_status)
+ * 
+ *     if len(mesh_struct.faces) > 0:             # <<<<<<<<<<<<<<
+ *         return DracoMesh(mesh_struct)
+ *     return DracoPointCloud(mesh_struct)
+ */
+  __pyx_t_5 = __pyx_convert_vector_to_py_unsigned_int(__pyx_v_mesh_struct.faces); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __pyx_t_2 = PyObject_Length(__pyx_t_5); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 169, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_4 = ((__pyx_t_2 > 0) != 0);
+  if (__pyx_t_4) {
+
+    /* "DracoPy.pyx":170
+ * 
+ *     if len(mesh_struct.faces) > 0:
+ *         return DracoMesh(mesh_struct)             # <<<<<<<<<<<<<<
+ *     return DracoPointCloud(mesh_struct)
+ * 
+ */
+    __Pyx_XDECREF(__pyx_r);
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_DracoMesh); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 170, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_7 = __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(__pyx_v_mesh_struct); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 170, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __pyx_t_8 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_8)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_8);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+      }
+    }
+    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
+    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 170, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_r = __pyx_t_5;
+    __pyx_t_5 = 0;
+    goto __pyx_L0;
+
+    /* "DracoPy.pyx":169
+ *         raise_decoding_error(mesh_struct.decode_status)
+ * 
+ *     if len(mesh_struct.faces) > 0:             # <<<<<<<<<<<<<<
+ *         return DracoMesh(mesh_struct)
+ *     return DracoPointCloud(mesh_struct)
+ */
+  }
+
+  /* "DracoPy.pyx":171
+ *     if len(mesh_struct.faces) > 0:
+ *         return DracoMesh(mesh_struct)
+ *     return DracoPointCloud(mesh_struct)             # <<<<<<<<<<<<<<
+ * 
+ * # FOR BACKWARDS COMPATIBILITY
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_DracoPointCloud); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __pyx_t_7 = __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(__pyx_v_mesh_struct); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_8 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+    __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
+    if (likely(__pyx_t_8)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+      __Pyx_INCREF(__pyx_t_8);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_6, function);
+    }
+  }
+  __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_r = __pyx_t_5;
+  __pyx_t_5 = 0;
+  goto __pyx_L0;
+
+  /* "DracoPy.pyx":160
+ *         raise ValueError('DracoPy only supports meshes with position attributes')
+ * 
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
+ *     """
+ *     Decodes a binary draco file into either a DracoPointCloud
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_AddTraceback("DracoPy.decode", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "DracoPy.pyx":175
+ * # FOR BACKWARDS COMPATIBILITY
+ * 
+ * def encode_mesh_to_buffer(*args, **kwargs) -> bytes:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(*args, **kwargs)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7DracoPy_9encode_mesh_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7DracoPy_8encode_mesh_to_buffer[] = "Provided for backwards compatibility. Use encode.";
+static PyMethodDef __pyx_mdef_7DracoPy_9encode_mesh_to_buffer = {"encode_mesh_to_buffer", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7DracoPy_9encode_mesh_to_buffer, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7DracoPy_8encode_mesh_to_buffer};
+static PyObject *__pyx_pw_7DracoPy_9encode_mesh_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_args = 0;
+  PyObject *__pyx_v_kwargs = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("encode_mesh_to_buffer (wrapper)", 0);
+  if (unlikely(__pyx_kwds) && unlikely(!__Pyx_CheckKeywordStrings(__pyx_kwds, "encode_mesh_to_buffer", 1))) return NULL;
+  __pyx_v_kwargs = (__pyx_kwds) ? PyDict_Copy(__pyx_kwds) : PyDict_New(); if (unlikely(!__pyx_v_kwargs)) return NULL;
+  __Pyx_GOTREF(__pyx_v_kwargs);
+  __Pyx_INCREF(__pyx_args);
+  __pyx_v_args = __pyx_args;
+  __pyx_r = __pyx_pf_7DracoPy_8encode_mesh_to_buffer(__pyx_self, __pyx_v_args, __pyx_v_kwargs);
+
+  /* function exit code */
+  __Pyx_XDECREF(__pyx_v_args);
+  __Pyx_XDECREF(__pyx_v_kwargs);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7DracoPy_8encode_mesh_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("encode_mesh_to_buffer", 0);
+
+  /* "DracoPy.pyx":177
+ * def encode_mesh_to_buffer(*args, **kwargs) -> bytes:
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(*args, **kwargs)             # <<<<<<<<<<<<<<
+ * 
+ * def encode_point_cloud_to_buffer(
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyDict_Copy(__pyx_v_kwargs); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_v_args, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_r = ((PyObject*)__pyx_t_3);
+  __pyx_t_3 = 0;
+  goto __pyx_L0;
+
+  /* "DracoPy.pyx":175
+ * # FOR BACKWARDS COMPATIBILITY
+ * 
+ * def encode_mesh_to_buffer(*args, **kwargs) -> bytes:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(*args, **kwargs)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("DracoPy.encode_mesh_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "DracoPy.pyx":179
+ *     return encode(*args, **kwargs)
+ * 
+ * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7DracoPy_11encode_point_cloud_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7DracoPy_10encode_point_cloud_to_buffer[] = "Provided for backwards compatibility. Use encode.";
+static PyMethodDef __pyx_mdef_7DracoPy_11encode_point_cloud_to_buffer = {"encode_point_cloud_to_buffer", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7DracoPy_11encode_point_cloud_to_buffer, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7DracoPy_10encode_point_cloud_to_buffer};
+static PyObject *__pyx_pw_7DracoPy_11encode_point_cloud_to_buffer(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_points = 0;
   PyObject *__pyx_v_quantization_bits = 0;
   PyObject *__pyx_v_compression_level = 0;
@@ -5699,14 +6327,22 @@ static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx
     values[2] = ((PyObject *)__pyx_int_1);
     values[3] = ((PyObject *)__pyx_int_neg_1);
 
-    /* "DracoPy.pyx":138
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
- *     quantization_origin=None, create_metadata=False             # <<<<<<<<<<<<<<
- * ):
- *     """
+    /* "DracoPy.pyx":181
+ * def encode_point_cloud_to_buffer(
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,             # <<<<<<<<<<<<<<
+ *     create_metadata=False
+ * ) -> bytes:
  */
     values[4] = ((PyObject *)Py_None);
+
+    /* "DracoPy.pyx":182
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
+ *     create_metadata=False             # <<<<<<<<<<<<<<
+ * ) -> bytes:
+ *     """Provided for backwards compatibility. Use encode."""
+ */
     values[5] = ((PyObject *)Py_False);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -5764,7 +6400,7 @@ static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode_point_cloud_to_buffer") < 0)) __PYX_ERR(0, 135, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode_point_cloud_to_buffer") < 0)) __PYX_ERR(0, 179, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5792,20 +6428,20 @@ static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("encode_point_cloud_to_buffer", 0, 1, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 135, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("encode_point_cloud_to_buffer", 0, 1, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 179, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("DracoPy.encode_point_cloud_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7DracoPy_4encode_point_cloud_to_buffer(__pyx_self, __pyx_v_points, __pyx_v_quantization_bits, __pyx_v_compression_level, __pyx_v_quantization_range, __pyx_v_quantization_origin, __pyx_v_create_metadata);
+  __pyx_r = __pyx_pf_7DracoPy_10encode_point_cloud_to_buffer(__pyx_self, __pyx_v_points, __pyx_v_quantization_bits, __pyx_v_compression_level, __pyx_v_quantization_range, __pyx_v_quantization_origin, __pyx_v_create_metadata);
 
-  /* "DracoPy.pyx":135
- * 
+  /* "DracoPy.pyx":179
+ *     return encode(*args, **kwargs)
  * 
  * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
  */
 
   /* function exit code */
@@ -5813,49 +6449,173 @@ static PyObject *__pyx_pw_7DracoPy_5encode_point_cloud_to_buffer(PyObject *__pyx
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7DracoPy_4encode_point_cloud_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata) {
-  PyArrayObject *__pyx_v_qorigin = 0;
-  __Pyx_memviewslice __pyx_v_quant_origin = { 0, 0, { 0 }, { 0 }, { 0 } };
-  std::vector<float>  __pyx_v_pointsview;
-  struct DracoFunctions::EncodedObject __pyx_v_encoded_point_cloud;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_qorigin;
-  __Pyx_Buffer __pyx_pybuffer_qorigin;
+static PyObject *__pyx_pf_7DracoPy_10encode_point_cloud_to_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_points, PyObject *__pyx_v_quantization_bits, PyObject *__pyx_v_compression_level, PyObject *__pyx_v_quantization_range, PyObject *__pyx_v_quantization_origin, PyObject *__pyx_v_create_metadata) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyArrayObject *__pyx_t_5 = NULL;
-  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  int __pyx_t_7;
-  int __pyx_t_8;
-  std::vector<float>  __pyx_t_9;
-  int __pyx_t_10;
-  int __pyx_t_11;
-  float __pyx_t_12;
-  Py_ssize_t __pyx_t_13;
-  int __pyx_t_14;
-  bool __pyx_t_15;
-  struct DracoFunctions::EncodedObject __pyx_t_16;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("encode_point_cloud_to_buffer", 0);
-  __Pyx_INCREF(__pyx_v_points);
-  __pyx_pybuffer_qorigin.pybuffer.buf = NULL;
-  __pyx_pybuffer_qorigin.refcount = 0;
-  __pyx_pybuffernd_qorigin.data = NULL;
-  __pyx_pybuffernd_qorigin.rcbuffer = &__pyx_pybuffer_qorigin;
 
-  /* "DracoPy.pyx":149
- *     a point where each coordinate is the minimum of that coordinate among the input vertices.
- *     """
- *     points = format_array(points)             # <<<<<<<<<<<<<<
- * 
- *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
+  /* "DracoPy.pyx":185
+ * ) -> bytes:
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(             # <<<<<<<<<<<<<<
+ *         points=points,
+ *         faces=None,
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_format_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 149, __pyx_L1_error)
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+
+  /* "DracoPy.pyx":186
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(
+ *         points=points,             # <<<<<<<<<<<<<<
+ *         faces=None,
+ *         quantization_bits=quantization_bits,
+ */
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_points, __pyx_v_points) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":187
+ *     return encode(
+ *         points=points,
+ *         faces=None,             # <<<<<<<<<<<<<<
+ *         quantization_bits=quantization_bits,
+ *         compression_level=compression_level,
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_faces, Py_None) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":188
+ *         points=points,
+ *         faces=None,
+ *         quantization_bits=quantization_bits,             # <<<<<<<<<<<<<<
+ *         compression_level=compression_level,
+ *         quantization_range=quantization_range,
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_quantization_bits, __pyx_v_quantization_bits) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":189
+ *         faces=None,
+ *         quantization_bits=quantization_bits,
+ *         compression_level=compression_level,             # <<<<<<<<<<<<<<
+ *         quantization_range=quantization_range,
+ *         quantization_origin=quantization_origin,
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_compression_level, __pyx_v_compression_level) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":190
+ *         quantization_bits=quantization_bits,
+ *         compression_level=compression_level,
+ *         quantization_range=quantization_range,             # <<<<<<<<<<<<<<
+ *         quantization_origin=quantization_origin,
+ *         create_metadata=create_metadata,
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_quantization_range, __pyx_v_quantization_range) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":191
+ *         compression_level=compression_level,
+ *         quantization_range=quantization_range,
+ *         quantization_origin=quantization_origin,             # <<<<<<<<<<<<<<
+ *         create_metadata=create_metadata,
+ *     )
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_quantization_origin, __pyx_v_quantization_origin) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":192
+ *         quantization_range=quantization_range,
+ *         quantization_origin=quantization_origin,
+ *         create_metadata=create_metadata,             # <<<<<<<<<<<<<<
+ *     )
+ * 
+ */
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_create_metadata, __pyx_v_create_metadata) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
+
+  /* "DracoPy.pyx":185
+ * ) -> bytes:
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(             # <<<<<<<<<<<<<<
+ *         points=points,
+ *         faces=None,
+ */
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (!(likely(PyBytes_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "bytes", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_r = ((PyObject*)__pyx_t_3);
+  __pyx_t_3 = 0;
+  goto __pyx_L0;
+
+  /* "DracoPy.pyx":179
+ *     return encode(*args, **kwargs)
+ * 
+ * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("DracoPy.encode_point_cloud_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "DracoPy.pyx":195
+ *     )
+ * 
+ * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return decode(buffer)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7DracoPy_13decode_buffer_to_mesh(PyObject *__pyx_self, PyObject *__pyx_v_buffer); /*proto*/
+static char __pyx_doc_7DracoPy_12decode_buffer_to_mesh[] = "Provided for backwards compatibility. Use decode.";
+static PyMethodDef __pyx_mdef_7DracoPy_13decode_buffer_to_mesh = {"decode_buffer_to_mesh", (PyCFunction)__pyx_pw_7DracoPy_13decode_buffer_to_mesh, METH_O, __pyx_doc_7DracoPy_12decode_buffer_to_mesh};
+static PyObject *__pyx_pw_7DracoPy_13decode_buffer_to_mesh(PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("decode_buffer_to_mesh (wrapper)", 0);
+  __pyx_r = __pyx_pf_7DracoPy_12decode_buffer_to_mesh(__pyx_self, ((PyObject *)__pyx_v_buffer));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7DracoPy_12decode_buffer_to_mesh(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("decode_buffer_to_mesh", 0);
+
+  /* "DracoPy.pyx":197
+ * def decode_buffer_to_mesh(buffer) -> DracoMesh:
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return decode(buffer)             # <<<<<<<<<<<<<<
+ * 
+ * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_decode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -5867,660 +6627,28 @@ static PyObject *__pyx_pf_7DracoPy_4encode_point_cloud_to_buffer(CYTHON_UNUSED P
       __Pyx_DECREF_SET(__pyx_t_2, function);
     }
   }
-  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_points) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_points);
+  __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_3, __pyx_v_buffer) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_buffer);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 149, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF_SET(__pyx_v_points, __pyx_t_1);
+  __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
+  goto __pyx_L0;
 
-  /* "DracoPy.pyx":151
- *     points = format_array(points)
- * 
- *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)             # <<<<<<<<<<<<<<
- *     cdef float[:] quant_origin = qorigin
- * 
- */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float32); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 151, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 151, __pyx_L1_error)
-  __pyx_t_5 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_qorigin.rcbuffer->pybuffer, (PyObject*)__pyx_t_5, &__Pyx_TypeInfo_float, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-      __pyx_v_qorigin = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 151, __pyx_L1_error)
-    } else {__pyx_pybuffernd_qorigin.diminfo[0].strides = __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_qorigin.diminfo[0].shape = __pyx_pybuffernd_qorigin.rcbuffer->pybuffer.shape[0];
-    }
-  }
-  __pyx_t_5 = 0;
-  __pyx_v_qorigin = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "DracoPy.pyx":152
- * 
- *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
- *     cdef float[:] quant_origin = qorigin             # <<<<<<<<<<<<<<
- * 
- *     if quantization_origin is not None:
- */
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_ds_float(((PyObject *)__pyx_v_qorigin), PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 152, __pyx_L1_error)
-  __pyx_v_quant_origin = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "DracoPy.pyx":154
- *     cdef float[:] quant_origin = qorigin
- * 
- *     if quantization_origin is not None:             # <<<<<<<<<<<<<<
- *         qorigin[:] = quantization_origin[:]
- *     else:
- */
-  __pyx_t_7 = (__pyx_v_quantization_origin != Py_None);
-  __pyx_t_8 = (__pyx_t_7 != 0);
-  if (__pyx_t_8) {
-
-    /* "DracoPy.pyx":155
- * 
- *     if quantization_origin is not None:
- *         qorigin[:] = quantization_origin[:]             # <<<<<<<<<<<<<<
- *     else:
- *         qorigin[:] = np.min(points, axis=0)
- */
-    __pyx_t_4 = __Pyx_PyObject_GetSlice(__pyx_v_quantization_origin, 0, 0, NULL, NULL, &__pyx_slice__4, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 155, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_4) < 0)) __PYX_ERR(0, 155, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "DracoPy.pyx":154
- *     cdef float[:] quant_origin = qorigin
- * 
- *     if quantization_origin is not None:             # <<<<<<<<<<<<<<
- *         qorigin[:] = quantization_origin[:]
- *     else:
- */
-    goto __pyx_L3;
-  }
-
-  /* "DracoPy.pyx":157
- *         qorigin[:] = quantization_origin[:]
- *     else:
- *         qorigin[:] = np.min(points, axis=0)             # <<<<<<<<<<<<<<
- * 
- *     cdef vector[float] pointsview = points.reshape((points.size,))
- */
-  /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_min); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_INCREF(__pyx_v_points);
-    __Pyx_GIVEREF(__pyx_v_points);
-    PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_points);
-    __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_axis, __pyx_int_0) < 0) __PYX_ERR(0, 157, __pyx_L1_error)
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_qorigin), __pyx_slice__4, __pyx_t_3) < 0)) __PYX_ERR(0, 157, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  }
-  __pyx_L3:;
-
-  /* "DracoPy.pyx":159
- *         qorigin[:] = np.min(points, axis=0)
- * 
- *     cdef vector[float] pointsview = points.reshape((points.size,))             # <<<<<<<<<<<<<<
- * 
- *     encoded_point_cloud = DracoPy.encode_point_cloud(
- */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_reshape); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 159, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_points, __pyx_n_s_size); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 159, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_2, function);
-    }
-  }
-  __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_4, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_9 = __pyx_convert_vector_from_py_float(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_pointsview = __pyx_t_9;
-
-  /* "DracoPy.pyx":162
- * 
- *     encoded_point_cloud = DracoPy.encode_point_cloud(
- *         pointsview, quantization_bits, compression_level,             # <<<<<<<<<<<<<<
- *         quantization_range, <float*>&quant_origin[0], create_metadata
- *     )
- */
-  __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_v_quantization_bits); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L1_error)
-  __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_v_compression_level); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L1_error)
-
-  /* "DracoPy.pyx":163
- *     encoded_point_cloud = DracoPy.encode_point_cloud(
- *         pointsview, quantization_bits, compression_level,
- *         quantization_range, <float*>&quant_origin[0], create_metadata             # <<<<<<<<<<<<<<
+  /* "DracoPy.pyx":195
  *     )
  * 
- */
-  __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_v_quantization_range); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L1_error)
-  __pyx_t_13 = 0;
-  __pyx_t_14 = -1;
-  if (__pyx_t_13 < 0) {
-    __pyx_t_13 += __pyx_v_quant_origin.shape[0];
-    if (unlikely(__pyx_t_13 < 0)) __pyx_t_14 = 0;
-  } else if (unlikely(__pyx_t_13 >= __pyx_v_quant_origin.shape[0])) __pyx_t_14 = 0;
-  if (unlikely(__pyx_t_14 != -1)) {
-    __Pyx_RaiseBufferIndexError(__pyx_t_14);
-    __PYX_ERR(0, 163, __pyx_L1_error)
-  }
-  __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_v_create_metadata); if (unlikely((__pyx_t_15 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 163, __pyx_L1_error)
-
-  /* "DracoPy.pyx":161
- *     cdef vector[float] pointsview = points.reshape((points.size,))
- * 
- *     encoded_point_cloud = DracoPy.encode_point_cloud(             # <<<<<<<<<<<<<<
- *         pointsview, quantization_bits, compression_level,
- *         quantization_range, <float*>&quant_origin[0], create_metadata
- */
-  try {
-    __pyx_t_16 = DracoFunctions::encode_point_cloud(__pyx_v_pointsview, __pyx_t_10, __pyx_t_11, __pyx_t_12, ((float *)(&(*((float *) ( /* dim=0 */ (__pyx_v_quant_origin.data + __pyx_t_13 * __pyx_v_quant_origin.strides[0]) ))))), __pyx_t_15);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 161, __pyx_L1_error)
-  }
-  __pyx_v_encoded_point_cloud = __pyx_t_16;
-
-  /* "DracoPy.pyx":166
- *     )
- * 
- *     if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
- *         return bytes(encoded_point_cloud.buffer)
- *     elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
- */
-  switch (__pyx_v_encoded_point_cloud.encode_status) {
-    case DracoFunctions::successful_encoding:
-
-    /* "DracoPy.pyx":167
- * 
- *     if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
- *         return bytes(encoded_point_cloud.buffer)             # <<<<<<<<<<<<<<
- *     elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
- *         raise EncodingFailedException('Invalid mesh')
- */
-    __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __pyx_convert_vector_to_py_unsigned_char(__pyx_v_encoded_point_cloud.buffer); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 167, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyBytes_Type)), __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 167, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_r = __pyx_t_2;
-    __pyx_t_2 = 0;
-    goto __pyx_L0;
-
-    /* "DracoPy.pyx":166
- *     )
- * 
- *     if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:             # <<<<<<<<<<<<<<
- *         return bytes(encoded_point_cloud.buffer)
- *     elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
- */
-    break;
-    case DracoFunctions::failed_during_encoding:
-
-    /* "DracoPy.pyx":169
- *         return bytes(encoded_point_cloud.buffer)
- *     elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:
- *         raise EncodingFailedException('Invalid mesh')             # <<<<<<<<<<<<<<
- * 
- * def raise_decoding_error(decoding_status):
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_EncodingFailedException); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 169, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-      __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_3);
-      if (likely(__pyx_t_1)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-        __Pyx_INCREF(__pyx_t_1);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_3, function);
-      }
-    }
-    __pyx_t_2 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_kp_u_Invalid_mesh) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_kp_u_Invalid_mesh);
-    __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 169, __pyx_L1_error)
-
-    /* "DracoPy.pyx":168
- *     if encoded_point_cloud.encode_status == DracoPy.encoding_status.successful_encoding:
- *         return bytes(encoded_point_cloud.buffer)
- *     elif encoded_point_cloud.encode_status == DracoPy.encoding_status.failed_during_encoding:             # <<<<<<<<<<<<<<
- *         raise EncodingFailedException('Invalid mesh')
- * 
- */
-    break;
-    default: break;
-  }
-
-  /* "DracoPy.pyx":135
- * 
- * 
- * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
+ * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return decode(buffer)
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
-  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
-    __Pyx_PyThreadState_declare
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_qorigin.rcbuffer->pybuffer);
-  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("DracoPy.encode_point_cloud_to_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  goto __pyx_L2;
-  __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_qorigin.rcbuffer->pybuffer);
-  __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_qorigin);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_quant_origin, 1);
-  __Pyx_XDECREF(__pyx_v_points);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "DracoPy.pyx":171
- *         raise EncodingFailedException('Invalid mesh')
- * 
- * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
- *         raise FileTypeException('Input mesh is not draco encoded')
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7DracoPy_7raise_decoding_error(PyObject *__pyx_self, PyObject *__pyx_v_decoding_status); /*proto*/
-static PyMethodDef __pyx_mdef_7DracoPy_7raise_decoding_error = {"raise_decoding_error", (PyCFunction)__pyx_pw_7DracoPy_7raise_decoding_error, METH_O, 0};
-static PyObject *__pyx_pw_7DracoPy_7raise_decoding_error(PyObject *__pyx_self, PyObject *__pyx_v_decoding_status) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("raise_decoding_error (wrapper)", 0);
-  __pyx_r = __pyx_pf_7DracoPy_6raise_decoding_error(__pyx_self, ((PyObject *)__pyx_v_decoding_status));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7DracoPy_6raise_decoding_error(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_decoding_status) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  int __pyx_t_3;
-  PyObject *__pyx_t_4 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("raise_decoding_error", 0);
-
-  /* "DracoPy.pyx":172
- * 
- * def raise_decoding_error(decoding_status):
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:             # <<<<<<<<<<<<<<
- *         raise FileTypeException('Input mesh is not draco encoded')
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- */
-  __pyx_t_1 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::not_draco_encoded); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 172, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 172, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(__pyx_t_3)) {
-
-    /* "DracoPy.pyx":173
- * def raise_decoding_error(decoding_status):
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
- *         raise FileTypeException('Input mesh is not draco encoded')             # <<<<<<<<<<<<<<
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_FileTypeException); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 173, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_1);
-      if (likely(__pyx_t_4)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
-        __Pyx_INCREF(__pyx_t_4);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_1, function);
-      }
-    }
-    __pyx_t_2 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_4, __pyx_kp_u_Input_mesh_is_not_draco_encoded) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_kp_u_Input_mesh_is_not_draco_encoded);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 173, __pyx_L1_error)
-
-    /* "DracoPy.pyx":172
- * 
- * def raise_decoding_error(decoding_status):
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:             # <<<<<<<<<<<<<<
- *         raise FileTypeException('Input mesh is not draco encoded')
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- */
-  }
-
-  /* "DracoPy.pyx":174
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
- *         raise FileTypeException('Input mesh is not draco encoded')
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:             # <<<<<<<<<<<<<<
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
- */
-  __pyx_t_2 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::failed_during_decoding); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 174, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 174, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (unlikely(__pyx_t_3)) {
-
-    /* "DracoPy.pyx":175
- *         raise FileTypeException('Input mesh is not draco encoded')
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')             # <<<<<<<<<<<<<<
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
- *         raise ValueError('DracoPy only supports meshes with position attributes')
- */
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_Raise(__pyx_t_1, 0, 0, 0);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(0, 175, __pyx_L1_error)
-
-    /* "DracoPy.pyx":174
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
- *         raise FileTypeException('Input mesh is not draco encoded')
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:             # <<<<<<<<<<<<<<
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
- */
-  }
-
-  /* "DracoPy.pyx":176
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:             # <<<<<<<<<<<<<<
- *         raise ValueError('DracoPy only supports meshes with position attributes')
- * 
- */
-  __pyx_t_1 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(DracoFunctions::no_position_attribute); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 176, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_RichCompare(__pyx_v_decoding_status, __pyx_t_1, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 176, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(__pyx_t_3)) {
-
-    /* "DracoPy.pyx":177
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
- *         raise ValueError('DracoPy only supports meshes with position attributes')             # <<<<<<<<<<<<<<
- * 
- * def decode_buffer_to_mesh(buffer):
- */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(0, 177, __pyx_L1_error)
-
-    /* "DracoPy.pyx":176
- *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
- *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
- *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:             # <<<<<<<<<<<<<<
- *         raise ValueError('DracoPy only supports meshes with position attributes')
- * 
- */
-  }
-
-  /* "DracoPy.pyx":171
- *         raise EncodingFailedException('Invalid mesh')
- * 
- * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
- *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
- *         raise FileTypeException('Input mesh is not draco encoded')
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("DracoPy.raise_decoding_error", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "DracoPy.pyx":179
- *         raise ValueError('DracoPy only supports meshes with position attributes')
- * 
- * def decode_buffer_to_mesh(buffer):             # <<<<<<<<<<<<<<
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7DracoPy_9decode_buffer_to_mesh(PyObject *__pyx_self, PyObject *__pyx_v_buffer); /*proto*/
-static PyMethodDef __pyx_mdef_7DracoPy_9decode_buffer_to_mesh = {"decode_buffer_to_mesh", (PyCFunction)__pyx_pw_7DracoPy_9decode_buffer_to_mesh, METH_O, 0};
-static PyObject *__pyx_pw_7DracoPy_9decode_buffer_to_mesh(PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("decode_buffer_to_mesh (wrapper)", 0);
-  __pyx_r = __pyx_pf_7DracoPy_8decode_buffer_to_mesh(__pyx_self, ((PyObject *)__pyx_v_buffer));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7DracoPy_8decode_buffer_to_mesh(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
-  struct DracoFunctions::MeshObject __pyx_v_mesh_struct;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  char const *__pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  struct DracoFunctions::MeshObject __pyx_t_3;
-  int __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
-  PyObject *__pyx_t_8 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("decode_buffer_to_mesh", 0);
-
-  /* "DracoPy.pyx":180
- * 
- * def decode_buffer_to_mesh(buffer):
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))             # <<<<<<<<<<<<<<
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
- *         return DracoMesh(mesh_struct)
- */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_buffer); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 180, __pyx_L1_error)
-  __pyx_t_2 = PyObject_Length(__pyx_v_buffer); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 180, __pyx_L1_error)
-  try {
-    __pyx_t_3 = DracoFunctions::decode_buffer(__pyx_t_1, __pyx_t_2);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 180, __pyx_L1_error)
-  }
-  __pyx_v_mesh_struct = __pyx_t_3;
-
-  /* "DracoPy.pyx":181
- * def decode_buffer_to_mesh(buffer):
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
- *         return DracoMesh(mesh_struct)
- *     else:
- */
-  __pyx_t_4 = ((__pyx_v_mesh_struct.decode_status == DracoFunctions::successful) != 0);
-  if (__pyx_t_4) {
-
-    /* "DracoPy.pyx":182
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
- *         return DracoMesh(mesh_struct)             # <<<<<<<<<<<<<<
- *     else:
- *         raise_decoding_error(mesh_struct.decode_status)
- */
-    __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_DracoMesh); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(__pyx_v_mesh_struct); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_8)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_8);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_r = __pyx_t_5;
-    __pyx_t_5 = 0;
-    goto __pyx_L0;
-
-    /* "DracoPy.pyx":181
- * def decode_buffer_to_mesh(buffer):
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
- *         return DracoMesh(mesh_struct)
- *     else:
- */
-  }
-
-  /* "DracoPy.pyx":184
- *         return DracoMesh(mesh_struct)
- *     else:
- *         raise_decoding_error(mesh_struct.decode_status)             # <<<<<<<<<<<<<<
- * 
- * def decode_point_cloud_buffer(buffer):
- */
-  /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_raise_decoding_error); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(__pyx_v_mesh_struct.decode_status); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_8)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_8);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 184, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-
-  /* "DracoPy.pyx":179
- *         raise ValueError('DracoPy only supports meshes with position attributes')
- * 
- * def decode_buffer_to_mesh(buffer):             # <<<<<<<<<<<<<<
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_8);
   __Pyx_AddTraceback("DracoPy.decode_buffer_to_mesh", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -6529,159 +6657,142 @@ static PyObject *__pyx_pf_7DracoPy_8decode_buffer_to_mesh(CYTHON_UNUSED PyObject
   return __pyx_r;
 }
 
-/* "DracoPy.pyx":186
- *         raise_decoding_error(mesh_struct.decode_status)
+/* "DracoPy.pyx":199
+ *     return decode(buffer)
  * 
- * def decode_point_cloud_buffer(buffer):             # <<<<<<<<<<<<<<
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
+ * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return cast(decode(buffer), DracoPointCloud)
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7DracoPy_11decode_point_cloud_buffer(PyObject *__pyx_self, PyObject *__pyx_v_buffer); /*proto*/
-static PyMethodDef __pyx_mdef_7DracoPy_11decode_point_cloud_buffer = {"decode_point_cloud_buffer", (PyCFunction)__pyx_pw_7DracoPy_11decode_point_cloud_buffer, METH_O, 0};
-static PyObject *__pyx_pw_7DracoPy_11decode_point_cloud_buffer(PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
+static PyObject *__pyx_pw_7DracoPy_15decode_buffer_to_point_cloud(PyObject *__pyx_self, PyObject *__pyx_v_buffer); /*proto*/
+static char __pyx_doc_7DracoPy_14decode_buffer_to_point_cloud[] = "Provided for backwards compatibility. Use decode.";
+static PyObject *__pyx_pw_7DracoPy_15decode_buffer_to_point_cloud(PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("decode_point_cloud_buffer (wrapper)", 0);
-  __pyx_r = __pyx_pf_7DracoPy_10decode_point_cloud_buffer(__pyx_self, ((PyObject *)__pyx_v_buffer));
+  __Pyx_RefNannySetupContext("decode_buffer_to_point_cloud (wrapper)", 0);
+  __pyx_r = __pyx_pf_7DracoPy_14decode_buffer_to_point_cloud(__pyx_self, ((PyObject *)__pyx_v_buffer));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7DracoPy_10decode_point_cloud_buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
-  struct DracoFunctions::PointCloudObject __pyx_v_point_cloud_struct;
+static PyObject *__pyx_pf_7DracoPy_14decode_buffer_to_point_cloud(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_buffer) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  char const *__pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  struct DracoFunctions::PointCloudObject __pyx_t_3;
-  int __pyx_t_4;
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
-  PyObject *__pyx_t_8 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("decode_point_cloud_buffer", 0);
+  __Pyx_RefNannySetupContext("decode_buffer_to_point_cloud", 0);
 
-  /* "DracoPy.pyx":187
+  /* "DracoPy.pyx":201
+ * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return cast(decode(buffer), DracoPointCloud)             # <<<<<<<<<<<<<<
  * 
- * def decode_point_cloud_buffer(buffer):
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))             # <<<<<<<<<<<<<<
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
- *         return DracoPointCloud(point_cloud_struct)
- */
-  __pyx_t_1 = __Pyx_PyObject_AsString(__pyx_v_buffer); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 187, __pyx_L1_error)
-  __pyx_t_2 = PyObject_Length(__pyx_v_buffer); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 187, __pyx_L1_error)
-  try {
-    __pyx_t_3 = DracoFunctions::decode_buffer_to_point_cloud(__pyx_t_1, __pyx_t_2);
-  } catch(...) {
-    __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 187, __pyx_L1_error)
-  }
-  __pyx_v_point_cloud_struct = __pyx_t_3;
-
-  /* "DracoPy.pyx":188
- * def decode_point_cloud_buffer(buffer):
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
- *         return DracoPointCloud(point_cloud_struct)
- *     else:
- */
-  __pyx_t_4 = ((__pyx_v_point_cloud_struct.decode_status == DracoFunctions::successful) != 0);
-  if (__pyx_t_4) {
-
-    /* "DracoPy.pyx":189
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
- *         return DracoPointCloud(point_cloud_struct)             # <<<<<<<<<<<<<<
- *     else:
- *         raise_decoding_error(point_cloud_struct.decode_status)
- */
-    __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_DracoPointCloud); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 189, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __pyx_convert__to_py_struct__DracoFunctions_3a__3a_PointCloudObject(__pyx_v_point_cloud_struct); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 189, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_8)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_8);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 189, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_r = __pyx_t_5;
-    __pyx_t_5 = 0;
-    goto __pyx_L0;
-
-    /* "DracoPy.pyx":188
- * def decode_point_cloud_buffer(buffer):
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:             # <<<<<<<<<<<<<<
- *         return DracoPointCloud(point_cloud_struct)
- *     else:
- */
-  }
-
-  /* "DracoPy.pyx":191
- *         return DracoPointCloud(point_cloud_struct)
- *     else:
- *         raise_decoding_error(point_cloud_struct.decode_status)             # <<<<<<<<<<<<<<
- */
-  /*else*/ {
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_raise_decoding_error); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 191, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(__pyx_v_point_cloud_struct.decode_status); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 191, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-      __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_6);
-      if (likely(__pyx_t_8)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-        __Pyx_INCREF(__pyx_t_8);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_6, function);
-      }
-    }
-    __pyx_t_5 = (__pyx_t_8) ? __Pyx_PyObject_Call2Args(__pyx_t_6, __pyx_t_8, __pyx_t_7) : __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7);
-    __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 191, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-
-  /* "DracoPy.pyx":186
- *         raise_decoding_error(mesh_struct.decode_status)
  * 
- * def decode_point_cloud_buffer(buffer):             # <<<<<<<<<<<<<<
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_cast); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_decode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_v_buffer) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_buffer);
+  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_DracoPointCloud); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 201, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+      __pyx_t_6 = 1;
+    }
+  }
+  #if CYTHON_FAST_PYCALL
+  if (PyFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 201, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  #if CYTHON_FAST_PYCCALL
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_t_3, __pyx_t_4};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 201, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  } else
+  #endif
+  {
+    __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 201, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    if (__pyx_t_5) {
+      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_5); __pyx_t_5 = NULL;
+    }
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_6, __pyx_t_3);
+    __Pyx_GIVEREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_t_4);
+    __pyx_t_3 = 0;
+    __pyx_t_4 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 201, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "DracoPy.pyx":199
+ *     return decode(buffer)
+ * 
+ * def decode_buffer_to_point_cloud(buffer) -> DracoPointCloud:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return cast(decode(buffer), DracoPointCloud)
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_AddTraceback("DracoPy.decode_point_cloud_buffer", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("DracoPy.decode_buffer_to_point_cloud", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -8007,63 +8118,6 @@ static PyObject *__pyx_convert_vector_to_py_unsigned_char(const std::vector<unsi
   return __pyx_r;
 }
 
-static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &__pyx_v_v) {
-  size_t __pyx_v_i;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  size_t __pyx_t_2;
-  size_t __pyx_t_3;
-  size_t __pyx_t_4;
-  PyObject *__pyx_t_5 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("__pyx_convert_vector_to_py_float", 0);
-
-  /* "vector.to_py":61
- * @cname("__pyx_convert_vector_to_py_float")
- * cdef object __pyx_convert_vector_to_py_float(vector[X]& v):
- *     return [v[i] for i in range(v.size())]             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 61, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_v_v.size();
-  __pyx_t_3 = __pyx_t_2;
-  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
-    __pyx_v_i = __pyx_t_4;
-    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_v[__pyx_v_i])); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 61, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) __PYX_ERR(2, 61, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  }
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* "vector.to_py":60
- * 
- * @cname("__pyx_convert_vector_to_py_float")
- * cdef object __pyx_convert_vector_to_py_float(vector[X]& v):             # <<<<<<<<<<<<<<
- *     return [v[i] for i in range(v.size())]
- * 
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_float", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = 0;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
 static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsigned int>  &__pyx_v_v) {
   size_t __pyx_v_i;
   PyObject *__pyx_r = NULL;
@@ -8114,6 +8168,63 @@ static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsig
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_unsigned_int", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &__pyx_v_v) {
+  size_t __pyx_v_i;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  size_t __pyx_t_2;
+  size_t __pyx_t_3;
+  size_t __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_vector_to_py_float", 0);
+
+  /* "vector.to_py":61
+ * @cname("__pyx_convert_vector_to_py_float")
+ * cdef object __pyx_convert_vector_to_py_float(vector[X]& v):
+ *     return [v[i] for i in range(v.size())]             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 61, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_v_v.size();
+  __pyx_t_3 = __pyx_t_2;
+  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+    __pyx_v_i = __pyx_t_4;
+    __pyx_t_5 = PyFloat_FromDouble((__pyx_v_v[__pyx_v_i])); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 61, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) __PYX_ERR(2, 61, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "vector.to_py":60
+ * 
+ * @cname("__pyx_convert_vector_to_py_float")
+ * cdef object __pyx_convert_vector_to_py_float(vector[X]& v):             # <<<<<<<<<<<<<<
+ *     return [v[i] for i in range(v.size())]
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_float", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -21924,6 +22035,7 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
+  {"decode_buffer_to_point_cloud", (PyCFunction)__pyx_pw_7DracoPy_15decode_buffer_to_point_cloud, METH_O, __pyx_doc_7DracoPy_14decode_buffer_to_point_cloud},
   {0, 0, 0, 0}
 };
 
@@ -22014,9 +22126,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_u_Specified_value_out_of_encoded_r, __pyx_k_Specified_value_out_of_encoded_r, sizeof(__pyx_k_Specified_value_out_of_encoded_r), 0, 1, 0, 0},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_kp_s_Unable_to_convert_item_to_object, __pyx_k_Unable_to_convert_item_to_object, sizeof(__pyx_k_Unable_to_convert_item_to_object), 0, 0, 1, 0},
+  {&__pyx_n_s_Union, __pyx_k_Union, sizeof(__pyx_k_Union), 0, 0, 1, 1},
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_View_MemoryView, __pyx_k_View_MemoryView, sizeof(__pyx_k_View_MemoryView), 0, 0, 1, 1},
   {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
+  {&__pyx_n_s_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 0, 1, 1},
   {&__pyx_n_s_arr, __pyx_k_arr, sizeof(__pyx_k_arr), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_axis, __pyx_k_axis, sizeof(__pyx_k_axis), 0, 0, 1, 1},
@@ -22024,6 +22138,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_buffer, __pyx_k_buffer, sizeof(__pyx_k_buffer), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
+  {&__pyx_n_s_cast, __pyx_k_cast, sizeof(__pyx_k_cast), 0, 0, 1, 1},
   {&__pyx_n_s_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_compression_level, __pyx_k_compression_level, sizeof(__pyx_k_compression_level), 0, 0, 1, 1},
@@ -22031,8 +22146,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
   {&__pyx_n_s_create_metadata, __pyx_k_create_metadata, sizeof(__pyx_k_create_metadata), 0, 0, 1, 1},
   {&__pyx_n_s_data_struct, __pyx_k_data_struct, sizeof(__pyx_k_data_struct), 0, 0, 1, 1},
+  {&__pyx_n_s_decode, __pyx_k_decode, sizeof(__pyx_k_decode), 0, 0, 1, 1},
   {&__pyx_n_s_decode_buffer_to_mesh, __pyx_k_decode_buffer_to_mesh, sizeof(__pyx_k_decode_buffer_to_mesh), 0, 0, 1, 1},
-  {&__pyx_n_s_decode_point_cloud_buffer, __pyx_k_decode_point_cloud_buffer, sizeof(__pyx_k_decode_point_cloud_buffer), 0, 0, 1, 1},
   {&__pyx_n_s_decode_status, __pyx_k_decode_status, sizeof(__pyx_k_decode_status), 0, 0, 1, 1},
   {&__pyx_n_s_decoding_status, __pyx_k_decoding_status, sizeof(__pyx_k_decoding_status), 0, 0, 1, 1},
   {&__pyx_n_s_dict, __pyx_k_dict, sizeof(__pyx_k_dict), 0, 0, 1, 1},
@@ -22043,9 +22158,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_encode_mesh_to_buffer, __pyx_k_encode_mesh_to_buffer, sizeof(__pyx_k_encode_mesh_to_buffer), 0, 0, 1, 1},
   {&__pyx_n_s_encode_point_cloud_to_buffer, __pyx_k_encode_point_cloud_to_buffer, sizeof(__pyx_k_encode_point_cloud_to_buffer), 0, 0, 1, 1},
-  {&__pyx_n_s_encoded_mesh, __pyx_k_encoded_mesh, sizeof(__pyx_k_encoded_mesh), 0, 0, 1, 1},
+  {&__pyx_n_s_encoded, __pyx_k_encoded, sizeof(__pyx_k_encoded), 0, 0, 1, 1},
   {&__pyx_n_s_encoded_point, __pyx_k_encoded_point, sizeof(__pyx_k_encoded_point), 0, 0, 1, 1},
-  {&__pyx_n_s_encoded_point_cloud, __pyx_k_encoded_point_cloud, sizeof(__pyx_k_encoded_point_cloud), 0, 0, 1, 1},
   {&__pyx_n_s_encoding_options, __pyx_k_encoding_options, sizeof(__pyx_k_encoding_options), 0, 0, 1, 1},
   {&__pyx_n_s_encoding_options_set, __pyx_k_encoding_options_set, sizeof(__pyx_k_encoding_options_set), 0, 0, 1, 1},
   {&__pyx_n_u_encoding_options_set, __pyx_k_encoding_options_set, sizeof(__pyx_k_encoding_options_set), 0, 1, 0, 1},
@@ -22073,6 +22187,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_issubdtype, __pyx_k_issubdtype, sizeof(__pyx_k_issubdtype), 0, 0, 1, 1},
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
+  {&__pyx_n_s_kwargs, __pyx_k_kwargs, sizeof(__pyx_k_kwargs), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_math, __pyx_k_math, sizeof(__pyx_k_math), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
@@ -22098,7 +22213,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
   {&__pyx_n_s_point, __pyx_k_point, sizeof(__pyx_k_point), 0, 0, 1, 1},
-  {&__pyx_n_s_point_cloud_struct, __pyx_k_point_cloud_struct, sizeof(__pyx_k_point_cloud_struct), 0, 0, 1, 1},
   {&__pyx_n_s_points, __pyx_k_points, sizeof(__pyx_k_points), 0, 0, 1, 1},
   {&__pyx_n_u_points, __pyx_k_points, sizeof(__pyx_k_points), 0, 1, 0, 1},
   {&__pyx_n_s_pointsview, __pyx_k_pointsview, sizeof(__pyx_k_pointsview), 0, 0, 1, 1},
@@ -22143,6 +22257,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_stringsource, __pyx_k_stringsource, sizeof(__pyx_k_stringsource), 0, 0, 1, 0},
   {&__pyx_n_s_struct, __pyx_k_struct, sizeof(__pyx_k_struct), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_n_s_typing, __pyx_k_typing, sizeof(__pyx_k_typing), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
@@ -22152,11 +22267,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_property = __Pyx_GetBuiltinName(__pyx_n_s_property); if (!__pyx_builtin_property) __PYX_ERR(0, 33, __pyx_L1_error)
-  __pyx_builtin_object = __Pyx_GetBuiltinName(__pyx_n_s_object); if (!__pyx_builtin_object) __PYX_ERR(0, 54, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_builtin_property = __Pyx_GetBuiltinName(__pyx_n_s_property); if (!__pyx_builtin_property) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_builtin_object = __Pyx_GetBuiltinName(__pyx_n_s_object); if (!__pyx_builtin_object) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 156, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 945, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 148, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(2, 151, __pyx_L1_error)
@@ -22172,61 +22287,61 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "DracoPy.pyx":63
+  /* "DracoPy.pyx":64
  *     def get_encoded_coordinate(self, value, axis):
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
  *             raise ValueError('Specified value out of encoded range')             # <<<<<<<<<<<<<<
  *         difference = value - self.quantization_origin[axis]
  *         quantized_index = floor((difference / self.inverse_alpha) + 0.5)
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Specified_value_out_of_encoded_r); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_Specified_value_out_of_encoded_r); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 64, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "DracoPy.pyx":111
+  /* "DracoPy.pyx":121
  *     integer_positions = np.issubdtype(points.dtype, np.integer)
  * 
  *     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)             # <<<<<<<<<<<<<<
  *     cdef float[:] quant_origin = qorigin
  * 
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_int_3); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_int_3); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_tuple__2); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_tuple__2); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "DracoPy.pyx":115
+  /* "DracoPy.pyx":125
  * 
  *     if quantization_origin is not None:
  *         qorigin[:] = quantization_origin[:]             # <<<<<<<<<<<<<<
  *     else:
  *         qorigin[:] = np.min(points, axis=0)
  */
-  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __pyx_slice__4 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__4)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_slice__4);
   __Pyx_GIVEREF(__pyx_slice__4);
 
-  /* "DracoPy.pyx":175
+  /* "DracoPy.pyx":156
  *         raise FileTypeException('Input mesh is not draco encoded')
  *     elif decoding_status == DracoPy.decoding_status.failed_during_decoding:
  *         raise TypeError('Failed to decode input mesh. Data might be corrupted')             # <<<<<<<<<<<<<<
  *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
  *         raise ValueError('DracoPy only supports meshes with position attributes')
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Failed_to_decode_input_mesh_Data); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_u_Failed_to_decode_input_mesh_Data); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 156, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "DracoPy.pyx":177
+  /* "DracoPy.pyx":158
  *         raise TypeError('Failed to decode input mesh. Data might be corrupted')
  *     elif decoding_status == DracoPy.decoding_status.no_position_attribute:
  *         raise ValueError('DracoPy only supports meshes with position attributes')             # <<<<<<<<<<<<<<
  * 
- * def decode_buffer_to_mesh(buffer):
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_DracoPy_only_supports_meshes_wit); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_u_DracoPy_only_supports_meshes_wit); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
@@ -22433,220 +22548,232 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__25);
   __Pyx_GIVEREF(__pyx_tuple__25);
 
-  /* "DracoPy.pyx":17
+  /* "DracoPy.pyx":18
  * 
  * class DracoPointCloud:
  *     def __init__(self, data_struct):             # <<<<<<<<<<<<<<
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:
  */
-  __pyx_tuple__26 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_data_struct); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
-  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_init, 17, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_init, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 18, __pyx_L1_error)
 
-  /* "DracoPy.pyx":25
+  /* "DracoPy.pyx":26
  *             self.encoding_options = None
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  */
-  __pyx_tuple__28 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_value, __pyx_n_s_axis); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_tuple__28 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_value, __pyx_n_s_axis); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_coordinate, 25, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_coordinate, 26, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 26, __pyx_L1_error)
 
-  /* "DracoPy.pyx":29
+  /* "DracoPy.pyx":30
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_point(point)
  */
-  __pyx_tuple__30 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_point); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(2, __pyx_n_s_self, __pyx_n_s_point); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__30);
   __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_point, 29, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(2, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_point, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 30, __pyx_L1_error)
 
-  /* "DracoPy.pyx":34
+  /* "DracoPy.pyx":35
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
  *         return 3
  * 
  */
-  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_tuple__32 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 35, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__32);
   __Pyx_GIVEREF(__pyx_tuple__32);
-  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_num_axes, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_num_axes, 35, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 35, __pyx_L1_error)
 
-  /* "DracoPy.pyx":38
+  /* "DracoPy.pyx":39
  * 
  *     @property
  *     def points(self):             # <<<<<<<<<<<<<<
  *         points = self.data_struct['points']
  *         N = len(points) // 3
  */
-  __pyx_tuple__34 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_points, __pyx_n_s_N); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_tuple__34 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_points, __pyx_n_s_N); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 39, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__34);
   __Pyx_GIVEREF(__pyx_tuple__34);
-  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_points, 38, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_points, 39, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 39, __pyx_L1_error)
 
-  /* "DracoPy.pyx":45
+  /* "DracoPy.pyx":46
  * class DracoMesh(DracoPointCloud):
  *     @property
  *     def faces(self):             # <<<<<<<<<<<<<<
  *         faces = self.data_struct['faces']
  *         N = len(faces) // 3
  */
-  __pyx_tuple__36 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_faces, __pyx_n_s_N); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_tuple__36 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_faces, __pyx_n_s_N); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__36);
   __Pyx_GIVEREF(__pyx_tuple__36);
-  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_faces, 45, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_faces, 46, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 46, __pyx_L1_error)
 
-  /* "DracoPy.pyx":51
+  /* "DracoPy.pyx":52
  * 
  *     @property
  *     def normals(self):             # <<<<<<<<<<<<<<
  *         return np.array(self.data_struct['normals'])
  * 
  */
-  __pyx_tuple__38 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_tuple__38 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__38);
   __Pyx_GIVEREF(__pyx_tuple__38);
-  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_normals, 51, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_normals, 52, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 52, __pyx_L1_error)
 
-  /* "DracoPy.pyx":54
+  /* "DracoPy.pyx":55
  *         return np.array(self.data_struct['normals'])
  * 
  * class EncodingOptions(object):             # <<<<<<<<<<<<<<
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):
  *         self.quantization_bits = quantization_bits
  */
-  __pyx_tuple__40 = PyTuple_Pack(1, __pyx_builtin_object); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_tuple__40 = PyTuple_Pack(1, __pyx_builtin_object); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__40);
   __Pyx_GIVEREF(__pyx_tuple__40);
 
-  /* "DracoPy.pyx":55
+  /* "DracoPy.pyx":56
  * 
  * class EncodingOptions(object):
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):             # <<<<<<<<<<<<<<
  *         self.quantization_bits = quantization_bits
  *         self.quantization_range = quantization_range
  */
-  __pyx_tuple__41 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_quantization_bits, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_tuple__41)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_tuple__41 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_quantization_bits, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin); if (unlikely(!__pyx_tuple__41)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__41);
   __Pyx_GIVEREF(__pyx_tuple__41);
-  __pyx_codeobj__42 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__41, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_init, 55, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__42)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_codeobj__42 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__41, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_init, 56, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__42)) __PYX_ERR(0, 56, __pyx_L1_error)
 
-  /* "DracoPy.pyx":61
+  /* "DracoPy.pyx":62
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
  *             raise ValueError('Specified value out of encoded range')
  */
-  __pyx_tuple__43 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_value, __pyx_n_s_axis, __pyx_n_s_difference, __pyx_n_s_quantized_index); if (unlikely(!__pyx_tuple__43)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_tuple__43 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_value, __pyx_n_s_axis, __pyx_n_s_difference, __pyx_n_s_quantized_index); if (unlikely(!__pyx_tuple__43)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__43);
   __Pyx_GIVEREF(__pyx_tuple__43);
-  __pyx_codeobj__44 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__43, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_coordinate, 61, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__44)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_codeobj__44 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__43, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_coordinate, 62, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__44)) __PYX_ERR(0, 62, __pyx_L1_error)
 
-  /* "DracoPy.pyx":68
+  /* "DracoPy.pyx":69
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
  *         encoded_point = []
  *         for axis in range(self.num_axes):
  */
-  __pyx_tuple__45 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_point, __pyx_n_s_encoded_point, __pyx_n_s_axis); if (unlikely(!__pyx_tuple__45)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_tuple__45 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_point, __pyx_n_s_encoded_point, __pyx_n_s_axis); if (unlikely(!__pyx_tuple__45)) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__45);
   __Pyx_GIVEREF(__pyx_tuple__45);
-  __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_point, 68, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_codeobj__46 = (PyObject*)__Pyx_PyCode_New(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__45, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_get_encoded_point, 69, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__46)) __PYX_ERR(0, 69, __pyx_L1_error)
 
-  /* "DracoPy.pyx":75
+  /* "DracoPy.pyx":76
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
  *         return 3
  * 
  */
-  __pyx_tuple__47 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__47)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_tuple__47 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__47)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__47);
   __Pyx_GIVEREF(__pyx_tuple__47);
-  __pyx_codeobj__48 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__47, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_num_axes, 75, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__48)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_codeobj__48 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__47, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_num_axes, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__48)) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "DracoPy.pyx":84
+  /* "DracoPy.pyx":85
  *     pass
  * 
  * def format_array(arr):             # <<<<<<<<<<<<<<
- *     if not isinstance(arr, np.ndarray):
- *         arr = np.array(arr)
+ *     if arr is None:
+ *         return None
  */
-  __pyx_tuple__49 = PyTuple_Pack(1, __pyx_n_s_arr); if (unlikely(!__pyx_tuple__49)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_tuple__49 = PyTuple_Pack(1, __pyx_n_s_arr); if (unlikely(!__pyx_tuple__49)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__49);
   __Pyx_GIVEREF(__pyx_tuple__49);
-  __pyx_codeobj__50 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__49, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_format_array, 84, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__50)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_codeobj__50 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__49, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_format_array, 85, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__50)) __PYX_ERR(0, 85, __pyx_L1_error)
 
-  /* "DracoPy.pyx":91
+  /* "DracoPy.pyx":95
  *     return arr
  * 
- * def encode_mesh_to_buffer(             # <<<<<<<<<<<<<<
- *     points, faces,
+ * def encode(             # <<<<<<<<<<<<<<
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  */
-  __pyx_tuple__51 = PyTuple_Pack(13, __pyx_n_s_points, __pyx_n_s_faces, __pyx_n_s_quantization_bits, __pyx_n_s_compression_level, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin, __pyx_n_s_create_metadata, __pyx_n_s_integer_positions, __pyx_n_s_qorigin, __pyx_n_s_quant_origin, __pyx_n_s_pointsview, __pyx_n_s_facesview, __pyx_n_s_encoded_mesh); if (unlikely(!__pyx_tuple__51)) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_tuple__51 = PyTuple_Pack(13, __pyx_n_s_points, __pyx_n_s_faces, __pyx_n_s_quantization_bits, __pyx_n_s_compression_level, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin, __pyx_n_s_create_metadata, __pyx_n_s_integer_positions, __pyx_n_s_qorigin, __pyx_n_s_quant_origin, __pyx_n_s_pointsview, __pyx_n_s_facesview, __pyx_n_s_encoded); if (unlikely(!__pyx_tuple__51)) __PYX_ERR(0, 95, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__51);
   __Pyx_GIVEREF(__pyx_tuple__51);
-  __pyx_codeobj__52 = (PyObject*)__Pyx_PyCode_New(7, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__51, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_encode_mesh_to_buffer, 91, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__52)) __PYX_ERR(0, 91, __pyx_L1_error)
+  __pyx_codeobj__52 = (PyObject*)__Pyx_PyCode_New(7, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__51, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_encode, 95, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__52)) __PYX_ERR(0, 95, __pyx_L1_error)
 
-  /* "DracoPy.pyx":135
- * 
- * 
- * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
- */
-  __pyx_tuple__53 = PyTuple_Pack(10, __pyx_n_s_points, __pyx_n_s_quantization_bits, __pyx_n_s_compression_level, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin, __pyx_n_s_create_metadata, __pyx_n_s_qorigin, __pyx_n_s_quant_origin, __pyx_n_s_pointsview, __pyx_n_s_encoded_point_cloud); if (unlikely(!__pyx_tuple__53)) __PYX_ERR(0, 135, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__53);
-  __Pyx_GIVEREF(__pyx_tuple__53);
-  __pyx_codeobj__54 = (PyObject*)__Pyx_PyCode_New(6, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__53, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_encode_point_cloud_to_buffer, 135, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__54)) __PYX_ERR(0, 135, __pyx_L1_error)
-
-  /* "DracoPy.pyx":171
+  /* "DracoPy.pyx":152
  *         raise EncodingFailedException('Invalid mesh')
  * 
  * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
  *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
  *         raise FileTypeException('Input mesh is not draco encoded')
  */
-  __pyx_tuple__55 = PyTuple_Pack(1, __pyx_n_s_decoding_status); if (unlikely(!__pyx_tuple__55)) __PYX_ERR(0, 171, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__55);
-  __Pyx_GIVEREF(__pyx_tuple__55);
-  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__55, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_raise_decoding_error, 171, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_tuple__53 = PyTuple_Pack(1, __pyx_n_s_decoding_status); if (unlikely(!__pyx_tuple__53)) __PYX_ERR(0, 152, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__53);
+  __Pyx_GIVEREF(__pyx_tuple__53);
+  __pyx_codeobj__54 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__53, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_raise_decoding_error, 152, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__54)) __PYX_ERR(0, 152, __pyx_L1_error)
 
-  /* "DracoPy.pyx":179
+  /* "DracoPy.pyx":160
  *         raise ValueError('DracoPy only supports meshes with position attributes')
  * 
- * def decode_buffer_to_mesh(buffer):             # <<<<<<<<<<<<<<
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
+ *     """
+ *     Decodes a binary draco file into either a DracoPointCloud
  */
-  __pyx_tuple__57 = PyTuple_Pack(2, __pyx_n_s_buffer, __pyx_n_s_mesh_struct); if (unlikely(!__pyx_tuple__57)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_tuple__55 = PyTuple_Pack(2, __pyx_n_s_buffer, __pyx_n_s_mesh_struct); if (unlikely(!__pyx_tuple__55)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__55);
+  __Pyx_GIVEREF(__pyx_tuple__55);
+  __pyx_codeobj__56 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__55, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_decode, 160, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__56)) __PYX_ERR(0, 160, __pyx_L1_error)
+
+  /* "DracoPy.pyx":175
+ * # FOR BACKWARDS COMPATIBILITY
+ * 
+ * def encode_mesh_to_buffer(*args, **kwargs) -> bytes:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(*args, **kwargs)
+ */
+  __pyx_tuple__57 = PyTuple_Pack(2, __pyx_n_s_args, __pyx_n_s_kwargs); if (unlikely(!__pyx_tuple__57)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__57);
   __Pyx_GIVEREF(__pyx_tuple__57);
-  __pyx_codeobj__58 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__57, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_decode_buffer_to_mesh, 179, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__58)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __pyx_codeobj__58 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARARGS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__57, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_encode_mesh_to_buffer, 175, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__58)) __PYX_ERR(0, 175, __pyx_L1_error)
 
-  /* "DracoPy.pyx":186
- *         raise_decoding_error(mesh_struct.decode_status)
+  /* "DracoPy.pyx":179
+ *     return encode(*args, **kwargs)
  * 
- * def decode_point_cloud_buffer(buffer):             # <<<<<<<<<<<<<<
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
+ * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
  */
-  __pyx_tuple__59 = PyTuple_Pack(2, __pyx_n_s_buffer, __pyx_n_s_point_cloud_struct); if (unlikely(!__pyx_tuple__59)) __PYX_ERR(0, 186, __pyx_L1_error)
+  __pyx_tuple__59 = PyTuple_Pack(6, __pyx_n_s_points, __pyx_n_s_quantization_bits, __pyx_n_s_compression_level, __pyx_n_s_quantization_range, __pyx_n_s_quantization_origin, __pyx_n_s_create_metadata); if (unlikely(!__pyx_tuple__59)) __PYX_ERR(0, 179, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__59);
   __Pyx_GIVEREF(__pyx_tuple__59);
-  __pyx_codeobj__60 = (PyObject*)__Pyx_PyCode_New(1, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__59, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_decode_point_cloud_buffer, 186, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__60)) __PYX_ERR(0, 186, __pyx_L1_error)
+  __pyx_codeobj__60 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__59, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_encode_point_cloud_to_buffer, 179, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__60)) __PYX_ERR(0, 179, __pyx_L1_error)
+
+  /* "DracoPy.pyx":195
+ *     )
+ * 
+ * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return decode(buffer)
+ */
+  __pyx_tuple__61 = PyTuple_Pack(1, __pyx_n_s_buffer); if (unlikely(!__pyx_tuple__61)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__61);
+  __Pyx_GIVEREF(__pyx_tuple__61);
+  __pyx_codeobj__62 = (PyObject*)__Pyx_PyCode_New(1, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__61, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_DracoPy_pyx, __pyx_n_s_decode_buffer_to_mesh, 195, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__62)) __PYX_ERR(0, 195, __pyx_L1_error)
 
   /* "View.MemoryView":286
  *         return self.name
@@ -22655,9 +22782,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__61 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__61)) __PYX_ERR(2, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__61);
-  __Pyx_GIVEREF(__pyx_tuple__61);
+  __pyx_tuple__63 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__63)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__63);
+  __Pyx_GIVEREF(__pyx_tuple__63);
 
   /* "View.MemoryView":287
  * 
@@ -22666,9 +22793,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__62 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__62)) __PYX_ERR(2, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__62);
-  __Pyx_GIVEREF(__pyx_tuple__62);
+  __pyx_tuple__64 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__64)) __PYX_ERR(2, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__64);
+  __Pyx_GIVEREF(__pyx_tuple__64);
 
   /* "View.MemoryView":288
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -22677,9 +22804,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__63 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__63)) __PYX_ERR(2, 288, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__63);
-  __Pyx_GIVEREF(__pyx_tuple__63);
+  __pyx_tuple__65 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__65)) __PYX_ERR(2, 288, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__65);
+  __Pyx_GIVEREF(__pyx_tuple__65);
 
   /* "View.MemoryView":291
  * 
@@ -22688,9 +22815,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__64 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__64)) __PYX_ERR(2, 291, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__64);
-  __Pyx_GIVEREF(__pyx_tuple__64);
+  __pyx_tuple__66 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__66)) __PYX_ERR(2, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__66);
+  __Pyx_GIVEREF(__pyx_tuple__66);
 
   /* "View.MemoryView":292
  * 
@@ -22699,19 +22826,19 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__65 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__65)) __PYX_ERR(2, 292, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__65);
-  __Pyx_GIVEREF(__pyx_tuple__65);
+  __pyx_tuple__67 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__67)) __PYX_ERR(2, 292, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__67);
+  __Pyx_GIVEREF(__pyx_tuple__67);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Enum(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_tuple__66 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__66)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__66);
-  __Pyx_GIVEREF(__pyx_tuple__66);
-  __pyx_codeobj__67 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__66, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__67)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__68 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__68)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__68);
+  __Pyx_GIVEREF(__pyx_tuple__68);
+  __pyx_codeobj__69 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__68, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__69)) __PYX_ERR(2, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -23117,450 +23244,489 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "DracoPy.pyx":5
+  /* "DracoPy.pyx":2
+ * # distutils: language = c++
+ * from typing import Union, cast             # <<<<<<<<<<<<<<
+ * 
+ * from cpython.mem cimport PyMem_Malloc, PyMem_Free
+ */
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_INCREF(__pyx_n_s_Union);
+  __Pyx_GIVEREF(__pyx_n_s_Union);
+  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Union);
+  __Pyx_INCREF(__pyx_n_s_cast);
+  __Pyx_GIVEREF(__pyx_n_s_cast);
+  PyList_SET_ITEM(__pyx_t_1, 1, __pyx_n_s_cast);
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_typing, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Union); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Union, __pyx_t_1) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_cast); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cast, __pyx_t_1) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "DracoPy.pyx":6
  * from cpython.mem cimport PyMem_Malloc, PyMem_Free
  * cimport DracoPy
  * import struct             # <<<<<<<<<<<<<<
  * from math import floor
  * from libc.string cimport memcmp
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_struct, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_struct, __pyx_t_1) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_struct, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_struct, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":6
+  /* "DracoPy.pyx":7
  * cimport DracoPy
  * import struct
  * from math import floor             # <<<<<<<<<<<<<<
  * from libc.string cimport memcmp
  * from libc.stdint cimport (
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_floor);
   __Pyx_GIVEREF(__pyx_n_s_floor);
-  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_floor);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_math, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_floor); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_floor);
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_math, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_floor, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_floor); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_floor, __pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":14
+  /* "DracoPy.pyx":15
  * 
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
  * 
  * class DracoPointCloud:
  */
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_2) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":16
+  /* "DracoPy.pyx":17
  * import numpy as np
  * 
  * class DracoPointCloud:             # <<<<<<<<<<<<<<
  *     def __init__(self, data_struct):
  *         self.data_struct = data_struct
  */
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_DracoPointCloud, __pyx_n_s_DracoPointCloud, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_DracoPointCloud, __pyx_n_s_DracoPointCloud, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
 
-  /* "DracoPy.pyx":17
+  /* "DracoPy.pyx":18
  * 
  * class DracoPointCloud:
  *     def __init__(self, data_struct):             # <<<<<<<<<<<<<<
  *         self.data_struct = data_struct
  *         if data_struct['encoding_options_set']:
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_1__init__, 0, __pyx_n_s_DracoPointCloud___init, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_init, __pyx_t_1) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_1__init__, 0, __pyx_n_s_DracoPointCloud___init, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_init, __pyx_t_2) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":25
+  /* "DracoPy.pyx":26
  *             self.encoding_options = None
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_3get_encoded_coordinate, 0, __pyx_n_s_DracoPointCloud_get_encoded_coor, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_encoded_coordinate, __pyx_t_1) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_3get_encoded_coordinate, 0, __pyx_n_s_DracoPointCloud_get_encoded_coor, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_get_encoded_coordinate, __pyx_t_2) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":29
+  /* "DracoPy.pyx":30
  *             return self.encoding_options.get_encoded_coordinate(value, axis)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
  *         if self.encoding_options is not None:
  *             return self.encoding_options.get_encoded_point(point)
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_5get_encoded_point, 0, __pyx_n_s_DracoPointCloud_get_encoded_poin, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_encoded_point, __pyx_t_1) < 0) __PYX_ERR(0, 29, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_5get_encoded_point, 0, __pyx_n_s_DracoPointCloud_get_encoded_poin, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_get_encoded_point, __pyx_t_2) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":34
+  /* "DracoPy.pyx":35
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
  *         return 3
  * 
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_7num_axes, 0, __pyx_n_s_DracoPointCloud_num_axes, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_7num_axes, 0, __pyx_n_s_DracoPointCloud_num_axes, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 35, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
 
-  /* "DracoPy.pyx":33
+  /* "DracoPy.pyx":34
  *             return self.encoding_options.get_encoded_point(point)
  * 
  *     @property             # <<<<<<<<<<<<<<
  *     def num_axes(self):
  *         return 3
  */
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_num_axes, __pyx_t_3) < 0) __PYX_ERR(0, 34, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_num_axes, __pyx_t_3) < 0) __PYX_ERR(0, 35, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "DracoPy.pyx":38
+  /* "DracoPy.pyx":39
  * 
  *     @property
  *     def points(self):             # <<<<<<<<<<<<<<
  *         points = self.data_struct['points']
  *         N = len(points) // 3
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_9points, 0, __pyx_n_s_DracoPointCloud_points, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__35)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15DracoPointCloud_9points, 0, __pyx_n_s_DracoPointCloud_points, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__35)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "DracoPy.pyx":37
+  /* "DracoPy.pyx":38
  *         return 3
  * 
  *     @property             # <<<<<<<<<<<<<<
  *     def points(self):
  *         points = self.data_struct['points']
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 37, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_points, __pyx_t_1) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_points, __pyx_t_2) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":16
+  /* "DracoPy.pyx":17
  * import numpy as np
  * 
  * class DracoPointCloud:             # <<<<<<<<<<<<<<
  *     def __init__(self, data_struct):
  *         self.data_struct = data_struct
  */
-  __pyx_t_1 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_DracoPointCloud, __pyx_empty_tuple, __pyx_t_2, NULL, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DracoPointCloud, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_DracoPointCloud, __pyx_empty_tuple, __pyx_t_1, NULL, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DracoPointCloud, __pyx_t_2) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "DracoPy.pyx":43
+  /* "DracoPy.pyx":44
  *         return np.array(points).reshape((N, 3))
  * 
  * class DracoMesh(DracoPointCloud):             # <<<<<<<<<<<<<<
  *     @property
  *     def faces(self):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_DracoPointCloud); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_DracoPointCloud); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_DracoMesh, __pyx_n_s_DracoMesh, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_DracoMesh, __pyx_n_s_DracoMesh, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "DracoPy.pyx":45
+  /* "DracoPy.pyx":46
  * class DracoMesh(DracoPointCloud):
  *     @property
  *     def faces(self):             # <<<<<<<<<<<<<<
  *         faces = self.data_struct['faces']
  *         N = len(faces) // 3
  */
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_9DracoMesh_1faces, 0, __pyx_n_s_DracoMesh_faces, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__37)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_9DracoMesh_1faces, 0, __pyx_n_s_DracoMesh_faces, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__37)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "DracoPy.pyx":44
+  /* "DracoPy.pyx":45
  * 
  * class DracoMesh(DracoPointCloud):
  *     @property             # <<<<<<<<<<<<<<
  *     def faces(self):
  *         faces = self.data_struct['faces']
  */
-  __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_faces, __pyx_t_5) < 0) __PYX_ERR(0, 45, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_faces, __pyx_t_5) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "DracoPy.pyx":51
+  /* "DracoPy.pyx":52
  * 
  *     @property
  *     def normals(self):             # <<<<<<<<<<<<<<
  *         return np.array(self.data_struct['normals'])
  * 
  */
-  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_9DracoMesh_3normals, 0, __pyx_n_s_DracoMesh_normals, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__39)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_9DracoMesh_3normals, 0, __pyx_n_s_DracoMesh_normals, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__39)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
 
-  /* "DracoPy.pyx":50
+  /* "DracoPy.pyx":51
  *         return np.array(faces).reshape((N, 3))
  * 
  *     @property             # <<<<<<<<<<<<<<
  *     def normals(self):
  *         return np.array(self.data_struct['normals'])
  */
-  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_normals, __pyx_t_4) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_normals, __pyx_t_4) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "DracoPy.pyx":43
+  /* "DracoPy.pyx":44
  *         return np.array(points).reshape((N, 3))
  * 
  * class DracoMesh(DracoPointCloud):             # <<<<<<<<<<<<<<
  *     @property
  *     def faces(self):
  */
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_DracoMesh, __pyx_t_1, __pyx_t_3, NULL, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_DracoMesh, __pyx_t_2, __pyx_t_3, NULL, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DracoMesh, __pyx_t_4) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_DracoMesh, __pyx_t_4) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":54
+  /* "DracoPy.pyx":55
  *         return np.array(self.data_struct['normals'])
  * 
  * class EncodingOptions(object):             # <<<<<<<<<<<<<<
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):
  *         self.quantization_bits = quantization_bits
  */
-  __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_tuple__40); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_tuple__40, __pyx_n_s_EncodingOptions, __pyx_n_s_EncodingOptions, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_tuple__40); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_tuple__40, __pyx_n_s_EncodingOptions, __pyx_n_s_EncodingOptions, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
 
-  /* "DracoPy.pyx":55
+  /* "DracoPy.pyx":56
  * 
  * class EncodingOptions(object):
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):             # <<<<<<<<<<<<<<
  *         self.quantization_bits = quantization_bits
  *         self.quantization_range = quantization_range
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_1__init__, 0, __pyx_n_s_EncodingOptions___init, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__42)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_1__init__, 0, __pyx_n_s_EncodingOptions___init, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__42)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_init, __pyx_t_3) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_init, __pyx_t_3) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "DracoPy.pyx":61
+  /* "DracoPy.pyx":62
  *         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
  * 
  *     def get_encoded_coordinate(self, value, axis):             # <<<<<<<<<<<<<<
  *         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
  *             raise ValueError('Specified value out of encoded range')
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_3get_encoded_coordinate, 0, __pyx_n_s_EncodingOptions_get_encoded_coor, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__44)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_3get_encoded_coordinate, 0, __pyx_n_s_EncodingOptions_get_encoded_coor, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__44)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_encoded_coordinate, __pyx_t_3) < 0) __PYX_ERR(0, 61, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_get_encoded_coordinate, __pyx_t_3) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "DracoPy.pyx":68
+  /* "DracoPy.pyx":69
  *         return self.quantization_origin[axis] + (quantized_index * self.inverse_alpha)
  * 
  *     def get_encoded_point(self, point):             # <<<<<<<<<<<<<<
  *         encoded_point = []
  *         for axis in range(self.num_axes):
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_5get_encoded_point, 0, __pyx_n_s_EncodingOptions_get_encoded_poin, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__46)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_5get_encoded_point, 0, __pyx_n_s_EncodingOptions_get_encoded_poin, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__46)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_get_encoded_point, __pyx_t_3) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_get_encoded_point, __pyx_t_3) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "DracoPy.pyx":75
+  /* "DracoPy.pyx":76
  * 
  *     @property
  *     def num_axes(self):             # <<<<<<<<<<<<<<
  *         return 3
  * 
  */
-  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_7num_axes, 0, __pyx_n_s_EncodingOptions_num_axes, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__48)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_New(&__pyx_mdef_7DracoPy_15EncodingOptions_7num_axes, 0, __pyx_n_s_EncodingOptions_num_axes, NULL, __pyx_n_s_DracoPy, __pyx_d, ((PyObject *)__pyx_codeobj__48)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "DracoPy.pyx":74
+  /* "DracoPy.pyx":75
  *         return encoded_point
  * 
  *     @property             # <<<<<<<<<<<<<<
  *     def num_axes(self):
  *         return 3
  */
-  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_num_axes, __pyx_t_4) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_num_axes, __pyx_t_4) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "DracoPy.pyx":54
+  /* "DracoPy.pyx":55
  *         return np.array(self.data_struct['normals'])
  * 
  * class EncodingOptions(object):             # <<<<<<<<<<<<<<
  *     def __init__(self, quantization_bits, quantization_range, quantization_origin):
  *         self.quantization_bits = quantization_bits
  */
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_EncodingOptions, __pyx_tuple__40, __pyx_t_2, NULL, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EncodingOptions, __pyx_tuple__40, __pyx_t_1, NULL, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EncodingOptions, __pyx_t_4) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EncodingOptions, __pyx_t_4) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":78
+  /* "DracoPy.pyx":79
  *         return 3
  * 
  * class FileTypeException(Exception):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
   __Pyx_GIVEREF(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
-  PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
-  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_FileTypeException, __pyx_n_s_FileTypeException, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
+  PyTuple_SET_ITEM(__pyx_t_2, 0, ((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
+  __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_FileTypeException, __pyx_n_s_FileTypeException, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_FileTypeException, __pyx_t_1, __pyx_t_4, NULL, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_FileTypeException, __pyx_t_2, __pyx_t_4, NULL, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_FileTypeException, __pyx_t_3) < 0) __PYX_ERR(0, 78, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_FileTypeException, __pyx_t_3) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":81
+  /* "DracoPy.pyx":82
  *     pass
  * 
  * class EncodingFailedException(Exception):             # <<<<<<<<<<<<<<
  *     pass
  * 
  */
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
   __Pyx_GIVEREF(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
-  PyTuple_SET_ITEM(__pyx_t_1, 0, ((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
-  __pyx_t_2 = __Pyx_CalculateMetaclass(NULL, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 81, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_2, __pyx_t_1, __pyx_n_s_EncodingFailedException, __pyx_n_s_EncodingFailedException, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  PyTuple_SET_ITEM(__pyx_t_2, 0, ((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])));
+  __pyx_t_1 = __Pyx_CalculateMetaclass(NULL, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = __Pyx_Py3MetaclassPrepare(__pyx_t_1, __pyx_t_2, __pyx_n_s_EncodingFailedException, __pyx_n_s_EncodingFailedException, (PyObject *) NULL, __pyx_n_s_DracoPy, (PyObject *) NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_Py3ClassCreate(__pyx_t_2, __pyx_n_s_EncodingFailedException, __pyx_t_1, __pyx_t_4, NULL, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_EncodingFailedException, __pyx_t_2, __pyx_t_4, NULL, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EncodingFailedException, __pyx_t_3) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_EncodingFailedException, __pyx_t_3) < 0) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":84
+  /* "DracoPy.pyx":85
  *     pass
  * 
  * def format_array(arr):             # <<<<<<<<<<<<<<
- *     if not isinstance(arr, np.ndarray):
- *         arr = np.array(arr)
+ *     if arr is None:
+ *         return None
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_1format_array, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_format_array, __pyx_t_1) < 0) __PYX_ERR(0, 84, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_1format_array, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_format_array, __pyx_t_2) < 0) __PYX_ERR(0, 85, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":91
+  /* "DracoPy.pyx":95
  *     return arr
  * 
- * def encode_mesh_to_buffer(             # <<<<<<<<<<<<<<
- *     points, faces,
+ * def encode(             # <<<<<<<<<<<<<<
+ *     points, faces=None,
  *     quantization_bits=14, compression_level=1,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_3encode_mesh_to_buffer, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_encode_mesh_to_buffer, __pyx_t_1) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_3encode, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_encode, __pyx_t_2) < 0) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":135
- * 
- * 
- * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
- *     points, quantization_bits=14,
- *     compression_level=1, quantization_range=-1,
- */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_5encode_point_cloud_to_buffer, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 135, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_encode_point_cloud_to_buffer, __pyx_t_1) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "DracoPy.pyx":171
+  /* "DracoPy.pyx":152
  *         raise EncodingFailedException('Invalid mesh')
  * 
  * def raise_decoding_error(decoding_status):             # <<<<<<<<<<<<<<
  *     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
  *         raise FileTypeException('Input mesh is not draco encoded')
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_7raise_decoding_error, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_raise_decoding_error, __pyx_t_1) < 0) __PYX_ERR(0, 171, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_5raise_decoding_error, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 152, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_raise_decoding_error, __pyx_t_2) < 0) __PYX_ERR(0, 152, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":179
+  /* "DracoPy.pyx":160
  *         raise ValueError('DracoPy only supports meshes with position attributes')
  * 
- * def decode_buffer_to_mesh(buffer):             # <<<<<<<<<<<<<<
- *     mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
- *     if mesh_struct.decode_status == DracoPy.decoding_status.successful:
+ * def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:             # <<<<<<<<<<<<<<
+ *     """
+ *     Decodes a binary draco file into either a DracoPointCloud
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_9decode_buffer_to_mesh, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 179, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_decode_buffer_to_mesh, __pyx_t_1) < 0) __PYX_ERR(0, 179, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_7decode, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_decode, __pyx_t_2) < 0) __PYX_ERR(0, 160, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "DracoPy.pyx":186
- *         raise_decoding_error(mesh_struct.decode_status)
+  /* "DracoPy.pyx":175
+ * # FOR BACKWARDS COMPATIBILITY
  * 
- * def decode_point_cloud_buffer(buffer):             # <<<<<<<<<<<<<<
- *     point_cloud_struct = DracoPy.decode_buffer_to_point_cloud(buffer, len(buffer))
- *     if point_cloud_struct.decode_status == DracoPy.decoding_status.successful:
+ * def encode_mesh_to_buffer(*args, **kwargs) -> bytes:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use encode."""
+ *     return encode(*args, **kwargs)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_11decode_point_cloud_buffer, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_decode_point_cloud_buffer, __pyx_t_1) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_9encode_mesh_to_buffer, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_encode_mesh_to_buffer, __pyx_t_2) < 0) __PYX_ERR(0, 175, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "DracoPy.pyx":179
+ *     return encode(*args, **kwargs)
+ * 
+ * def encode_point_cloud_to_buffer(             # <<<<<<<<<<<<<<
+ *     points, quantization_bits=14, compression_level=1,
+ *     quantization_range=-1, quantization_origin=None,
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_11encode_point_cloud_to_buffer, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 179, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_encode_point_cloud_to_buffer, __pyx_t_2) < 0) __PYX_ERR(0, 179, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "DracoPy.pyx":195
+ *     )
+ * 
+ * def decode_buffer_to_mesh(buffer) -> DracoMesh:             # <<<<<<<<<<<<<<
+ *     """Provided for backwards compatibility. Use decode."""
+ *     return decode(buffer)
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_7DracoPy_13decode_buffer_to_mesh, NULL, __pyx_n_s_DracoPy); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_decode_buffer_to_mesh, __pyx_t_2) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "DracoPy.pyx":1
  * # distutils: language = c++             # <<<<<<<<<<<<<<
+ * from typing import Union, cast
  * 
- * from cpython.mem cimport PyMem_Malloc, PyMem_Free
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "View.MemoryView":209
  *         info.obj = self
@@ -23569,10 +23735,10 @@ if (!__Pyx_RefNanny) {
  * 
  *     def __dealloc__(array self):
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 209, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) __PYX_ERR(2, 209, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_array_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 209, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_array_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(2, 209, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_array_type);
 
   /* "View.MemoryView":286
@@ -23582,12 +23748,12 @@ if (!__Pyx_RefNanny) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__61, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__63, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(generic);
-  __Pyx_DECREF_SET(generic, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(generic, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":287
  * 
@@ -23596,12 +23762,12 @@ if (!__Pyx_RefNanny) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__62, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__64, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(strided);
-  __Pyx_DECREF_SET(strided, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(strided, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":288
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -23610,12 +23776,12 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__63, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 288, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__65, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 288, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect);
-  __Pyx_DECREF_SET(indirect, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(indirect, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":291
  * 
@@ -23624,12 +23790,12 @@ if (!__Pyx_RefNanny) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__64, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 291, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__66, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(contiguous);
-  __Pyx_DECREF_SET(contiguous, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":292
  * 
@@ -23638,12 +23804,12 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__65, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 292, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__67, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 292, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
   __Pyx_XGOTREF(indirect_contiguous);
-  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  __pyx_t_1 = 0;
+  __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_2);
+  __pyx_t_2 = 0;
 
   /* "View.MemoryView":316
  * 
@@ -23678,10 +23844,10 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 549, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) __PYX_ERR(2, 549, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 549, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_memoryview_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(2, 549, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryview_type);
 
   /* "View.MemoryView":995
@@ -23691,10 +23857,10 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 995, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem((PyObject *)__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_1) < 0) __PYX_ERR(2, 995, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __pyx_capsule_create(((void *)(&__pyx_memoryview_getbuffer)), ((char *)"getbuffer(obj, view, flags)")); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 995, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem((PyObject *)__pyx_memoryviewslice_type->tp_dict, __pyx_n_s_pyx_getbuffer, __pyx_t_2) < 0) __PYX_ERR(2, 995, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_memoryviewslice_type);
 
   /* "(tree fragment)":1
@@ -23702,10 +23868,10 @@ if (!__Pyx_RefNanny) {
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_15View_dot_MemoryView_1__pyx_unpickle_Enum, NULL, __pyx_n_s_View_MemoryView); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_1) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_15View_dot_MemoryView_1__pyx_unpickle_Enum, NULL, __pyx_n_s_View_MemoryView); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_2) < 0) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "(tree fragment)":11
  *         __pyx_unpickle_Enum__set_state(<Enum> __pyx_result, __pyx_state)
@@ -25715,6 +25881,67 @@ static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *memslice,
     }
 }
 
+/* ArgTypeTest */
+    static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
+{
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
+    }
+    else if (exact) {
+        #if PY_MAJOR_VERSION == 2
+        if ((type == &PyBaseString_Type) && likely(__Pyx_PyBaseString_CheckExact(obj))) return 1;
+        #endif
+    }
+    else {
+        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
+    }
+    PyErr_Format(PyExc_TypeError,
+        "Argument '%.200s' has incorrect type (expected %.200s, got %.200s)",
+        name, type->tp_name, Py_TYPE(obj)->tp_name);
+    return 0;
+}
+
+/* KeywordStringCheck */
+    static int __Pyx_CheckKeywordStrings(
+    PyObject *kwdict,
+    const char* function_name,
+    int kw_allowed)
+{
+    PyObject* key = 0;
+    Py_ssize_t pos = 0;
+#if CYTHON_COMPILING_IN_PYPY
+    if (!kw_allowed && PyDict_Next(kwdict, &pos, &key, 0))
+        goto invalid_keyword;
+    return 1;
+#else
+    while (PyDict_Next(kwdict, &pos, &key, 0)) {
+        #if PY_MAJOR_VERSION < 3
+        if (unlikely(!PyString_Check(key)))
+        #endif
+            if (unlikely(!PyUnicode_Check(key)))
+                goto invalid_keyword_type;
+    }
+    if ((!kw_allowed) && unlikely(key))
+        goto invalid_keyword;
+    return 1;
+invalid_keyword_type:
+    PyErr_Format(PyExc_TypeError,
+        "%.200s() keywords must be strings", function_name);
+    return 0;
+#endif
+invalid_keyword:
+    PyErr_Format(PyExc_TypeError,
+    #if PY_MAJOR_VERSION < 3
+        "%.200s() got an unexpected keyword argument '%.200s'",
+        function_name, PyString_AsString(key));
+    #else
+        "%s() got an unexpected keyword argument '%U'",
+        function_name, key);
+    #endif
+    return 0;
+}
+
 /* GetTopmostException */
     #if CYTHON_USE_EXC_INFO_STACK
 static _PyErr_StackItem *
@@ -25868,27 +26095,6 @@ bad:
     Py_XDECREF(local_value);
     Py_XDECREF(local_tb);
     return -1;
-}
-
-/* ArgTypeTest */
-    static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact)
-{
-    if (unlikely(!type)) {
-        PyErr_SetString(PyExc_SystemError, "Missing type object");
-        return 0;
-    }
-    else if (exact) {
-        #if PY_MAJOR_VERSION == 2
-        if ((type == &PyBaseString_Type) && likely(__Pyx_PyBaseString_CheckExact(obj))) return 1;
-        #endif
-    }
-    else {
-        if (likely(__Pyx_TypeCheck(obj, type))) return 1;
-    }
-    PyErr_Format(PyExc_TypeError,
-        "Argument '%.200s' has incorrect type (expected %.200s, got %.200s)",
-        name, type->tp_name, Py_TYPE(obj)->tp_name);
-    return 0;
 }
 
 /* BytesEquals */
@@ -28096,34 +28302,6 @@ static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(s
       Py_DECREF(res);
       return NULL;
     }
-    static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_PointCloudObject(struct DracoFunctions::PointCloudObject s) {
-      PyObject* res;
-      PyObject* member;
-      res = __Pyx_PyDict_NewPresized(6); if (unlikely(!res)) return NULL;
-      member = __pyx_convert_vector_to_py_float(s.points); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_points, member) < 0)) goto bad;
-      Py_DECREF(member);
-      member = __Pyx_PyBool_FromLong(s.encoding_options_set); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_encoding_options_set, member) < 0)) goto bad;
-      Py_DECREF(member);
-      member = __Pyx_PyInt_From_int(s.quantization_bits); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_quantization_bits, member) < 0)) goto bad;
-      Py_DECREF(member);
-      member = PyFloat_FromDouble(s.quantization_range); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_quantization_range, member) < 0)) goto bad;
-      Py_DECREF(member);
-      member = __pyx_convert_vector_to_py_double(s.quantization_origin); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_quantization_origin, member) < 0)) goto bad;
-      Py_DECREF(member);
-      member = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(s.decode_status); if (unlikely(!member)) goto bad;
-      if (unlikely(PyDict_SetItem(res, __pyx_n_s_decode_status, member) < 0)) goto bad;
-      Py_DECREF(member);
-      return res;
-      bad:
-      Py_XDECREF(member);
-      Py_DECREF(res);
-      return NULL;
-    }
     /* Declarations */
     #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -28500,202 +28678,6 @@ no_fail:
 }
 
 /* CIntFromPy */
-    static CYTHON_INLINE uint32_t __Pyx_PyInt_As_uint32_t(PyObject *x) {
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-    const uint32_t neg_one = (uint32_t) -1, const_zero = (uint32_t) 0;
-#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
-#pragma GCC diagnostic pop
-#endif
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(uint32_t) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(uint32_t, long, PyInt_AS_LONG(x))
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                goto raise_neg_overflow;
-            }
-            return (uint32_t) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (uint32_t) 0;
-                case  1: __PYX_VERIFY_RETURN_INT(uint32_t, digit, digits[0])
-                case 2:
-                    if (8 * sizeof(uint32_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) >= 2 * PyLong_SHIFT) {
-                            return (uint32_t) (((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(uint32_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) >= 3 * PyLong_SHIFT) {
-                            return (uint32_t) (((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(uint32_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) >= 4 * PyLong_SHIFT) {
-                            return (uint32_t) (((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
-                        }
-                    }
-                    break;
-            }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON
-            if (unlikely(Py_SIZE(x) < 0)) {
-                goto raise_neg_overflow;
-            }
-#else
-            {
-                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-                if (unlikely(result < 0))
-                    return (uint32_t) -1;
-                if (unlikely(result == 1))
-                    goto raise_neg_overflow;
-            }
-#endif
-            if (sizeof(uint32_t) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, unsigned long, PyLong_AsUnsignedLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(uint32_t) <= sizeof(unsigned PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-#endif
-            }
-        } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (uint32_t) 0;
-                case -1: __PYX_VERIFY_RETURN_INT(uint32_t, sdigit, (sdigit) (-(sdigit)digits[0]))
-                case  1: __PYX_VERIFY_RETURN_INT(uint32_t,  digit, +digits[0])
-                case -2:
-                    if (8 * sizeof(uint32_t) - 1 > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (uint32_t) (((uint32_t)-1)*(((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if (8 * sizeof(uint32_t) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
-                            return (uint32_t) ((((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (uint32_t) (((uint32_t)-1)*(((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(uint32_t) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
-                            return (uint32_t) ((((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (uint32_t) (((uint32_t)-1)*(((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(uint32_t) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(uint32_t) - 1 > 4 * PyLong_SHIFT) {
-                            return (uint32_t) ((((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
-                        }
-                    }
-                    break;
-            }
-#endif
-            if (sizeof(uint32_t) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, long, PyLong_AsLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(uint32_t) <= sizeof(PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, PY_LONG_LONG, PyLong_AsLongLong(x))
-#endif
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            uint32_t val;
-            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (uint32_t) -1;
-        }
-    } else {
-        uint32_t val;
-        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
-        if (!tmp) return (uint32_t) -1;
-        val = __Pyx_PyInt_As_uint32_t(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to uint32_t");
-    return (uint32_t) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to uint32_t");
-    return (uint32_t) -1;
-}
-
-/* CIntFromPy */
     static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
 #ifdef __Pyx_HAS_GCC_DIAGNOSTIC
 #pragma GCC diagnostic push
@@ -28889,6 +28871,202 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to int");
     return (int) -1;
+}
+
+/* CIntFromPy */
+    static CYTHON_INLINE uint32_t __Pyx_PyInt_As_uint32_t(PyObject *x) {
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+    const uint32_t neg_one = (uint32_t) -1, const_zero = (uint32_t) 0;
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
+    const int is_unsigned = neg_one > const_zero;
+#if PY_MAJOR_VERSION < 3
+    if (likely(PyInt_Check(x))) {
+        if (sizeof(uint32_t) < sizeof(long)) {
+            __PYX_VERIFY_RETURN_INT(uint32_t, long, PyInt_AS_LONG(x))
+        } else {
+            long val = PyInt_AS_LONG(x);
+            if (is_unsigned && unlikely(val < 0)) {
+                goto raise_neg_overflow;
+            }
+            return (uint32_t) val;
+        }
+    } else
+#endif
+    if (likely(PyLong_Check(x))) {
+        if (is_unsigned) {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (uint32_t) 0;
+                case  1: __PYX_VERIFY_RETURN_INT(uint32_t, digit, digits[0])
+                case 2:
+                    if (8 * sizeof(uint32_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) >= 2 * PyLong_SHIFT) {
+                            return (uint32_t) (((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(uint32_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) >= 3 * PyLong_SHIFT) {
+                            return (uint32_t) (((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(uint32_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) >= 4 * PyLong_SHIFT) {
+                            return (uint32_t) (((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0]));
+                        }
+                    }
+                    break;
+            }
+#endif
+#if CYTHON_COMPILING_IN_CPYTHON
+            if (unlikely(Py_SIZE(x) < 0)) {
+                goto raise_neg_overflow;
+            }
+#else
+            {
+                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
+                if (unlikely(result < 0))
+                    return (uint32_t) -1;
+                if (unlikely(result == 1))
+                    goto raise_neg_overflow;
+            }
+#endif
+            if (sizeof(uint32_t) <= sizeof(unsigned long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, unsigned long, PyLong_AsUnsignedLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(uint32_t) <= sizeof(unsigned PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
+#endif
+            }
+        } else {
+#if CYTHON_USE_PYLONG_INTERNALS
+            const digit* digits = ((PyLongObject*)x)->ob_digit;
+            switch (Py_SIZE(x)) {
+                case  0: return (uint32_t) 0;
+                case -1: __PYX_VERIFY_RETURN_INT(uint32_t, sdigit, (sdigit) (-(sdigit)digits[0]))
+                case  1: __PYX_VERIFY_RETURN_INT(uint32_t,  digit, +digits[0])
+                case -2:
+                    if (8 * sizeof(uint32_t) - 1 > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (uint32_t) (((uint32_t)-1)*(((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 2:
+                    if (8 * sizeof(uint32_t) > 1 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
+                            return (uint32_t) ((((((uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -3:
+                    if (8 * sizeof(uint32_t) - 1 > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (uint32_t) (((uint32_t)-1)*(((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 3:
+                    if (8 * sizeof(uint32_t) > 2 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
+                            return (uint32_t) ((((((((uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+                case -4:
+                    if (8 * sizeof(uint32_t) - 1 > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (uint32_t) (((uint32_t)-1)*(((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+                case 4:
+                    if (8 * sizeof(uint32_t) > 3 * PyLong_SHIFT) {
+                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
+                            __PYX_VERIFY_RETURN_INT(uint32_t, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
+                        } else if (8 * sizeof(uint32_t) - 1 > 4 * PyLong_SHIFT) {
+                            return (uint32_t) ((((((((((uint32_t)digits[3]) << PyLong_SHIFT) | (uint32_t)digits[2]) << PyLong_SHIFT) | (uint32_t)digits[1]) << PyLong_SHIFT) | (uint32_t)digits[0])));
+                        }
+                    }
+                    break;
+            }
+#endif
+            if (sizeof(uint32_t) <= sizeof(long)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, long, PyLong_AsLong(x))
+#ifdef HAVE_LONG_LONG
+            } else if (sizeof(uint32_t) <= sizeof(PY_LONG_LONG)) {
+                __PYX_VERIFY_RETURN_INT_EXC(uint32_t, PY_LONG_LONG, PyLong_AsLongLong(x))
+#endif
+            }
+        }
+        {
+#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
+            PyErr_SetString(PyExc_RuntimeError,
+                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
+#else
+            uint32_t val;
+            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
+ #if PY_MAJOR_VERSION < 3
+            if (likely(v) && !PyLong_Check(v)) {
+                PyObject *tmp = v;
+                v = PyNumber_Long(tmp);
+                Py_DECREF(tmp);
+            }
+ #endif
+            if (likely(v)) {
+                int one = 1; int is_little = (int)*(unsigned char *)&one;
+                unsigned char *bytes = (unsigned char *)&val;
+                int ret = _PyLong_AsByteArray((PyLongObject *)v,
+                                              bytes, sizeof(val),
+                                              is_little, !is_unsigned);
+                Py_DECREF(v);
+                if (likely(!ret))
+                    return val;
+            }
+#endif
+            return (uint32_t) -1;
+        }
+    } else {
+        uint32_t val;
+        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
+        if (!tmp) return (uint32_t) -1;
+        val = __Pyx_PyInt_As_uint32_t(tmp);
+        Py_DECREF(tmp);
+        return val;
+    }
+raise_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "value too large to convert to uint32_t");
+    return (uint32_t) -1;
+raise_neg_overflow:
+    PyErr_SetString(PyExc_OverflowError,
+        "can't convert negative value to uint32_t");
+    return (uint32_t) -1;
 }
 
 /* CIntToPy */
