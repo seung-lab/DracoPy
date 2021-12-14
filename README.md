@@ -37,5 +37,10 @@ It supports Linux, OS X, and Windows. Numpy is required.
 pip install DracoPy 
 ```
 
+## Acknowledgements 
+
+We graciously thank The Stanford 3D Scanning Repository for providing the Stanford Bunny test model. 
+
+https://graphics.stanford.edu/data/3Dscanrep/
 
 
