@@ -25,7 +25,12 @@ def test_decoding_and_encoding_mesh_file():
     assert len(mesh.faces) == EXPECTED_FACES_BUNNY
     assert len(mesh.normals) == EXPECTED_POINTS_BUNNY_MESH
 
-    encoding_test = DracoPy.encode(mesh.points, mesh.faces)
+    encoding_test1 = DracoPy.encode(mesh.points, mesh.faces)
+    encoding_test2 = DracoPy.encode(mesh.points.flatten(), mesh.faces)
+
+    assert encoding_test1 == encoding_test2
+    encoding_test = encoding_test1
+
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
         test_file.write(encoding_test)
 

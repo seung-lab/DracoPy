@@ -91,7 +91,7 @@ def format_array(arr):
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     if arr.ndim == 1:
-        arr = arr.reshape((len(arr), 3))
+        arr = arr.reshape((len(arr) // 3, 3))
     return arr
 
 def encode(

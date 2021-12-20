@@ -4958,7 +4958,7 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)             # <<<<<<<<<<<<<<
  *     if arr.ndim == 1:
- *         arr = arr.reshape((len(arr), 3))
+ *         arr = arr.reshape((len(arr) // 3, 3))
  */
     __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
@@ -4996,7 +4996,7 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)
  *     if arr.ndim == 1:             # <<<<<<<<<<<<<<
- *         arr = arr.reshape((len(arr), 3))
+ *         arr = arr.reshape((len(arr) // 3, 3))
  *     return arr
  */
   __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_ndim); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 93, __pyx_L1_error)
@@ -5011,14 +5011,14 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
     /* "DracoPy.pyx":94
  *         arr = np.array(arr)
  *     if arr.ndim == 1:
- *         arr = arr.reshape((len(arr), 3))             # <<<<<<<<<<<<<<
+ *         arr = arr.reshape((len(arr) // 3, 3))             # <<<<<<<<<<<<<<
  *     return arr
  * 
  */
     __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_arr, __pyx_n_s_reshape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 94, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_6 = PyObject_Length(__pyx_v_arr); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 94, __pyx_L1_error)
-    __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
+    __pyx_t_4 = PyInt_FromSsize_t(__Pyx_div_Py_ssize_t(__pyx_t_6, 3)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 94, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
@@ -5051,14 +5051,14 @@ static PyObject *__pyx_pf_7DracoPy_format_array(CYTHON_UNUSED PyObject *__pyx_se
  *     if not isinstance(arr, np.ndarray):
  *         arr = np.array(arr)
  *     if arr.ndim == 1:             # <<<<<<<<<<<<<<
- *         arr = arr.reshape((len(arr), 3))
+ *         arr = arr.reshape((len(arr) // 3, 3))
  *     return arr
  */
   }
 
   /* "DracoPy.pyx":95
  *     if arr.ndim == 1:
- *         arr = arr.reshape((len(arr), 3))
+ *         arr = arr.reshape((len(arr) // 3, 3))
  *     return arr             # <<<<<<<<<<<<<<
  * 
  * def encode(
