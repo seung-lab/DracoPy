@@ -43,7 +43,7 @@ def test_decoding_and_encoding_mesh_file():
     encoding_test4 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
                                     quantization_bits=1)
     mesh_decode = DracoPy.decode(encoding_test4)
-    encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
+    encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                     quantization_bits=30)
     mesh_decode = DracoPy.decode(encoding_test5)
 
@@ -70,8 +70,13 @@ def test_decoding_and_encoding_mesh_file_integer_positions():
     points *= 2 ** 16
     points = points.astype(np.uint32)
 
-    encoding_test = DracoPy.encode(
+    encoding_test_uint = DracoPy.encode(
         points, mesh_object.faces,
+        quantization_bits=16,
+    )
+
+    encoding_test_int = DracoPy.encode(
+        points.astype(np.int64), mesh_object.faces,
         quantization_bits=16,
     )
 
@@ -79,15 +84,17 @@ def test_decoding_and_encoding_mesh_file_integer_positions():
         points.astype(np.float32), mesh_object.faces,
         quantization_bits=16,
     )
-    assert encoding_test != encoding_test_float
+    assert encoding_test_uint != encoding_test_float
+    assert encoding_test_uint != encoding_test_int
+    assert encoding_test_int != encoding_test_float
 
-    encoding_test2 = DracoPy.encode(
-        points.astype(np.int64), mesh_object.faces,
+    encoding_test_uint64 = DracoPy.encode(
+        points.astype(np.uint64), mesh_object.faces,
         quantization_bits=16,
     )
-    assert encoding_test == encoding_test2
+    assert encoding_test_uint == encoding_test_uint64
 
-    mesh_object = DracoPy.decode(encoding_test)
+    mesh_object = DracoPy.decode(encoding_test_uint)
 
     assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
     assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY

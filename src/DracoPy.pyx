@@ -15,7 +15,7 @@ cimport numpy as np
 import numpy as np
 
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 
 class DracoPointCloud:
@@ -102,14 +102,14 @@ def encode(
     points, faces=None,
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
-    preserve_order=False, create_metadata=False
+    create_metadata=False, preserve_order=False
 ) -> bytes:
     """
     bytes encode(
         points, faces=None,
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
-        preserve_order=False, create_metadata=False
+        create_metadata=False, preserve_order=False
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -139,7 +139,12 @@ def encode(
     points = format_array(points)
     faces = format_array(faces)
 
-    integer_positions = np.issubdtype(points.dtype, np.integer)
+    integer_mark = 0
+
+    if np.issubdtype(points.dtype, np.signedinteger):
+        integer_mark = 1
+    elif np.issubdtype(points.dtype, np.unsignedinteger):
+        integer_mark = 2
 
     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
     cdef float[:] quant_origin = qorigin
@@ -156,7 +161,7 @@ def encode(
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
-            preserve_order, create_metadata, integer_positions
+            preserve_order, create_metadata, integer_mark
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -164,7 +169,7 @@ def encode(
             pointsview, facesview,
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
-            preserve_order, create_metadata, integer_positions
+            preserve_order, create_metadata, integer_mark
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
@@ -214,8 +219,8 @@ def encode_point_cloud_to_buffer(
         compression_level=compression_level,
         quantization_range=quantization_range,
         quantization_origin=quantization_origin,
-        preserve_order=False,
         create_metadata=create_metadata,
+        preserve_order=False
     )
 
 def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:

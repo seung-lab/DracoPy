@@ -1,6 +1,8 @@
 #ifndef __DRACOPY_H__
 #define __DRACOPY_H__
 
+#include<algorithm>
+#include<cmath>
 #include<vector>
 #include<cstddef>
 #include "draco/compression/decode.h"
@@ -201,53 +203,86 @@ namespace DracoFunctions {
     const float *quantization_origin,
     const bool preserve_order = false,
     const bool create_metadata = false,
-    const bool integer_positions = false
+    const int integer_mark = 0
   ) {
-    draco::TriangleSoupMeshBuilder mb;
-    mb.Start(faces.size());
+    // @zeruniverse TriangleSoupMeshBuilder will cause problems when
+    //    preserve_order=True due to vertices merging.
+    //    In order to support preserve_order, we need to build mesh
+    //    manually.
+    draco::Mesh mesh; //Initialize a draco mesh
 
-    auto dtype = integer_positions
-      ? draco::DataType::DT_UINT32
-      : draco::DataType::DT_FLOAT32;
-
-    const int pos_att_id = mb.AddAttribute(
-      draco::GeometryAttribute::POSITION, 3, dtype
-    );
-
-    if (integer_positions) {
-      for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
-        auto p1 = faces[i]*3;
-        auto p2 = faces[i+1]*3;
-        auto p3 = faces[i+2]*3;
-
-        mb.SetAttributeValuesForFace(
-          pos_att_id, draco::FaceIndex(i),
-          draco::Vector3ui(points[p1], points[p1+1], points[p1+2]).data(),
-          draco::Vector3ui(points[p2], points[p2+1], points[p2+2]).data(),
-          draco::Vector3ui(points[p3], points[p3+1], points[p3+2]).data()
-        );
-      }
-    }
-    else {
-      for (std::size_t i = 0; i <= faces.size() - 3; i += 3) {
-        auto p1 = faces[i]*3;
-        auto p2 = faces[i+1]*3;
-        auto p3 = faces[i+2]*3;
-
-        mb.SetAttributeValuesForFace(
-          pos_att_id, draco::FaceIndex(i),
-          draco::Vector3f(points[p1], points[p1+1], points[p1+2]).data(),
-          draco::Vector3f(points[p2], points[p2+1], points[p2+2]).data(),
-          draco::Vector3f(points[p3], points[p3+1], points[p3+2]).data()
-        );
-      }
+    // Process vertices
+    const size_t num_pts = points.size() / 3;
+    mesh.set_num_points(num_pts);
+    draco::GeometryAttribute positions_attr;
+    if (integer_mark == 1) {
+      positions_attr.Init(draco::GeometryAttribute::POSITION, // Attribute type
+                          nullptr,                            // data buffer
+                          3,                                  // number of components
+                          draco::DT_INT32,                    // data type
+                          false,                              // normalized
+                          sizeof(int32_t) * 3,                // byte stride
+                          0);                                 // byte offset
+    } else if (integer_mark == 2) {
+      positions_attr.Init(draco::GeometryAttribute::POSITION, // Attribute type
+                          nullptr,                            // data buffer
+                          3,                                  // number of components
+                          draco::DT_UINT32,                   // data type
+                          false,                              // normalized
+                          sizeof(uint32_t) * 3,               // byte stride
+                          0);                                 // byte offset
+    } else {
+      positions_attr.Init(draco::GeometryAttribute::POSITION, // Attribute type
+                          nullptr,                            // data buffer
+                          3,                                  // number of components
+                          draco::DT_FLOAT32,                  // data type
+                          false,                              // normalized
+                          sizeof(float) * 3,                  // byte stride
+                          0);                                 // byte offset
     }
 
-    std::unique_ptr<draco::Mesh> ptr_mesh = mb.Finalize();
-    draco::Mesh *mesh = ptr_mesh.get();
+    const auto pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    if (integer_mark == 1) {
+      std::vector<int32_t> pts_int;
+      pts_int.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+        return lrint(x);
+      });
+      for (size_t i = 0; i < num_pts; ++i) {
+        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+      }
+    } else if (integer_mark == 2) {
+      std::vector<uint32_t> pts_int;
+      pts_int.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+        return (x <= 0.f)? 0: (uint32_t)(x + 0.5);
+      });
+      for (size_t i = 0; i < num_pts; ++i) {
+        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+      }
+    } else {
+      for (size_t i = 0; i < num_pts; ++i) {
+        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+      }
+    }
+
+    // Process faces
+    const size_t num_faces = faces.size() / 3;
+    for (size_t i = 0; i < num_faces; ++i) {
+      mesh.AddFace(
+          draco::Mesh::Face{draco::PointIndex(faces[3 * i]),
+                            draco::PointIndex(faces[3 * i + 1]),
+                            draco::PointIndex(faces[3 * i + 2])});
+    }
+
+    // deduplicate
+    if (!preserve_order && mesh.DeduplicateAttributeValues()) {
+      mesh.DeduplicatePointIds();
+    }
+
     draco::Encoder encoder;
     setup_encoder_and_metadata(
-      mesh, encoder, compression_level,
+      &mesh, encoder, compression_level,
       quantization_bits, quantization_range,
       quantization_origin, create_metadata
     );
@@ -256,10 +291,9 @@ namespace DracoFunctions {
     }
 
     draco::EncoderBuffer buffer;
-    const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
+    const draco::Status status = encoder.EncodeMeshToBuffer(mesh, &buffer);
     EncodedObject encodedMeshObject;
     encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
-
 
     if (status.ok()) {
       encodedMeshObject.encode_status = successful_encoding;
@@ -276,15 +310,19 @@ namespace DracoFunctions {
     const std::vector<float> &points, const int quantization_bits,
     const int compression_level, const float quantization_range,
     const float *quantization_origin, const bool preserve_order = false,
-    const bool create_metadata = false, const bool integer_positions = false
+    const bool create_metadata = false, const int integer_mark = 0
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
 
-    auto dtype = integer_positions
-      ? draco::DataType::DT_UINT32
-      : draco::DataType::DT_FLOAT32;
+    auto dtype = (integer_mark == 1)
+      ? draco::DataType::DT_INT32
+      : (
+        (integer_mark == 2)
+          ? draco::DataType::DT_UINT32
+          : draco::DataType::DT_FLOAT32
+      );
 
     const int pos_att_id = pcb.AddAttribute(
       draco::GeometryAttribute::POSITION, 3, dtype
@@ -294,7 +332,7 @@ namespace DracoFunctions {
       pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
     }
 
-    std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(true);
+    std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(!preserve_order);
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
     draco::Encoder encoder;
     setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
