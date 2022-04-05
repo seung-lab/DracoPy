@@ -8,7 +8,7 @@ import numpy as np
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
     cdef enum decoding_status:
-        successful, not_draco_encoded, no_position_attribute, 
+        successful, not_draco_encoded, no_position_attribute,
         failed_during_decoding
 
     cdef enum encoding_status:
@@ -51,22 +51,24 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
 
     EncodedObject encode_mesh(
-        const vector[float] points, 
-        const vector[uint32_t] faces, 
+        const vector[float] points,
+        const vector[uint32_t] faces,
         const int quantization_bits,
-        const int compression_level, 
-        const float quantization_range, 
-        const float *quantization_origin, 
+        const int compression_level,
+        const float quantization_range,
+        const float *quantization_origin,
+        const bool preserve_order,
         const bool create_metadata,
         const bool integer_positions
     ) except +
-    
+
     EncodedObject encode_point_cloud(
-        const vector[float] points, 
+        const vector[float] points,
         const int quantization_bits,
-        const int compression_level, 
-        const float quantization_range, 
-        const const float *quantization_origin, 
+        const int compression_level,
+        const float quantization_range,
+        const const float *quantization_origin,
+        const bool preserve_order,
         const bool create_metadata,
         const bool integer_positions
     ) except +

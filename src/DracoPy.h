@@ -14,16 +14,16 @@
 
 namespace DracoFunctions {
 
-  enum decoding_status { 
-    successful, 
-    not_draco_encoded, 
-    no_position_attribute, 
+  enum decoding_status {
+    successful,
+    not_draco_encoded,
+    no_position_attribute,
     no_normal_coord_attribute,
-    failed_during_decoding 
+    failed_during_decoding
   };
-  enum encoding_status { 
-    successful_encoding, 
-    failed_during_encoding 
+  enum encoding_status {
+    successful_encoding,
+    failed_during_encoding
   };
 
   struct PointCloudObject {
@@ -87,7 +87,7 @@ namespace DracoFunctions {
       auto statusor = decoder.DecodePointCloudFromBuffer(&decoderBuffer);
       CHECK_STATUS(statusor, meshObject)
       in_pointcloud = std::move(statusor).value();
-      // This is okay because draco::Mesh is a subclass of 
+      // This is okay because draco::Mesh is a subclass of
       // draco::PointCloud
       mesh = static_cast<draco::Mesh*>(in_pointcloud.get());
     }
@@ -172,7 +172,7 @@ namespace DracoFunctions {
     std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
     if (quantization_origin == NULL || quantization_range == -1) {
       encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
-    } 
+    }
     else {
       encoder.SetAttributeExplicitQuantization(draco::GeometryAttribute::POSITION, quantization_bits, 3, quantization_origin, quantization_range);
       if (create_metadata) {
@@ -191,19 +191,20 @@ namespace DracoFunctions {
   }
 
   EncodedObject encode_mesh(
-    const std::vector<float> &points, 
+    const std::vector<float> &points,
     const std::vector<unsigned int> &faces,
-    const int quantization_bits, 
-    const int compression_level, 
-    const float quantization_range, 
-    const float *quantization_origin, 
-    const bool create_metadata,
+    const int quantization_bits,
+    const int compression_level,
+    const float quantization_range,
+    const float *quantization_origin,
+    const bool preserve_order = false,
+    const bool create_metadata = false,
     const bool integer_positions = false
   ) {
     draco::TriangleSoupMeshBuilder mb;
     mb.Start(faces.size());
 
-    auto dtype = integer_positions 
+    auto dtype = integer_positions
       ? draco::DataType::DT_UINT32
       : draco::DataType::DT_FLOAT32;
 
@@ -218,9 +219,9 @@ namespace DracoFunctions {
         auto p3 = faces[i+2]*3;
 
         mb.SetAttributeValuesForFace(
-          pos_att_id, draco::FaceIndex(i), 
-          draco::Vector3ui(points[p1], points[p1+1], points[p1+2]).data(), 
-          draco::Vector3ui(points[p2], points[p2+1], points[p2+2]).data(), 
+          pos_att_id, draco::FaceIndex(i),
+          draco::Vector3ui(points[p1], points[p1+1], points[p1+2]).data(),
+          draco::Vector3ui(points[p2], points[p2+1], points[p2+2]).data(),
           draco::Vector3ui(points[p3], points[p3+1], points[p3+2]).data()
         );
       }
@@ -232,9 +233,9 @@ namespace DracoFunctions {
         auto p3 = faces[i+2]*3;
 
         mb.SetAttributeValuesForFace(
-          pos_att_id, draco::FaceIndex(i), 
-          draco::Vector3f(points[p1], points[p1+1], points[p1+2]).data(), 
-          draco::Vector3f(points[p2], points[p2+1], points[p2+2]).data(), 
+          pos_att_id, draco::FaceIndex(i),
+          draco::Vector3f(points[p1], points[p1+1], points[p1+2]).data(),
+          draco::Vector3f(points[p2], points[p2+1], points[p2+2]).data(),
           draco::Vector3f(points[p3], points[p3+1], points[p3+2]).data()
         );
       }
@@ -244,21 +245,23 @@ namespace DracoFunctions {
     draco::Mesh *mesh = ptr_mesh.get();
     draco::Encoder encoder;
     setup_encoder_and_metadata(
-      mesh, encoder, compression_level, 
-      quantization_bits, quantization_range, 
+      mesh, encoder, compression_level,
+      quantization_bits, quantization_range,
       quantization_origin, create_metadata
     );
-  
+    if (preserve_order) {
+      encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
+    }
 
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodeMeshToBuffer(*mesh, &buffer);
     EncodedObject encodedMeshObject;
     encodedMeshObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
-  
+
 
     if (status.ok()) {
       encodedMeshObject.encode_status = successful_encoding;
-    } 
+    }
     else {
       std::cerr << "Draco encoding error: " << status.error_msg_string() << std::endl;
       encodedMeshObject.encode_status = failed_during_encoding;
@@ -269,15 +272,15 @@ namespace DracoFunctions {
 
   EncodedObject encode_point_cloud(
     const std::vector<float> &points, const int quantization_bits,
-    const int compression_level, const float quantization_range, 
-    const float *quantization_origin, const bool create_metadata,
-    const bool integer_positions = false
+    const int compression_level, const float quantization_range,
+    const float *quantization_origin, const bool preserve_order = false,
+    const bool create_metadata = false, const bool integer_positions = false
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
 
-    auto dtype = integer_positions 
+    auto dtype = integer_positions
       ? draco::DataType::DT_UINT32
       : draco::DataType::DT_FLOAT32;
 
@@ -286,22 +289,25 @@ namespace DracoFunctions {
     );
 
     for (draco::PointIndex i(0); i < num_points; i++) {
-      pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());  
+      pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
     }
 
     std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(true);
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
     draco::Encoder encoder;
     setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
-    
+    if (preserve_order) {
+      encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
+    }
+
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodePointCloudToBuffer(*point_cloud, &buffer);
-    
+
     EncodedObject encodedPointCloudObject;
     encodedPointCloudObject.buffer = *((std::vector<unsigned char> *)buffer.buffer());
     if (status.ok()) {
       encodedPointCloudObject.encode_status = successful_encoding;
-    } 
+    }
     else {
       std::cerr << "Draco encoding error: " << status.error_msg_string() << std::endl;
       encodedPointCloudObject.encode_status = failed_during_encoding;
