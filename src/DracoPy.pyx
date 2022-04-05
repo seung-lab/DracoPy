@@ -121,6 +121,7 @@ def encode(
     Quantization_range is a float representing the size of the
         bounding cube for the mesh. By default it is the range
         of the dimension of the input vertices with greatest range.
+        Set a negative value to use the default behavior.
     Quantization_origin is the point in space where the bounding box begins.
         By default it is a point where each coordinate is the minimum of
         that coordinate among the input vertices.
@@ -133,7 +134,7 @@ def encode(
 
     # @zeruniverse Draco supports quantization_bits 1 to 30, see following link:
     # https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L107
-    assert 1 <= quantization_bits <= 30, "Compression level must be in range [1, 30]"
+    assert 1 <= quantization_bits <= 30, "Quantization bits must be in range [1, 30]"
 
     points = format_array(points)
     faces = format_array(faces)
@@ -224,6 +225,3 @@ def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
 def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:
     """Provided for backwards compatibility. Use decode."""
     return cast(decode(buffer), DracoPointCloud)
-
-
-

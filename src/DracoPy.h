@@ -170,7 +170,9 @@ namespace DracoFunctions {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
     std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
-    if (quantization_origin == NULL || quantization_range == -1) {
+    if (quantization_origin == NULL || quantization_range <= 0.f) {
+      // @zeruniverse All quantization_range <= 0.f is useless, see
+      //    https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L160-L170
       encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
     }
     else {
