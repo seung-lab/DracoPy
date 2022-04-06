@@ -34,7 +34,8 @@ except SKBuildError:
 # Draco must already be built/setup.py already be run before running the above command
 
 src_dir = './src'
-lib_dir = os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib/'))
+lib_dirs = [os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib/')),
+            os.path.abspath(os.path.join(CMAKE_INSTALL_DIR(), 'lib64/'))]
 cmake_args = []
 
 operating_system = platform.system().lower()
@@ -51,31 +52,33 @@ if is_macos:
         '-DCMAKE_OSX_ARCHITECTURES:STRING='+plat_name[sep[1]+1:]
     ]
     library_link_args = [
-        f'-l{lib}' for lib in ('dracoenc', 'draco', 'dracodec')
+        f'-l{lib}' for lib in ('draco',)
     ]
 elif is_windows:
-    library_link_args = [ 
-        lib for lib in ('dracoenc.lib', 'draco.lib', 'dracodec.lib')
+    library_link_args = [
+        lib for lib in ('draco.lib',)
     ]
 else: # linux
     library_link_args = [
-        f'-l:{lib}' for lib in ('libdracoenc.a', 'libdraco.a', 'libdracodec.a')
+        f'-l:{lib}' for lib in ('libdraco.a',)
     ]
 
+cmake_args.append("-DCMAKE_POSITION_INDEPENDENT_CODE=ON") # make -fPIC code
+
 if is_windows:
-    extra_link_args = ['/LIBPATH:{0}'.format(lib_dir)] + library_link_args
+    extra_link_args = ['/LIBPATH:{0}'.format(lib_dir) for lib_dir in lib_dirs] + library_link_args
     extra_compile_args = [
       '/std:c++17', '/O2',
     ]
 else:
-    extra_link_args = ['-L{0}'.format(lib_dir)] + library_link_args
+    extra_link_args = ['-L{0}'.format(lib_dir) for lib_dir in lib_dirs] + library_link_args
     extra_compile_args = [
       '-std=c++11','-O3'
     ]
 
 setup(
     name='DracoPy',
-    version='1.0.1',
+    version='1.0.2',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
@@ -93,7 +96,7 @@ setup(
             sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
-            include_dirs = [ 
+            include_dirs = [
                 np.get_include(),
                 os.path.join(CMAKE_INSTALL_DIR(), 'include/'),
             ],
@@ -111,6 +114,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering",
         "Operating System :: POSIX",
         "Operating System :: MacOS",

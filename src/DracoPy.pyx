@@ -14,6 +14,10 @@ from libc.stdint cimport (
 cimport numpy as np
 import numpy as np
 
+
+__version__ = "1.0.2"
+
+
 class DracoPointCloud:
     def __init__(self, data_struct):
         self.data_struct = data_struct
@@ -22,7 +26,7 @@ class DracoPointCloud:
                 data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
-    
+
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
             return self.encoding_options.get_encoded_coordinate(value, axis)
@@ -60,7 +64,7 @@ class EncodingOptions(object):
         self.quantization_range = quantization_range
         self.quantization_origin = quantization_origin
         self.inverse_alpha = quantization_range / ((2 ** quantization_bits) - 1)
-    
+
     def get_encoded_coordinate(self, value, axis):
         if value < self.quantization_origin[axis] or value > (self.quantization_origin[axis] + self.quantization_range):
             raise ValueError('Specified value out of encoded range')
@@ -73,7 +77,7 @@ class EncodingOptions(object):
         for axis in range(self.num_axes):
             encoded_point.append(self.get_encoded_coordinate(point[axis], axis))
         return encoded_point
-    
+
     @property
     def num_axes(self):
         return 3
@@ -95,30 +99,30 @@ def format_array(arr):
     return arr
 
 def encode(
-    points, faces=None, 
-    quantization_bits=14, compression_level=1, 
-    quantization_range=-1, quantization_origin=None, 
+    points, faces=None,
+    quantization_bits=14, compression_level=1,
+    quantization_range=-1, quantization_origin=None,
     create_metadata=False
 ) -> bytes:
     """
     bytes encode(
-        points, faces=None, 
-        quantization_bits=14, compression_level=1, 
-        quantization_range=-1, quantization_origin=None, 
+        points, faces=None,
+        quantization_bits=14, compression_level=1,
+        quantization_range=-1, quantization_origin=None,
         create_metadata=False
     )
 
-    Encode a list or numpy array of points/vertices (float) and faces 
+    Encode a list or numpy array of points/vertices (float) and faces
     (unsigned int) to a draco buffer. If faces is None, then a point
     cloud file will be generated, otherwise a mesh file.
 
     Quantization bits should be an integer between 0 and 31
     Compression level should be an integer between 0 and 10
-    Quantization_range is a float representing the size of the 
-        bounding cube for the mesh. By default it is the range 
+    Quantization_range is a float representing the size of the
+        bounding cube for the mesh. By default it is the range
         of the dimension of the input vertices with greatest range.
-    Quantization_origin is the point in space where the bounding box begins. 
-        By default it is a point where each coordinate is the minimum of 
+    Quantization_origin is the point in space where the bounding box begins.
+        By default it is a point where each coordinate is the minimum of
         that coordinate among the input vertices.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0,10]"
@@ -142,16 +146,16 @@ def encode(
 
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
-            pointsview, quantization_bits, compression_level, 
-            quantization_range, <float*>&quant_origin[0], 
+            pointsview, quantization_bits, compression_level,
+            quantization_range, <float*>&quant_origin[0],
             create_metadata, integer_positions
         )
     else:
         facesview = faces.reshape((faces.size,))
         encoded = DracoPy.encode_mesh(
-            pointsview, facesview, 
-            quantization_bits, compression_level, 
-            quantization_range, &quant_origin[0], 
+            pointsview, facesview,
+            quantization_bits, compression_level,
+            quantization_range, &quant_origin[0],
             create_metadata, integer_positions
         )
 
@@ -190,21 +194,21 @@ def encode_mesh_to_buffer(*args, **kwargs) -> bytes:
     return encode(*args, **kwargs)
 
 def encode_point_cloud_to_buffer(
-    points, quantization_bits=14, compression_level=1, 
-    quantization_range=-1, quantization_origin=None, 
+    points, quantization_bits=14, compression_level=1,
+    quantization_range=-1, quantization_origin=None,
     create_metadata=False
 ) -> bytes:
     """Provided for backwards compatibility. Use encode."""
     return encode(
-        points=points, 
-        faces=None, 
-        quantization_bits=quantization_bits, 
+        points=points,
+        faces=None,
+        quantization_bits=quantization_bits,
         compression_level=compression_level,
-        quantization_range=quantization_range, 
-        quantization_origin=quantization_origin, 
+        quantization_range=quantization_range,
+        quantization_origin=quantization_origin,
         create_metadata=create_metadata,
     )
- 
+
 def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
     """Provided for backwards compatibility. Use decode."""
     return decode(buffer)
