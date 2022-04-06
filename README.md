@@ -21,6 +21,17 @@ binary = DracoPy.encode(mesh.points, mesh.faces)
 with open('bunny_test.drc', 'wb') as test_file:
   test_file.write(encoding_test)
 
+# If faces is omitted, DracoPy will encode a point cloud
+binary = Dracopy.encode(mesh.points)
+
+# Options for encoding:
+binary = Dracopy.encode(    
+  mesh.points, faces=mesh.faces,
+  quantization_bits=14, compression_level=1,
+  quantization_range=-1, quantization_origin=None,
+  create_metadata=False, preserve_order=False
+)
+
 ```
 
 DracoPy is a Python wrapper for Google's Draco mesh compression library.
