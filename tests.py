@@ -13,14 +13,14 @@ EXPECTED_FACES_BUNNY = 208353 // 3
 def test_decoding_and_encoding_mesh_file():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         mesh = DracoPy.decode(draco_file.read())
-    
+
     assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
     assert len(mesh.faces) == EXPECTED_FACES_BUNNY
     assert len(mesh.normals) == 0
 
     with open(os.path.join(testdata_directory, "bunny_normals.drc"), "rb") as draco_file:
         mesh = DracoPy.decode(draco_file.read())
-    
+
     assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
     assert len(mesh.faces) == EXPECTED_FACES_BUNNY
     assert len(mesh.normals) == EXPECTED_POINTS_BUNNY_MESH
@@ -30,6 +30,22 @@ def test_decoding_and_encoding_mesh_file():
 
     assert encoding_test1 == encoding_test2
     encoding_test = encoding_test1
+
+    # test preserve_order
+    np.random.shuffle(mesh.faces)
+    encoding_test3 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
+                                    preserve_order=True)
+    mesh_decode = DracoPy.decode(encoding_test3)
+    assert np.allclose(mesh.points, mesh_decode.points)
+    assert np.allclose(mesh.faces, mesh_decode.faces)
+
+    # test extreme quantization
+    encoding_test4 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
+                                    quantization_bits=1)
+    mesh_decode = DracoPy.decode(encoding_test4)
+    encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
+                                    quantization_bits=30)
+    mesh_decode = DracoPy.decode(encoding_test5)
 
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
         test_file.write(encoding_test)
@@ -54,24 +70,31 @@ def test_decoding_and_encoding_mesh_file_integer_positions():
     points *= 2 ** 16
     points = points.astype(np.uint32)
 
-    encoding_test = DracoPy.encode(
-        points, mesh_object.faces, 
+    encoding_test_uint = DracoPy.encode(
+        points, mesh_object.faces,
+        quantization_bits=16,
+    )
+
+    encoding_test_int = DracoPy.encode(
+        points.astype(np.int64), mesh_object.faces,
         quantization_bits=16,
     )
 
     encoding_test_float = DracoPy.encode(
-        points.astype(np.float32), mesh_object.faces, 
+        points.astype(np.float32), mesh_object.faces,
         quantization_bits=16,
     )
-    assert encoding_test != encoding_test_float
-    
-    encoding_test2 = DracoPy.encode(
-        points.astype(np.int64), mesh_object.faces, 
-        quantization_bits=16,
-    )
-    assert encoding_test == encoding_test2
+    assert encoding_test_uint != encoding_test_float
+    assert encoding_test_uint != encoding_test_int
+    assert encoding_test_int != encoding_test_float
 
-    mesh_object = DracoPy.decode(encoding_test)
+    encoding_test_uint64 = DracoPy.encode(
+        points.astype(np.uint64), mesh_object.faces,
+        quantization_bits=16,
+    )
+    assert encoding_test_uint == encoding_test_uint64
+
+    mesh_object = DracoPy.decode(encoding_test_uint)
 
     assert len(mesh_object.points) == EXPECTED_POINTS_BUNNY_MESH
     assert len(mesh_object.faces) == EXPECTED_FACES_BUNNY
@@ -129,6 +152,18 @@ def test_decoding_and_encoding_point_cloud_file():
             os.path.join(testdata_directory, "point_cloud_bunny_test.drc"), "wb"
         ) as test_file:
             test_file.write(encoding_test)
+
+        # test preserve_order
+        np.random.shuffle(point_cloud_object.points)
+        encoding_test2 = DracoPy.encode(point_cloud_object.points, compression_level=10,
+                                        quantization_bits=30, preserve_order=True)
+        ptc_decode = DracoPy.decode(encoding_test2)
+        assert np.allclose(point_cloud_object.points, ptc_decode.points)
+
+        # test extreme quantization
+        encoding_test3 = DracoPy.encode(point_cloud_object.points, compression_level=10,
+                                        quantization_bits=1)
+        ptc_decode = DracoPy.decode(encoding_test3)
 
     with open(
         os.path.join(testdata_directory, "point_cloud_bunny_test.drc"), "rb"

@@ -15,7 +15,7 @@ cimport numpy as np
 import numpy as np
 
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 
 class DracoPointCloud:
@@ -102,36 +102,49 @@ def encode(
     points, faces=None,
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
-    create_metadata=False
+    create_metadata=False, preserve_order=False
 ) -> bytes:
     """
     bytes encode(
         points, faces=None,
-        quantization_bits=14, compression_level=1,
+        quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
-        create_metadata=False
+        create_metadata=False, preserve_order=False
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
     (unsigned int) to a draco buffer. If faces is None, then a point
     cloud file will be generated, otherwise a mesh file.
 
-    Quantization bits should be an integer between 0 and 31
+    Quantization bits should be an integer between 1 and 30
     Compression level should be an integer between 0 and 10
     Quantization_range is a float representing the size of the
         bounding cube for the mesh. By default it is the range
         of the dimension of the input vertices with greatest range.
+        Set a negative value to use the default behavior.
     Quantization_origin is the point in space where the bounding box begins.
         By default it is a point where each coordinate is the minimum of
         that coordinate among the input vertices.
+    Preserve_order controls whether the order of points / faces should be
+        preserved after compression. Setting it to True will reduce compression
+        ratio (greatly) but guarantees the result points / faces are in same
+        order as the input.
     """
-    assert 0 <= compression_level <= 10, "Compression level must be in range [0,10]"
-    assert 0 <= quantization_bits <= 31, "Compression level must be in range [0,31]"
+    assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
+
+    # @zeruniverse Draco supports quantization_bits 1 to 30, see following link:
+    # https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L107
+    assert 1 <= quantization_bits <= 30, "Quantization bits must be in range [1, 30]"
 
     points = format_array(points)
     faces = format_array(faces)
 
-    integer_positions = np.issubdtype(points.dtype, np.integer)
+    integer_mark = 0
+
+    if np.issubdtype(points.dtype, np.signedinteger):
+        integer_mark = 1
+    elif np.issubdtype(points.dtype, np.unsignedinteger):
+        integer_mark = 2
 
     cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
     cdef float[:] quant_origin = qorigin
@@ -148,7 +161,7 @@ def encode(
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
-            create_metadata, integer_positions
+            preserve_order, create_metadata, integer_mark
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -156,7 +169,7 @@ def encode(
             pointsview, facesview,
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
-            create_metadata, integer_positions
+            preserve_order, create_metadata, integer_mark
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
@@ -207,6 +220,7 @@ def encode_point_cloud_to_buffer(
         quantization_range=quantization_range,
         quantization_origin=quantization_origin,
         create_metadata=create_metadata,
+        preserve_order=False
     )
 
 def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
@@ -216,6 +230,3 @@ def decode_buffer_to_mesh(buffer) -> Union[DracoMesh, DracoPointCloud]:
 def decode_buffer_to_point_cloud(buffer) -> Union[DracoMesh, DracoPointCloud]:
     """Provided for backwards compatibility. Use decode."""
     return cast(decode(buffer), DracoPointCloud)
-
-
-

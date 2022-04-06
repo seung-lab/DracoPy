@@ -1,5 +1,5 @@
 DracoPy.egg-info/
-MANIFEST
+MANIFEST*
 _skbuild/
 *.so
 .vscode/
@@ -7,3 +7,4 @@ dist/
 bunny_test.drc
 *secret.json
 __pycache__/
+.eggs/
