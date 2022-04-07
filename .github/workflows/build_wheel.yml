@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* pp27-* pp36-* pp37-*
+  CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* pp* *-musllinux*
 
 jobs:
   build_wheels:
@@ -25,7 +25,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
 
       - name: Build wheels
-        uses: joerick/cibuildwheel@v1.12.0
+        uses: joerick/cibuildwheel@v2.3.1
         # to supply options, put them in 'env', like:
         env:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install oldest-supported-numpy scikit-build 
