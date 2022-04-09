@@ -2507,7 +2507,7 @@ static const char __pyx_k_size[] = "size";
 static const char __pyx_k_step[] = "step";
 static const char __pyx_k_stop[] = "stop";
 static const char __pyx_k_test[] = "__test__";
-static const char __pyx_k_1_1_0[] = "1.1.0";
+static const char __pyx_k_1_1_1[] = "1.1.1";
 static const char __pyx_k_ASCII[] = "ASCII";
 static const char __pyx_k_Union[] = "Union";
 static const char __pyx_k_array[] = "array";
@@ -2661,7 +2661,7 @@ static const char __pyx_k_got_differing_extents_in_dimensi[] = "got differing ex
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 static const char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
-static PyObject *__pyx_kp_s_1_1_0;
+static PyObject *__pyx_kp_s_1_1_1;
 static PyObject *__pyx_n_s_ASCII;
 static PyObject *__pyx_kp_s_Buffer_view_does_not_expose_stri;
 static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
@@ -22313,7 +22313,7 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_s_1_1_0, __pyx_k_1_1_0, sizeof(__pyx_k_1_1_0), 0, 0, 1, 0},
+  {&__pyx_kp_s_1_1_1, __pyx_k_1_1_1, sizeof(__pyx_k_1_1_1), 0, 0, 1, 0},
   {&__pyx_n_s_ASCII, __pyx_k_ASCII, sizeof(__pyx_k_ASCII), 0, 0, 1, 1},
   {&__pyx_kp_s_Buffer_view_does_not_expose_stri, __pyx_k_Buffer_view_does_not_expose_stri, sizeof(__pyx_k_Buffer_view_does_not_expose_stri), 0, 0, 1, 0},
   {&__pyx_kp_s_Can_only_create_a_buffer_that_is, __pyx_k_Can_only_create_a_buffer_that_is, sizeof(__pyx_k_Can_only_create_a_buffer_that_is), 0, 0, 1, 0},
@@ -23553,11 +23553,11 @@ if (!__Pyx_RefNanny) {
   /* "DracoPy.pyx":18
  *
  *
- * __version__ = "1.1.0"             # <<<<<<<<<<<<<<
+ * __version__ = "1.1.1"             # <<<<<<<<<<<<<<
  *
  *
  */
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_version, __pyx_kp_s_1_1_0) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_version, __pyx_kp_s_1_1_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
 
   /* "DracoPy.pyx":21
  *
