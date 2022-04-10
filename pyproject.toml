@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-	"setuptools", 
-	"scikit-build >= 0.9.0", 
-	"wheel", 
-	"numpy"
+	"setuptools",
+	"scikit-build >= 0.9.0",
+	"wheel",
+	"oldest-supported-numpy"
 ]
