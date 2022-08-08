@@ -1,5 +1,6 @@
+#cython: language_level=3
 from libcpp.vector cimport vector
-from libc.stdint cimport uint32_t
+from libc.stdint cimport uint8_t, uint32_t
 from libcpp cimport bool
 
 cimport numpy
@@ -49,8 +50,6 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         encoding_status encode_status
 
     MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
-
-    PointCloudObject decode_buffer_to_point_cloud(const char *buffer, size_t buffer_len) except +
 
     EncodedObject encode_mesh(
         const vector[float] points,
