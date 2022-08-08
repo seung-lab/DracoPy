@@ -49,8 +49,8 @@ class DracoPointCloud:
     def colors(self):
         if self.data_struct['colors_set']:
             colors_ = self.data_struct['colors']
-            N = len(colors_) // 4
-            return np.array(colors_).reshape((N, 4))
+            N = len(self.data_struct['points']) // 3
+            return np.array(colors_).reshape((N, -1))
         else:
             return None
 
@@ -140,8 +140,8 @@ def encode(
         preserved after compression. Setting it to True will reduce compression
         ratio (greatly) but guarantees the result points / faces are in same
         order as the input.
-    Colors is a numpy array of colors (uint8) with shape (N, 4). N is the number of
-        vertices. Use None if mesh does not have colors
+    Colors is a numpy array of colors (uint8) with shape (N, K). N is the number of
+        vertices. K must be >= 1. Use None if mesh does not have colors
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -172,9 +172,12 @@ def encode(
     cdef vector[uint32_t] facesview
     cdef vector[uint8_t] colorsview
 
+    colors_channel = 1
     if colors is not None:
-        assert colors.shape[-1] == 4, "Colors' last dim must be 4 (RGBA)"
         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
+        assert len(colors.shape) == 2, "Colors must be 2D"
+        colors_channel = colors.shape[1]
+        assert 1 <= colors_channel <= 100, "Number of color channels must be in range [1, 100]"
         colorsview = colors.reshape((colors.size,))
 
     if faces is None:
@@ -182,7 +185,8 @@ def encode(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            NULL if colors is None else &colorsview
+            NULL if colors is None else &colorsview,
+            colors_channel
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -191,7 +195,8 @@ def encode(
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            NULL if colors is None else &colorsview
+            NULL if colors is None else &colorsview,
+            colors_channel
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
