@@ -1,4 +1,5 @@
 import os
+from xml.etree.ElementPath import prepare_self
 import DracoPy
 import pytest
 
@@ -45,13 +46,14 @@ def test_decoding_and_encoding_mesh_file():
 
     # test extreme quantization
     encoding_test4 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
-                                    quantization_bits=1, colors=colors)
+                                    quantization_bits=1, colors=colors,
+                                    preserve_order=True)
     mesh_decode = DracoPy.decode(encoding_test4)
     assert np.allclose(colors, mesh_decode.colors), "colors decode result is wrong"
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                     quantization_bits=30, colors=colors)
     mesh_decode = DracoPy.decode(encoding_test5)
-    assert np.allclose(colors, mesh_decode.colors), "colors decode result is wrong"
+    assert mesh_decode.colors is not None, "colors should present"
 
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
         test_file.write(encoding_test)
@@ -161,18 +163,18 @@ def test_decoding_and_encoding_point_cloud_file():
 
         # test preserve_order
         np.random.shuffle(point_cloud_object.points)
+        colors = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 100]).astype(np.uint8)
         encoding_test2 = DracoPy.encode(point_cloud_object.points, compression_level=10,
-                                        quantization_bits=30, preserve_order=True)
+                                        quantization_bits=30, preserve_order=True, colors=colors)
         ptc_decode = DracoPy.decode(encoding_test2)
         assert np.allclose(point_cloud_object.points, ptc_decode.points)
-        assert ptc_decode.colors is None, "colors should not present"
-        colors = np.random.randint(0, 255, [ptc_decode.points.shape[0], 100]).astype(np.uint8)
+        assert np.allclose(colors, ptc_decode.colors)
 
         # test extreme quantization
         encoding_test3 = DracoPy.encode(point_cloud_object.points, compression_level=10,
                                         quantization_bits=1)
         ptc_decode = DracoPy.decode(encoding_test3)
-        assert np.allclose(colors, ptc_decode.colors)
+        assert ptc_decode.colors is None, "colors should not present"
 
     with open(
         os.path.join(testdata_directory, "point_cloud_bunny_test.drc"), "rb"
