@@ -130,7 +130,7 @@ namespace DracoFunctions {
       const auto *const color_att = mesh->attribute(color_att_id);
       const int colors_channel = color_att->num_components();
       meshObject.colors.reserve(colors_channel * mesh->num_points());
-      uint8_t color_val[colors_channel];
+      uint8_t* color_val = new uint8_t[colors_channel];
       for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
         if (!color_att->ConvertValue<uint8_t>(color_att->mapped_index(v), colors_channel, color_val)) {
           meshObject.colors_set = false; // color decoding failed!
@@ -140,6 +140,7 @@ namespace DracoFunctions {
           }
         }
       }
+      delete [] color_val;
     } else meshObject.colors_set = false;
 
     const draco::GeometryMetadata *metadata = mesh->GetMetadata();
