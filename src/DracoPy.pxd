@@ -38,12 +38,14 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         # Encoding options
         bool encoding_options_set
+        bool colors_set
         int quantization_bits
         double quantization_range
         vector[double] quantization_origin
 
         # Represents the decoding success or error message
         decoding_status decode_status
+        vector[uint8_t] colors
 
     cdef struct EncodedObject:
         vector[unsigned char] buffer

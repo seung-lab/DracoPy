@@ -2412,6 +2412,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_int(unsigned int value)
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint8_t(uint8_t value);
+
 /* CIntFromPy.proto */
 static CYTHON_INLINE size_t __Pyx_PyInt_As_size_t(PyObject *);
 
@@ -2501,6 +2504,7 @@ static PyObject *__pyx_convert_vector_to_py_unsigned_char(const std::vector<unsi
 static PyObject *__pyx_convert_vector_to_py_unsigned_int(const std::vector<unsigned int>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_float(const std::vector<float>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_double(const std::vector<double>  &); /*proto*/
+static PyObject *__pyx_convert_vector_to_py_uint8_t(const std::vector<uint8_t>  &); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -2816,6 +2820,7 @@ static PyObject *__pyx_n_s_colors;
 static PyObject *__pyx_n_u_colors;
 static PyObject *__pyx_n_s_colors_2;
 static PyObject *__pyx_n_s_colors_channel;
+static PyObject *__pyx_n_s_colors_set;
 static PyObject *__pyx_n_u_colors_set;
 static PyObject *__pyx_n_s_colorsview;
 static PyObject *__pyx_n_s_compression_level;
@@ -9211,6 +9216,63 @@ static PyObject *__pyx_convert_vector_to_py_double(const std::vector<double>  &_
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_double", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = 0;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_convert_vector_to_py_uint8_t(const std::vector<uint8_t>  &__pyx_v_v) {
+  size_t __pyx_v_i;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  size_t __pyx_t_2;
+  size_t __pyx_t_3;
+  size_t __pyx_t_4;
+  PyObject *__pyx_t_5 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("__pyx_convert_vector_to_py_uint8_t", 0);
+
+  /* "vector.to_py":61
+ * @cname("__pyx_convert_vector_to_py_uint8_t")
+ * cdef object __pyx_convert_vector_to_py_uint8_t(vector[X]& v):
+ *     return [v[i] for i in range(v.size())]             # <<<<<<<<<<<<<<
+ *
+ *
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 61, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_v_v.size();
+  __pyx_t_3 = __pyx_t_2;
+  for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
+    __pyx_v_i = __pyx_t_4;
+    __pyx_t_5 = __Pyx_PyInt_From_uint8_t((__pyx_v_v[__pyx_v_i])); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 61, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) __PYX_ERR(2, 61, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  }
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "vector.to_py":60
+ *
+ * @cname("__pyx_convert_vector_to_py_uint8_t")
+ * cdef object __pyx_convert_vector_to_py_uint8_t(vector[X]& v):             # <<<<<<<<<<<<<<
+ *     return [v[i] for i in range(v.size())]
+ *
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_AddTraceback("vector.to_py.__pyx_convert_vector_to_py_uint8_t", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -23104,6 +23166,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_u_colors, __pyx_k_colors, sizeof(__pyx_k_colors), 0, 1, 0, 1},
   {&__pyx_n_s_colors_2, __pyx_k_colors_2, sizeof(__pyx_k_colors_2), 0, 0, 1, 1},
   {&__pyx_n_s_colors_channel, __pyx_k_colors_channel, sizeof(__pyx_k_colors_channel), 0, 0, 1, 1},
+  {&__pyx_n_s_colors_set, __pyx_k_colors_set, sizeof(__pyx_k_colors_set), 0, 0, 1, 1},
   {&__pyx_n_u_colors_set, __pyx_k_colors_set, sizeof(__pyx_k_colors_set), 0, 1, 0, 1},
   {&__pyx_n_s_colorsview, __pyx_k_colorsview, sizeof(__pyx_k_colorsview), 0, 0, 1, 1},
   {&__pyx_n_s_compression_level, __pyx_k_compression_level, sizeof(__pyx_k_compression_level), 0, 0, 1, 1},
@@ -29357,7 +29420,7 @@ __pyx_fail:
 static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(struct DracoFunctions::MeshObject s) {
       PyObject* res;
       PyObject* member;
-      res = __Pyx_PyDict_NewPresized(8); if (unlikely(!res)) return NULL;
+      res = __Pyx_PyDict_NewPresized(10); if (unlikely(!res)) return NULL;
       member = __pyx_convert_vector_to_py_float(s.points); if (unlikely(!member)) goto bad;
       if (unlikely(PyDict_SetItem(res, __pyx_n_s_points, member) < 0)) goto bad;
       Py_DECREF(member);
@@ -29370,6 +29433,9 @@ static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(s
       member = __Pyx_PyBool_FromLong(s.encoding_options_set); if (unlikely(!member)) goto bad;
       if (unlikely(PyDict_SetItem(res, __pyx_n_s_encoding_options_set, member) < 0)) goto bad;
       Py_DECREF(member);
+      member = __Pyx_PyBool_FromLong(s.colors_set); if (unlikely(!member)) goto bad;
+      if (unlikely(PyDict_SetItem(res, __pyx_n_s_colors_set, member) < 0)) goto bad;
+      Py_DECREF(member);
       member = __Pyx_PyInt_From_int(s.quantization_bits); if (unlikely(!member)) goto bad;
       if (unlikely(PyDict_SetItem(res, __pyx_n_s_quantization_bits, member) < 0)) goto bad;
       Py_DECREF(member);
@@ -29381,6 +29447,9 @@ static PyObject* __pyx_convert__to_py_struct__DracoFunctions_3a__3a_MeshObject(s
       Py_DECREF(member);
       member = __Pyx_PyInt_From_enum__DracoFunctions_3a__3a_decoding_status(s.decode_status); if (unlikely(!member)) goto bad;
       if (unlikely(PyDict_SetItem(res, __pyx_n_s_decode_status, member) < 0)) goto bad;
+      Py_DECREF(member);
+      member = __pyx_convert_vector_to_py_uint8_t(s.colors); if (unlikely(!member)) goto bad;
+      if (unlikely(PyDict_SetItem(res, __pyx_n_s_colors, member) < 0)) goto bad;
       Py_DECREF(member);
       return res;
       bad:
@@ -30537,6 +30606,44 @@ raise_neg_overflow:
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(int),
+                                     little, !is_unsigned);
+    }
+}
+
+/* CIntToPy */
+    static CYTHON_INLINE PyObject* __Pyx_PyInt_From_uint8_t(uint8_t value) {
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+    const uint8_t neg_one = (uint8_t) -1, const_zero = (uint8_t) 0;
+#ifdef __Pyx_HAS_GCC_DIAGNOSTIC
+#pragma GCC diagnostic pop
+#endif
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(uint8_t) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(uint8_t) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(uint8_t) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(uint8_t) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(uint8_t) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(uint8_t),
                                      little, !is_unsigned);
     }
 }
