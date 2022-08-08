@@ -44,7 +44,7 @@ class DracoPointCloud:
         points_ = self.data_struct['points']
         N = len(points_) // 3
         return np.array(points_).reshape((N, 3))
-    
+
     @property
     def colors(self):
         if self.data_struct['colors_set']:
@@ -172,7 +172,7 @@ def encode(
     cdef vector[uint32_t] facesview
     cdef vector[uint8_t] colorsview
 
-    colors_channel = 1
+    colors_channel = 0
     if colors is not None:
         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
         assert len(colors.shape) == 2, "Colors must be 2D"
@@ -185,8 +185,7 @@ def encode(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            NULL if colors is None else &colorsview,
-            colors_channel
+            colorsview, colors_channel
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -195,8 +194,7 @@ def encode(
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            NULL if colors is None else &colorsview,
-            colors_channel
+            colorsview, colors_channel
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:

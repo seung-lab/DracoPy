@@ -19,12 +19,14 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
 
         # Encoding options
         bool encoding_options_set
+        bool colors_set
         int quantization_bits
         double quantization_range
         vector[double] quantization_origin
 
         # Represents the decoding success or error message
         decoding_status decode_status
+        vector[uint8_t] colors
 
     cdef struct MeshObject:
         vector[float] points
@@ -59,7 +61,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const float *quantization_origin,
         const bool preserve_order,
         const bool create_metadata,
-        const int integer_mark
+        const int integer_mark,
+        const vector[uint8_t] colors,
+        const uint8_t colors_channel
     ) except +
 
     EncodedObject encode_point_cloud(
@@ -70,5 +74,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const const float *quantization_origin,
         const bool preserve_order,
         const bool create_metadata,
-        const int integer_mark
+        const int integer_mark,
+        const vector[uint8_t] colors,
+        const uint8_t colors_channel
     ) except +
