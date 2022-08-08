@@ -78,9 +78,9 @@ else:
 
 setup(
     name='DracoPy',
-    version='1.1.1',
+    version='1.1.2',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
-    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez',
+    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez, Zeyu Zhao',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     long_description=read('README.md'),

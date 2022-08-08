@@ -25,11 +25,12 @@ with open('bunny_test.drc', 'wb') as test_file:
 binary = Dracopy.encode(mesh.points)
 
 # Options for encoding:
-binary = Dracopy.encode(    
+binary = Dracopy.encode(
   mesh.points, faces=mesh.faces,
   quantization_bits=14, compression_level=1,
   quantization_range=-1, quantization_origin=None,
-  create_metadata=False, preserve_order=False
+  create_metadata=False, preserve_order=False,
+  colors=mesh.colors
 )
 
 ```
@@ -45,13 +46,11 @@ Installation from source requires Python >= 3.6, pip >= 10, and a C++ compiler t
 It supports Linux, OS X, and Windows. Numpy is required.
 
 ```bash
-pip install DracoPy 
+pip install DracoPy
 ```
 
-## Acknowledgements 
+## Acknowledgements
 
-We graciously thank The Stanford 3D Scanning Repository for providing the Stanford Bunny test model. 
+We graciously thank The Stanford 3D Scanning Repository for providing the Stanford Bunny test model.
 
 https://graphics.stanford.edu/data/3Dscanrep/
-
-
