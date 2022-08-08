@@ -1,5 +1,4 @@
 import os
-from xml.etree.ElementPath import prepare_self
 import DracoPy
 import pytest
 
