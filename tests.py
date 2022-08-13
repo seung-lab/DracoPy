@@ -48,7 +48,7 @@ def test_decoding_and_encoding_mesh_file():
                                     quantization_bits=1, colors=colors,
                                     preserve_order=True)
     mesh_decode = DracoPy.decode(encoding_test4)
-    assert np.allclose(colors, mesh_decode.colors), "colors decode result is wrong"
+    assert np.array_equal(colors, mesh_decode.colors), "colors decode result is wrong"
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                     quantization_bits=30, colors=colors)
     mesh_decode = DracoPy.decode(encoding_test5)
@@ -167,7 +167,7 @@ def test_decoding_and_encoding_point_cloud_file():
                                         quantization_bits=30, preserve_order=True, colors=colors)
         ptc_decode = DracoPy.decode(encoding_test2)
         assert np.allclose(point_cloud_object.points, ptc_decode.points)
-        assert np.allclose(colors, ptc_decode.colors)
+        assert np.array_equal(colors, ptc_decode.colors)
 
         # test extreme quantization
         encoding_test3 = DracoPy.encode(point_cloud_object.points, compression_level=10,
