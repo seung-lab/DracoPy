@@ -162,7 +162,7 @@ def test_decoding_and_encoding_point_cloud_file():
 
         # test preserve_order
         np.random.shuffle(point_cloud_object.points)
-        colors = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 100]).astype(np.uint8)
+        colors = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 255]).astype(np.uint8)
         encoding_test2 = DracoPy.encode(point_cloud_object.points, compression_level=10,
                                         quantization_bits=30, preserve_order=True, colors=colors)
         ptc_decode = DracoPy.decode(encoding_test2)
