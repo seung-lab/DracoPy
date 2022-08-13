@@ -2739,7 +2739,7 @@ static const char __pyx_k_Failed_to_decode_input_mesh_Data[] = "Failed to decode
 static const char __pyx_k_Incompatible_checksums_0x_x_vs_0[] = "Incompatible checksums (0x%x vs (0xb068931, 0x82a3537, 0x6ae9995) = (name))";
 static const char __pyx_k_Indirect_dimensions_not_supporte[] = "Indirect dimensions not supported";
 static const char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, expected 'c' or 'fortran', got %s";
-static const char __pyx_k_Number_of_color_channels_must_be[] = "Number of color channels must be in range [1, 255]";
+static const char __pyx_k_Number_of_color_channels_must_be[] = "Number of color channels must be in range [1, 127]";
 static const char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on buffer access (axis %d)";
 static const char __pyx_k_Quantization_bits_must_be_in_ran[] = "Quantization bits must be in range [1, 30]";
 static const char __pyx_k_Specified_value_out_of_encoded_r[] = "Specified value out of encoded range";
@@ -3026,7 +3026,7 @@ static PyObject *__pyx_int_3;
 static PyObject *__pyx_int_10;
 static PyObject *__pyx_int_14;
 static PyObject *__pyx_int_30;
-static PyObject *__pyx_int_255;
+static PyObject *__pyx_int_127;
 static PyObject *__pyx_int_112105877;
 static PyObject *__pyx_int_136983863;
 static PyObject *__pyx_int_184977713;
@@ -6207,7 +6207,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, P
  *         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
  *         assert len(colors.shape) == 2, "Colors must be 2D"             # <<<<<<<<<<<<<<
  *         colors_channel = colors.shape[1]
- *         assert 1 <= colors_channel <= 255, "Number of color channels must be in range [1, 255]"
+ *         assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
@@ -6226,7 +6226,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, P
  *         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
  *         assert len(colors.shape) == 2, "Colors must be 2D"
  *         colors_channel = colors.shape[1]             # <<<<<<<<<<<<<<
- *         assert 1 <= colors_channel <= 255, "Number of color channels must be in range [1, 255]"
+ *         assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
  *         colorsview = colors.reshape((colors.size,))
  */
     __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_colors, __pyx_n_s_shape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 179, __pyx_L1_error)
@@ -6240,7 +6240,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, P
     /* "DracoPy.pyx":180
  *         assert len(colors.shape) == 2, "Colors must be 2D"
  *         colors_channel = colors.shape[1]
- *         assert 1 <= colors_channel <= 255, "Number of color channels must be in range [1, 255]"             # <<<<<<<<<<<<<<
+ *         assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"             # <<<<<<<<<<<<<<
  *         colorsview = colors.reshape((colors.size,))
  *
  */
@@ -6249,7 +6249,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, P
       __pyx_t_1 = PyObject_RichCompare(__pyx_int_1, __pyx_v_colors_channel, Py_LE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)
       if (__Pyx_PyObject_IsTrue(__pyx_t_1)) {
         __Pyx_DECREF(__pyx_t_1);
-        __pyx_t_1 = PyObject_RichCompare(__pyx_v_colors_channel, __pyx_int_255, Py_LE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)
+        __pyx_t_1 = PyObject_RichCompare(__pyx_v_colors_channel, __pyx_int_127, Py_LE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)
       }
       __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 180, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6262,7 +6262,7 @@ static PyObject *__pyx_pf_7DracoPy_2encode(CYTHON_UNUSED PyObject *__pyx_self, P
 
     /* "DracoPy.pyx":181
  *         colors_channel = colors.shape[1]
- *         assert 1 <= colors_channel <= 255, "Number of color channels must be in range [1, 255]"
+ *         assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
  *         colorsview = colors.reshape((colors.size,))             # <<<<<<<<<<<<<<
  *
  *     if faces is None:
@@ -23917,7 +23917,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   __pyx_int_10 = PyInt_FromLong(10); if (unlikely(!__pyx_int_10)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_14 = PyInt_FromLong(14); if (unlikely(!__pyx_int_14)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_30 = PyInt_FromLong(30); if (unlikely(!__pyx_int_30)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_255 = PyInt_FromLong(255); if (unlikely(!__pyx_int_255)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_127 = PyInt_FromLong(127); if (unlikely(!__pyx_int_127)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_112105877 = PyInt_FromLong(112105877L); if (unlikely(!__pyx_int_112105877)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_136983863 = PyInt_FromLong(136983863L); if (unlikely(!__pyx_int_136983863)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_184977713 = PyInt_FromLong(184977713L); if (unlikely(!__pyx_int_184977713)) __PYX_ERR(0, 1, __pyx_L1_error)

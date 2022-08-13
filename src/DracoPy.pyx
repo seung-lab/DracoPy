@@ -177,7 +177,7 @@ def encode(
         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
         assert len(colors.shape) == 2, "Colors must be 2D"
         colors_channel = colors.shape[1]
-        assert 1 <= colors_channel <= 255, "Number of color channels must be in range [1, 255]"
+        assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
         colorsview = colors.reshape((colors.size,))
 
     if faces is None:
