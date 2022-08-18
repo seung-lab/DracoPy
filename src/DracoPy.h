@@ -33,11 +33,13 @@ namespace DracoFunctions {
 
     // Encoding options stored in metadata
     bool encoding_options_set;
+    bool colors_set;
     int quantization_bits;
     double quantization_range;
     std::vector<double> quantization_origin;
 
     decoding_status decode_status;
+    std::vector<uint8_t> colors;
   };
 
   struct MeshObject : PointCloudObject {
@@ -122,6 +124,28 @@ namespace DracoFunctions {
       meshObject.points.push_back(pos_val[2]);
     }
 
+    const int color_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::COLOR);
+    if (color_att_id >= 0) {
+      meshObject.colors_set = true;
+      const auto *const color_att = mesh->attribute(color_att_id);
+      const int colors_channel = color_att->num_components();
+      meshObject.colors.reserve(colors_channel * mesh->num_points());
+      uint8_t* color_val = new uint8_t[colors_channel];
+      for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
+        if (!color_att->ConvertValue<uint8_t>(color_att->mapped_index(v), colors_channel, color_val)) {
+          meshObject.colors_set = false; // color decoding failed!
+          break; // it already failed
+        } else {
+          for (int i = 0; i < colors_channel; ++i) {
+            meshObject.colors.push_back(color_val[i]);
+          }
+        }
+      }
+      delete [] color_val;
+    } else {
+      meshObject.colors_set = false;
+    }
+
     const draco::GeometryMetadata *metadata = mesh->GetMetadata();
     meshObject.encoding_options_set = false;
     if (metadata) {
@@ -201,9 +225,11 @@ namespace DracoFunctions {
     const int compression_level,
     const float quantization_range,
     const float *quantization_origin,
-    const bool preserve_order = false,
-    const bool create_metadata = false,
-    const int integer_mark = 0
+    const bool preserve_order,
+    const bool create_metadata,
+    const int integer_mark,
+    const std::vector<uint8_t> &colors,
+    const uint8_t colors_channel
   ) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
@@ -240,8 +266,20 @@ namespace DracoFunctions {
                           sizeof(float) * 3,                  // byte stride
                           0);                                 // byte offset
     }
+    int color_att_id = -1;
+    if(colors_channel) {
+      draco::GeometryAttribute colors_attr;
+      colors_attr.Init(draco::GeometryAttribute::COLOR, // Attribute type
+                       nullptr,                            // data buffer
+                       colors_channel,                     // number of components
+                       draco::DT_UINT8,                    // data type
+                       true,                               // normalized
+                       sizeof(uint8_t) * colors_channel,   // byte stride
+                       0);                                 // byte offset
+      color_att_id = mesh.AddAttribute(colors_attr, true, num_pts);
+    }
 
-    const auto pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
     if (integer_mark == 1) {
       std::vector<int32_t> pts_int;
       pts_int.reserve(points.size());
@@ -250,6 +288,9 @@ namespace DracoFunctions {
       });
       for (size_t i = 0; i < num_pts; ++i) {
         mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+        if(colors_channel){
+          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
       }
     } else if (integer_mark == 2) {
       std::vector<uint32_t> pts_int;
@@ -259,10 +300,16 @@ namespace DracoFunctions {
       });
       for (size_t i = 0; i < num_pts; ++i) {
         mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+        if(colors_channel){
+          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
       }
     } else {
       for (size_t i = 0; i < num_pts; ++i) {
         mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+        if(colors_channel){
+          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
       }
     }
 
@@ -309,8 +356,10 @@ namespace DracoFunctions {
   EncodedObject encode_point_cloud(
     const std::vector<float> &points, const int quantization_bits,
     const int compression_level, const float quantization_range,
-    const float *quantization_origin, const bool preserve_order = false,
-    const bool create_metadata = false, const int integer_mark = 0
+    const float *quantization_origin, const bool preserve_order,
+    const bool create_metadata, const int integer_mark,
+    const std::vector<uint8_t> &colors,
+    const uint8_t colors_channel
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
@@ -328,8 +377,18 @@ namespace DracoFunctions {
       draco::GeometryAttribute::POSITION, 3, dtype
     );
 
-    for (draco::PointIndex i(0); i < num_points; i++) {
-      pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
+    if(colors_channel){
+      const int color_att_id = pcb.AddAttribute(
+        draco::GeometryAttribute::COLOR, colors_channel, draco::DataType::DT_UINT8
+      );
+      for (draco::PointIndex i(0); i < num_points; i++) {
+        pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
+        pcb.SetAttributeValueForPoint(color_att_id, i, colors.data() + colors_channel * i.value());
+      }
+    } else {
+      for (draco::PointIndex i(0); i < num_points; i++) {
+        pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
+      }
     }
 
     std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(!preserve_order);

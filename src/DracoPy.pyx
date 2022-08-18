@@ -15,7 +15,7 @@ cimport numpy as np
 import numpy as np
 
 
-__version__ = "1.1.1"
+__version__ = "1.2.0"
 
 
 class DracoPointCloud:
@@ -41,9 +41,18 @@ class DracoPointCloud:
 
     @property
     def points(self):
-        points = self.data_struct['points']
-        N = len(points) // 3
-        return np.array(points).reshape((N, 3))
+        points_ = self.data_struct['points']
+        N = len(points_) // 3
+        return np.array(points_).reshape((N, 3))
+
+    @property
+    def colors(self):
+        if self.data_struct['colors_set']:
+            colors_ = self.data_struct['colors']
+            N = len(self.data_struct['points']) // 3
+            return np.array(colors_).reshape((N, -1))
+        else:
+            return None
 
 class DracoMesh(DracoPointCloud):
     @property
@@ -102,14 +111,16 @@ def encode(
     points, faces=None,
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
-    create_metadata=False, preserve_order=False
+    create_metadata=False, preserve_order=False,
+    colors=None
 ) -> bytes:
     """
     bytes encode(
         points, faces=None,
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
-        create_metadata=False, preserve_order=False
+        create_metadata=False, preserve_order=False,
+        colors=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -129,6 +140,8 @@ def encode(
         preserved after compression. Setting it to True will reduce compression
         ratio (greatly) but guarantees the result points / faces are in same
         order as the input.
+    Colors is a numpy array of colors (uint8) with shape (N, K). N is the number of
+        vertices. K must be >= 1. Use None if mesh does not have colors
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -138,6 +151,7 @@ def encode(
 
     points = format_array(points)
     faces = format_array(faces)
+    colors = format_array(colors)
 
     integer_mark = 0
 
@@ -156,12 +170,22 @@ def encode(
 
     cdef vector[float] pointsview = points.reshape((points.size,))
     cdef vector[uint32_t] facesview
+    cdef vector[uint8_t] colorsview
+
+    colors_channel = 0
+    if colors is not None:
+        assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
+        assert len(colors.shape) == 2, "Colors must be 2D"
+        colors_channel = colors.shape[1]
+        assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
+        colorsview = colors.reshape((colors.size,))
 
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
-            preserve_order, create_metadata, integer_mark
+            preserve_order, create_metadata, integer_mark,
+            colorsview, colors_channel
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -169,7 +193,8 @@ def encode(
             pointsview, facesview,
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
-            preserve_order, create_metadata, integer_mark
+            preserve_order, create_metadata, integer_mark,
+            colorsview, colors_channel
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
