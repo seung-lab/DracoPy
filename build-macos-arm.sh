@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/bin/sh
 
 function build {
 	python setup-macos-arm.py develop
