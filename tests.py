@@ -65,6 +65,11 @@ def test_decoding_and_encoding_mesh_file():
         assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
         assert len(mesh.faces) == EXPECTED_FACES_BUNNY
 
+    with pytest.raises(AssertionError):
+        invalid_c = np.random.randint(0, 255, [mesh.points.shape[0], 128]).astype(np.uint8)
+        invalid_m = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
+                                   quantization_bits=26, colors=invalid_c)
+
 def test_decoding_and_encoding_mesh_file_integer_positions():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         file_content = draco_file.read()
@@ -184,3 +189,8 @@ def test_decoding_and_encoding_point_cloud_file():
         point_cloud_object = DracoPy.decode(file_content)
         assert (point_cloud_object.encoding_options) is None
         assert len(point_cloud_object.points) == EXPECTED_POINTS_BUNNY_PTC
+
+    with pytest.raises(AssertionError):
+        invalid_c = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 128]).astype(np.uint8)
+        invalid_m = DracoPy.encode(point_cloud_object.points, compression_level=1,
+                                   quantization_bits=26, colors=invalid_c)
