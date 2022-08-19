@@ -49,8 +49,10 @@ def test_decoding_and_encoding_mesh_file():
                                     preserve_order=True)
     mesh_decode = DracoPy.decode(encoding_test4)
     assert np.array_equal(colors, mesh_decode.colors), "colors decode result is wrong"
+
+    # Setting quantization_bits 26 here. Larger value causes MemoryError on 32bit systems.
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
-                                    quantization_bits=30, colors=colors)
+                                    quantization_bits=26, colors=colors)
     mesh_decode = DracoPy.decode(encoding_test5)
     assert mesh_decode.colors is not None, "colors should present"
 
@@ -62,6 +64,11 @@ def test_decoding_and_encoding_mesh_file():
         assert (mesh.encoding_options) is None
         assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
         assert len(mesh.faces) == EXPECTED_FACES_BUNNY
+
+    with pytest.raises(AssertionError):
+        invalid_c = np.random.randint(0, 255, [mesh.points.shape[0], 128]).astype(np.uint8)
+        invalid_m = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
+                                   quantization_bits=26, colors=invalid_c)
 
 def test_decoding_and_encoding_mesh_file_integer_positions():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
@@ -164,7 +171,7 @@ def test_decoding_and_encoding_point_cloud_file():
         np.random.shuffle(point_cloud_object.points)
         colors = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 127]).astype(np.uint8)
         encoding_test2 = DracoPy.encode(point_cloud_object.points, compression_level=10,
-                                        quantization_bits=30, preserve_order=True, colors=colors)
+                                        quantization_bits=26, preserve_order=True, colors=colors)
         ptc_decode = DracoPy.decode(encoding_test2)
         assert np.allclose(point_cloud_object.points, ptc_decode.points)
         assert np.array_equal(colors, ptc_decode.colors)
@@ -182,3 +189,8 @@ def test_decoding_and_encoding_point_cloud_file():
         point_cloud_object = DracoPy.decode(file_content)
         assert (point_cloud_object.encoding_options) is None
         assert len(point_cloud_object.points) == EXPECTED_POINTS_BUNNY_PTC
+
+    with pytest.raises(AssertionError):
+        invalid_c = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 128]).astype(np.uint8)
+        invalid_m = DracoPy.encode(point_cloud_object.points, compression_level=1,
+                                   quantization_bits=26, colors=invalid_c)
