@@ -31,6 +31,7 @@ jobs:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install oldest-supported-numpy scikit-build 
           CPPFLAGS: -I/usr/local/opt/zlib/include
           LDFLAGS: -L/usr/local/opt/zlib/lib
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
 
       - uses: actions/upload-artifact@v2
         with:
