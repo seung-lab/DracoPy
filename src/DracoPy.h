@@ -185,7 +185,7 @@ namespace DracoFunctions {
       }
       meshObject.normals.push_back(normal_val[0]);
       meshObject.normals.push_back(normal_val[1]);
-      meshObject.normals.push_back(normal_val[3]);
+      meshObject.normals.push_back(normal_val[2]);
     }
 
     meshObject.decode_status = successful;
