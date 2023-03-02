@@ -67,6 +67,15 @@ class DracoMesh(DracoPointCloud):
         N = len(normals_) // 3
         return np.array(normals_).reshape((N,3))
 
+    @property
+    def tex_coord(self):
+        tex_coord_ = self.data_struct['tex_coord']
+        if len(tex_coord_) == 0:
+            return np.array([], dtype=tex_coord_.dtype)
+        N = len(self.data_struct['points']) // 3
+        NC = len(tex_coord_) // N
+        return np.array(tex_coord_).reshape((N, NC))
+
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
         self.quantization_bits = quantization_bits

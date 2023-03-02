@@ -20,6 +20,7 @@ namespace DracoFunctions {
     successful,
     not_draco_encoded,
     no_position_attribute,
+    no_tex_coord_attribute,
     no_normal_coord_attribute,
     failed_during_decoding
   };
@@ -45,6 +46,7 @@ namespace DracoFunctions {
   struct MeshObject : PointCloudObject {
     std::vector<float> normals;
     std::vector<unsigned int> faces;
+    std::vector<float> tex_coord;
   };
 
   struct EncodedObject {
@@ -144,6 +146,24 @@ namespace DracoFunctions {
       delete [] color_val;
     } else {
       meshObject.colors_set = false;
+    }
+
+    const int tex_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::TEX_COORD);
+    if (tex_att_id >= 0) {
+      const auto *const tex_att = mesh->attribute(tex_att_id);
+      const int tex_channel = tex_att->num_components();
+      meshObject.tex_coord.reserve(tex_channel * mesh->num_points());
+      float* tex_val = new float[tex_channel];
+      for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
+        if (!tex_att->ConvertValue<float>(tex_att->mapped_index(v), tex_channel, tex_val)) {
+          break; // it already failed
+        } else {
+          for (int i = 0; i < tex_channel; ++i) {
+            meshObject.tex_coord.push_back(tex_val[i]);
+          }
+        }
+      }
+      delete [] tex_val;
     }
 
     const draco::GeometryMetadata *metadata = mesh->GetMetadata();

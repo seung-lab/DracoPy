@@ -33,8 +33,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[float] points
         vector[unsigned int] faces
 
-        # TODO: add support for normals, which are not currently supported.
         vector[float] normals
+        vector[float] tex_coord
 
         # Encoding options
         bool encoding_options_set
