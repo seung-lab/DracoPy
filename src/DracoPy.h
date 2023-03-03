@@ -156,7 +156,8 @@ namespace DracoFunctions {
       float* tex_val = new float[tex_channel];
       for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
         if (!tex_att->ConvertValue<float>(tex_att->mapped_index(v), tex_channel, tex_val)) {
-          break; // it already failed
+          meshObject.decode_status = no_tex_coord_attribute;
+          break;
         } else {
           for (int i = 0; i < tex_channel; ++i) {
             meshObject.tex_coord.push_back(tex_val[i]);
