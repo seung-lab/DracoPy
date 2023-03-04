@@ -71,7 +71,7 @@ class DracoMesh(DracoPointCloud):
     def tex_coord(self):
         tex_coord_ = self.data_struct['tex_coord']
         if len(tex_coord_) == 0:
-            return np.array([], dtype=tex_coord_.dtype)
+            return None
         N = len(self.data_struct['points']) // 3
         NC = len(tex_coord_) // N
         return np.array(tex_coord_).reshape((N, NC))
