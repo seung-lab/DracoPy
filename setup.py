@@ -5,7 +5,6 @@ import sys
 
 from skbuild import setup
 from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
-from packaging.version import LegacyVersion
 from skbuild.exceptions import SKBuildError
 from skbuild.cmaker import get_cmake_version
 
@@ -21,12 +20,7 @@ def read(fname):
 
 # Add CMake as a build requirement if cmake is not installed or is too low a version
 setup_requires = []
-try:
-    cmake_version = LegacyVersion(get_cmake_version())
-    if cmake_version < LegacyVersion("3.5") or cmake_version >= LegacyVersion("3.15"):
-        setup_requires.append('cmake<3.15')
-except SKBuildError:
-    setup_requires.append('cmake<3.15')
+setup_requires.append('cmake<3.15')
 
 # If you want to re-build the cython cpp file (DracoPy.cpp), run:
 # cython --cplus -3 -I./_skbuild/linux-x86_64-3.6/cmake-install/include/draco/ ./src/DracoPy.pyx
