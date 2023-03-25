@@ -83,11 +83,11 @@ setup(
     cmake_source_dir='./draco',
     cmake_args=cmake_args,
     setup_requires=setup_requires,
-    install_requires=['pytest'],
+    install_requires=['cython'],
     ext_modules=[
         setuptools.Extension(
             'DracoPy',
-            sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
+            sources=[ os.path.join(src_dir, 'DracoPy.pyx') ],
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
             include_dirs = [
