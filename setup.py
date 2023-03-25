@@ -19,7 +19,7 @@ def read(fname):
     return f.read()
 
 # Add CMake as a build requirement if cmake is not installed or is too low a version
-setup_requires = []
+setup_requires = ['cython']
 setup_requires.append('cmake<3.15')
 
 # If you want to re-build the cython cpp file (DracoPy.cpp), run:
@@ -83,7 +83,6 @@ setup(
     cmake_source_dir='./draco',
     cmake_args=cmake_args,
     setup_requires=setup_requires,
-    install_requires=['cython'],
     ext_modules=[
         setuptools.Extension(
             'DracoPy',

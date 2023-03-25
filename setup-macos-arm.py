@@ -10,8 +10,6 @@ def read(fname):
   with open(os.path.join(os.path.dirname(__file__), fname), 'rt') as f:
     return f.read()
 
-setup_requires = []
-
 src_dir = './src'
 
 setuptools.setup(
@@ -24,11 +22,12 @@ setuptools.setup(
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
     license = "License :: OSI Approved :: Apache Software License",
-    install_requires=['numpy','pytest'],
+    setup_requires=['cython'],
+    install_requires=['numpy'],
     ext_modules=[
         setuptools.Extension(
             'DracoPy',
-            sources=[ os.path.join(src_dir, 'DracoPy.cpp') ],
+            sources=[ os.path.join(src_dir, 'DracoPy.pyx') ],
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
             include_dirs = [
