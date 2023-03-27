@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* pp* *-musllinux*
+  CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* cp36-* pp* *-musllinux*
 
 jobs:
   build_wheels:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-20.04, macos-latest, windows-2019]
         arch: [auto]
         include:
           - os: ubuntu-20.04
@@ -22,13 +22,13 @@ jobs:
 
       - name: Set up QEMU
         if:  ${{ matrix.arch == 'aarch64' }}
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Build wheels
-        uses: joerick/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.12.1
         # to supply options, put them in 'env', like:
         env:
-          CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install oldest-supported-numpy scikit-build 
+          CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install cython oldest-supported-numpy scikit-build 
           CPPFLAGS: -I/usr/local/opt/zlib/include
           LDFLAGS: -L/usr/local/opt/zlib/lib
           CIBW_ARCHS_MACOS: "x86_64 arm64"
