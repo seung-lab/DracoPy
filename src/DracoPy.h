@@ -250,7 +250,9 @@ namespace DracoFunctions {
     const bool create_metadata,
     const int integer_mark,
     const std::vector<uint8_t> &colors,
-    const uint8_t colors_channel
+    const uint8_t colors_channel,
+    const std::vector<float> &tex_coord,
+    const uint8_t tex_coord_channel
   ) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
@@ -290,7 +292,7 @@ namespace DracoFunctions {
     int color_att_id = -1;
     if(colors_channel) {
       draco::GeometryAttribute colors_attr;
-      colors_attr.Init(draco::GeometryAttribute::COLOR, // Attribute type
+      colors_attr.Init(draco::GeometryAttribute::COLOR,    // Attribute type
                        nullptr,                            // data buffer
                        colors_channel,                     // number of components
                        draco::DT_UINT8,                    // data type
@@ -298,6 +300,18 @@ namespace DracoFunctions {
                        sizeof(uint8_t) * colors_channel,   // byte stride
                        0);                                 // byte offset
       color_att_id = mesh.AddAttribute(colors_attr, true, num_pts);
+    }
+    int tex_coord_att_id = -1;
+    if(tex_coord_channel) {
+      draco::GeometryAttribute tex_coord_attr;
+      tex_coord_attr.Init(draco::GeometryAttribute::TEX_COORD, // Attribute type
+                          nullptr,                             // data buffer
+                          tex_coord_channel,                   // number of components
+                          draco::DT_FLOAT32,                   // data type
+                          true,                                // normalized
+                          sizeof(float) * tex_coord_channel,   // byte stride
+                          0);                                  // byte offset
+      tex_coord_att_id = mesh.AddAttribute(tex_coord_attr, true, num_pts);
     }
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
@@ -308,9 +322,12 @@ namespace DracoFunctions {
         return lrint(x);
       });
       for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
         if(colors_channel){
-          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
+        if(tex_coord_channel){
+          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
         }
       }
     } else if (integer_mark == 2) {
@@ -320,16 +337,22 @@ namespace DracoFunctions {
         return (x <= 0.f)? 0: (uint32_t)(x + 0.5);
       });
       for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
         if(colors_channel){
-          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
+        if(tex_coord_channel){
+          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
         }
       }
     } else {
       for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
         if(colors_channel){
-          mesh.attribute(color_att_id) ->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+        }
+        if(tex_coord_channel){
+          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
         }
       }
     }
