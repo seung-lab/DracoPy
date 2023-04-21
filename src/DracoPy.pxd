@@ -64,7 +64,9 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const bool create_metadata,
         const int integer_mark,
         const vector[uint8_t] colors,
-        const uint8_t colors_channel
+        const uint8_t colors_channel,
+        const vector[float] tex_coord,
+        const uint8_t tex_coord_channel,
     ) except +
 
     EncodedObject encode_point_cloud(

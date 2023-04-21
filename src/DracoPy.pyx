@@ -106,14 +106,14 @@ class FileTypeException(Exception):
 class EncodingFailedException(Exception):
     pass
 
-def format_array(arr):
+def format_array(arr, col=3):
     if arr is None:
         return None
 
     if not isinstance(arr, np.ndarray):
         arr = np.array(arr)
     if arr.ndim == 1:
-        arr = arr.reshape((len(arr) // 3, 3))
+        arr = arr.reshape((len(arr) // col, col))
     return arr
 
 def encode(
@@ -121,7 +121,7 @@ def encode(
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
-    colors=None
+    colors=None, tex_coord=None
 ) -> bytes:
     """
     bytes encode(
@@ -129,7 +129,7 @@ def encode(
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
-        colors=None
+        colors=None, tex_coord=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -161,6 +161,7 @@ def encode(
     points = format_array(points)
     faces = format_array(faces)
     colors = format_array(colors)
+    tex_coord = format_array(tex_coord, col=2)
 
     integer_mark = 0
 
@@ -180,6 +181,7 @@ def encode(
     cdef vector[float] pointsview = points.reshape((points.size,))
     cdef vector[uint32_t] facesview
     cdef vector[uint8_t] colorsview
+    cdef vector[float] texcoordview
 
     colors_channel = 0
     if colors is not None:
@@ -188,6 +190,14 @@ def encode(
         colors_channel = colors.shape[1]
         assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
         colorsview = colors.reshape((colors.size,))
+
+    tex_coord_channel = 0
+    if tex_coord is not None:
+        assert np.issubdtype(tex_coord.dtype, np.float), "Tex coord must be float"
+        assert len(tex_coord.shape) == 2, "Tex coord must be 2D"
+        tex_coord_channel = tex_coord.shape[1]
+        assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"
+        texcoordview = tex_coord.reshape((tex_coord.size,))
 
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
@@ -203,7 +213,7 @@ def encode(
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel
+            colorsview, colors_channel, texcoordview, tex_coord_channel
         )
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:

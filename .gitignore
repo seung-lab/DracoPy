@@ -9,3 +9,4 @@ bunny_test.drc
 *secret.json
 __pycache__/
 .eggs/
+src/DracoPy.cpp
