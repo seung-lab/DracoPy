@@ -195,7 +195,7 @@ def encode(
 
     tex_coord_channel = 0
     if tex_coord is not None:
-        assert np.issubdtype(tex_coord.dtype, np.float), "Tex coord must be float"
+        assert np.issubdtype(tex_coord.dtype, float), "Tex coord must be float"
         assert len(tex_coord.shape) == 2, "Tex coord must be 2D"
         tex_coord_channel = tex_coord.shape[1]
         assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"
