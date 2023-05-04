@@ -151,6 +151,8 @@ def encode(
         order as the input.
     Colors is a numpy array of colors (uint8) with shape (N, K). N is the number of
         vertices. K must be >= 1. Use None if mesh does not have colors
+    Tex coord is a numpy array of texture coordinates (float) with shape (N, 2). N is the number of
+        vertices. Use None if mesh does not have texture coordinates.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -193,7 +195,7 @@ def encode(
 
     tex_coord_channel = 0
     if tex_coord is not None:
-        assert np.issubdtype(tex_coord.dtype, np.float), "Tex coord must be float"
+        assert np.issubdtype(tex_coord.dtype, float), "Tex coord must be float"
         assert len(tex_coord.shape) == 2, "Tex coord must be 2D"
         tex_coord_channel = tex_coord.shape[1]
         assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"

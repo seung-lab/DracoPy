@@ -42,6 +42,7 @@ def test_decoding_and_encoding_mesh_file():
     assert mesh_decode.colors is None, "colors should not present"
 
     colors = np.random.randint(0, 255, [mesh.points.shape[0], 16]).astype(np.uint8)
+    tex_coord = np.random.random([mesh.points.shape[0], 2])
 
     # test extreme quantization
     encoding_test4 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
@@ -52,9 +53,10 @@ def test_decoding_and_encoding_mesh_file():
 
     # Setting quantization_bits 26 here. Larger value causes MemoryError on 32bit systems.
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
-                                    quantization_bits=26, colors=colors)
+                                    quantization_bits=26, colors=colors, tex_coord=tex_coord)
     mesh_decode = DracoPy.decode(encoding_test5)
     assert mesh_decode.colors is not None, "colors should present"
+    assert mesh_decode.tex_coord is not None, "tex_coord should present"
 
     with open(os.path.join(testdata_directory, "bunny_test.drc"), "wb") as test_file:
         test_file.write(encoding_test)
