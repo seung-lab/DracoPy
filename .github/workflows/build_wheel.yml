@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp36-* pp* *-musllinux*
+  CIBW_SKIP: cp36-* cp312-* pp* *-musllinux*
 
 jobs:
   build_wheels:
