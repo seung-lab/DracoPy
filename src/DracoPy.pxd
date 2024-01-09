@@ -74,7 +74,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const int quantization_bits,
         const int compression_level,
         const float quantization_range,
-        const const float *quantization_origin,
+        const float *quantization_origin,
         const bool preserve_order,
         const bool create_metadata,
         const int integer_mark,

@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp27-* cp33-* cp34-* cp35-* cp36-* pp* *-musllinux*
+  CIBW_SKIP: cp36-* cp312-* pp* *-musllinux*
 
 jobs:
   build_wheels:
@@ -25,7 +25,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.1
+        uses: pypa/cibuildwheel@v2.15.0
         # to supply options, put them in 'env', like:
         env:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install cython oldest-supported-numpy scikit-build 
@@ -33,6 +33,6 @@ jobs:
           LDFLAGS: -L/usr/local/opt/zlib/lib
           CIBW_ARCHS_MACOS: "x86_64 arm64"
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
