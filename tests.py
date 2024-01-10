@@ -42,7 +42,7 @@ def test_decoding_and_encoding_mesh_file():
     assert mesh_decode.colors is None, "colors should not present"
 
     colors = np.random.randint(0, 255, [mesh.points.shape[0], 16]).astype(np.uint8)
-    tex_coord = np.random.random([mesh.points.shape[0], 2])
+    tex_coord = np.random.random([mesh.points.shape[0], 2]).astype(float)
 
     # test extreme quantization
     encoding_test4 = DracoPy.encode(mesh.points, mesh.faces, compression_level=10,
@@ -55,6 +55,20 @@ def test_decoding_and_encoding_mesh_file():
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                     quantization_bits=26, colors=colors, tex_coord=tex_coord)
     mesh_decode = DracoPy.decode(encoding_test5)
+    
+    #this is very slow
+    # from tqdm import tqdm
+    # ptmap = {}
+    # for pt in tqdm(mesh.points):
+    #     for i in range(len(mesh.points)):
+    #         if np.all(np.isclose(pt, mesh.points[i])):
+    #             ptmap[tuple(pt)] = i
+    #             break
+
+    # for i, pt in enumerate(mesh_decode.points):
+    #     pt = tuple(pt)
+    #     assert np.all(np.isclose(mesh.tex_coord[ptmap[pt]], mesh_decode.tex_coord[i]))
+
     assert mesh_decode.colors is not None, "colors should present"
     assert mesh_decode.tex_coord is not None, "tex_coord should present"
 
@@ -71,6 +85,43 @@ def test_decoding_and_encoding_mesh_file():
         invalid_c = np.random.randint(0, 255, [mesh.points.shape[0], 128]).astype(np.uint8)
         invalid_m = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                    quantization_bits=26, colors=invalid_c)
+
+def test_tex_coord_encoding():
+    points = np.array([
+        [0,0,0],
+        [1,0,0],
+        [1,1,0],
+        [0,1,0],
+    ])
+    faces = np.array([[0,1,2], [0,3,2]])
+    # tex_coord = np.random.random([len(points), 2]).astype(float)
+    tex_coord = np.array([
+        [0.0, 0.1],
+        [0.2, 0.3],
+        [0.4, 0.5],
+        [0.6, 0.7],
+    ])
+
+    encoded = DracoPy.encode(
+        points, faces, 
+        compression_level=1,
+        quantization_bits=26, 
+        # colors=colors, 
+        tex_coord=tex_coord
+    )
+    mesh = DracoPy.decode(encoded)
+
+    ptmap = {}
+    for pt in mesh.points:
+        for i in range(len(points)):
+            if np.all(pt == points[i]):
+                ptmap[tuple(pt)] = i
+                break
+
+    for i, pt in enumerate(mesh.points):
+        pt = tuple(pt)
+        assert np.all(np.isclose(tex_coord[ptmap[pt]], mesh.tex_coord[i]))
+
 
 def test_decoding_and_encoding_mesh_file_integer_positions():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
