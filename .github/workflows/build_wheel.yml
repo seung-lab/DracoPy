@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp36-* cp312-* pp* *-musllinux*
+  CIBW_SKIP: cp36-* pp* *-musllinux*
 
 jobs:
   build_wheels:
@@ -11,10 +11,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest, windows-2019]
+        os: [ubuntu-latest, macos-latest, windows-2019]
         arch: [auto]
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: aarch64
 
     steps:
@@ -25,7 +25,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.15.0
+        uses: pypa/cibuildwheel@v2.16.2
         # to supply options, put them in 'env', like:
         env:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install cython oldest-supported-numpy scikit-build 
