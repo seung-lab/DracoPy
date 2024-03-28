@@ -1,5 +1,4 @@
 [![PyPI version](https://badge.fury.io/py/DracoPy.svg)](https://badge.fury.io/py/DracoPy)
-[![Build Status](https://travis-ci.org/seung-lab/DracoPy.svg?branch=master)](https://travis-ci.org/seung-lab/DracoPy)
 
 # DracoPy
 
