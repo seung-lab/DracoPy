@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp36-* pp* *-musllinux*
+  CIBW_SKIP: cp36-* pp* *-musllinux* cp312-manylinux_i686
 
 jobs:
   build_wheels:
@@ -14,7 +14,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-2019]
         arch: [auto]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             arch: aarch64
 
     steps:
