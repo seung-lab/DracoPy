@@ -24,6 +24,9 @@ jobs:
         if:  ${{ matrix.arch == 'aarch64' }}
         uses: docker/setup-qemu-action@v2
 
+      - name: Install CMake
+        uses: ssrobins/install-cmake@v1
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
         # to supply options, put them in 'env', like:
