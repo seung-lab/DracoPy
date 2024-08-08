@@ -8,8 +8,16 @@ from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
 from skbuild.exceptions import SKBuildError
 from skbuild.cmaker import get_cmake_version
 
-import numpy as np
 import multiprocessing as mp
+
+class NumpyImport:
+  def __repr__(self):
+    import numpy as np
+
+    return np.get_include()
+
+  __fspath__ = __repr__
+
 
 if not "CMAKE_BUILD_PARALLEL_LEVEL" in os.environ:
     os.environ["CMAKE_BUILD_PARALLEL_LEVEL"] = str(mp.cpu_count())
@@ -90,7 +98,7 @@ setup(
             depends=[ os.path.join(src_dir, 'DracoPy.h') ],
             language='c++',
             include_dirs = [
-                np.get_include(),
+                str(NumpyImport()),
                 os.path.join(CMAKE_INSTALL_DIR(), 'include/'),
             ],
             extra_compile_args=extra_compile_args,

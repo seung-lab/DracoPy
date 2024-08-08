@@ -3,5 +3,5 @@ requires = [
 	"setuptools",
 	"scikit-build >= 0.9.0",
 	"wheel",
-	"oldest-supported-numpy"
+	"numpy"
 ]
