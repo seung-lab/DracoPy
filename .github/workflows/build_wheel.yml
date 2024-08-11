@@ -28,7 +28,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.19.1
         # to supply options, put them in 'env', like:
         env:
-          CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install --user --break-system-packages cython numpy scikit-build
+          CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install cython numpy scikit-build
           CPPFLAGS: -I/usr/local/opt/zlib/include
           LDFLAGS: -L/usr/local/opt/zlib/lib
           CIBW_ARCHS_MACOS: "x86_64 arm64"
