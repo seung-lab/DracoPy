@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp36-* cp37* pp* *-musllinux* cp312*
+  CIBW_SKIP: cp36-* cp37* pp* *-musllinux* 
 
 jobs:
   build_wheels:
@@ -23,6 +23,12 @@ jobs:
       - name: Set up QEMU
         if:  ${{ matrix.arch == 'aarch64' }}
         uses: docker/setup-qemu-action@v2
+
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        # with:
+        #   cmake-version: '3.16.x'
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.19.1
