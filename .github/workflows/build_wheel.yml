@@ -13,9 +13,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-2019]
         arch: [auto]
-        include:
-          - os: ubuntu-20.04
-            arch: aarch64
+        # include:
+        #   - os: ubuntu-20.04
+        #     arch: aarch64
 
     steps:
       - uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
           CPPFLAGS: -I/usr/local/opt/zlib/include
           LDFLAGS: -L/usr/local/opt/zlib/lib
           CIBW_ARCHS_MACOS: "x86_64 arm64"
-          CIBW_ARCHS_LINUX: "auto aarch64"
+          CIBW_ARCHS_LINUX: "auto"
 
       - uses: actions/upload-artifact@v3
         with:
