@@ -19,10 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up QEMU
+      - name: Install OpenSSL
         if:  ${{ matrix.arch == 'aarch64' }}
-        uses: docker/setup-qemu-action@v2
-
+        run: sudo apt-get update && sudo apt-get install -y libssl-dev
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2
