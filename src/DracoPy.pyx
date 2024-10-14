@@ -13,9 +13,7 @@ from libc.stdint cimport (
 
 cimport numpy as np
 import numpy as np
-
-
-__version__ = "1.4.0"
+np.import_array()
 
 
 class DracoPointCloud:
