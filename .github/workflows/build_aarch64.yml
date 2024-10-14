@@ -27,6 +27,9 @@ jobs:
         if:  ${{ matrix.arch == 'aarch64' }}
         run: sudo apt-get update && sudo apt-get install -y libssl-dev
 
+      - name: Set OpenSSL path
+        run: echo "OPENSSL_ROOT_DIR=/usr" >> $GITHUB_ENV
+
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2
         # with:
