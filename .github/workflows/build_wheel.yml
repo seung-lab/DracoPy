@@ -13,9 +13,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-2019]
         arch: [auto]
-        # include:
-        #   - os: ubuntu-20.04
-        #     arch: aarch64
 
     steps:
       - uses: actions/checkout@v2
@@ -37,7 +34,7 @@ jobs:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install "cmake>=3.30.2" && pip install cython numpy scikit-build
           CPPFLAGS: -I/usr/local/opt/zlib/include
           LDFLAGS: -L/usr/local/opt/zlib/lib
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
+          CIBW_ARCHS_MACOS: "x86_64"
           CIBW_ARCHS_LINUX: "auto"
 
       - uses: actions/upload-artifact@v3
