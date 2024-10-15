@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 function build {
 	python setup-macos-arm.py develop
@@ -7,9 +7,9 @@ function build {
 }
 
 rm -r .eggs build *.so
-make 
+make -j 7
 
-for venv in dracopy38 dracopy39 dracopy310 dracopy311
+for venv in dracopy38 dracopy39 dracopy310 dracopy311 dracopy312;
 do
 	echo $venv
 	workon $venv

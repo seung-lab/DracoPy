@@ -14,7 +14,7 @@ src_dir = './src'
 
 setuptools.setup(
     name='DracoPy',
-    version='1.4.0',
+    version='1.4.1',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez, Zeyu Zhao, Denis Riviere',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
@@ -46,11 +46,11 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering",
         "Operating System :: POSIX",
         "Operating System :: MacOS",
