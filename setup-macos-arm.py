@@ -35,7 +35,7 @@ setuptools.setup(
                 np.get_include(),
             ],
             extra_compile_args=[
-              '-std=c++11','-O3', '-stdlib=libc++'
+              '-std=c++17','-O3', '-stdlib=libc++'
             ],
             extra_link_args=[ "-ldraco" ],
         )

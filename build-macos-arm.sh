@@ -1,6 +1,13 @@
 #!/bin/zsh
 
+source /usr/local/bin/virtualenvwrapper.sh
+
+export ARCHFLAGS="-arch arm64"
+
 function build {
+	pip install numpy cython -U
+	rm src/DracoPy.cpp
+	cython -3 src/DracoPy.pyx
 	python setup-macos-arm.py develop
 	python -m pytest -v -x tests.py
 	python setup-macos-arm.py bdist_wheel	

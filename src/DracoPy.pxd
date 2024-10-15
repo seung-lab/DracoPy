@@ -3,8 +3,10 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint8_t, uint32_t
 from libcpp cimport bool
 
-cimport numpy
+cimport numpy as cnp
 import numpy as np
+
+cnp.import_array()
 
 cdef extern from "DracoPy.h" namespace "DracoFunctions":
 

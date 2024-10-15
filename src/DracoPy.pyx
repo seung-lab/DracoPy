@@ -11,10 +11,10 @@ from libc.stdint cimport (
   uint8_t, uint16_t, uint32_t, uint64_t,
 )
 
-cimport numpy as np
-import numpy as np
-np.import_array()
+cimport numpy as cnp
+cnp.import_array()
 
+import numpy as np
 
 class DracoPointCloud:
     def __init__(self, data_struct):
@@ -170,7 +170,7 @@ def encode(
     elif np.issubdtype(points.dtype, np.unsignedinteger):
         integer_mark = 2
 
-    cdef np.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
+    cdef cnp.ndarray[float, ndim=1] qorigin = np.zeros((3,), dtype=np.float32)
     cdef float[:] quant_origin = qorigin
 
     if quantization_origin is not None:
