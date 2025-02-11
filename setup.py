@@ -2,6 +2,7 @@ import setuptools
 import os
 import platform
 import sys
+import shutil
 
 from skbuild import setup
 from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
@@ -77,6 +78,9 @@ else:
     extra_compile_args = [
       '-std=c++11','-O3'
     ]
+
+if os.path.exists(".eggs"):
+    shutil.rmtree(".eggs")
 
 setup(
     name='DracoPy',
