@@ -94,6 +94,7 @@ setup(
     license = "License :: OSI Approved :: Apache Software License",
     cmake_source_dir='./draco',
     cmake_args=cmake_args,
+    build_args=['--verbose'],
     setup_requires=setup_requires,
     ext_modules=[
         setuptools.Extension(
