@@ -1,5 +1,5 @@
 # distutils: language = c++
-from typing import Union, cast
+from typing import Union, cast, Dict, List, Optional
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
@@ -49,6 +49,16 @@ class DracoPointCloud:
             colors_ = self.data_struct['colors']
             N = len(self.data_struct['points']) // 3
             return np.array(colors_).reshape((N, -1))
+        else:
+            return None
+            
+    @property
+    def custom_attributes(self):
+        if 'custom_attributes' in self.data_struct and len(self.data_struct['custom_attributes']) > 0:
+            attrs = {}
+            for i, name in enumerate(self.data_struct['attribute_names']):
+                attrs[name.decode('utf-8')] = np.array(self.data_struct['custom_attributes'][i])
+            return attrs
         else:
             return None
 
@@ -119,7 +129,8 @@ def encode(
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
-    colors=None, tex_coord=None, normals=None
+    colors=None, tex_coord=None, normals=None,
+    custom_attributes=None, attribute_names=None
 ) -> bytes:
     """
     bytes encode(
@@ -127,7 +138,8 @@ def encode(
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
-        colors=None, tex_coord=None, normals=None
+        colors=None, tex_coord=None, normals=None,
+        custom_attributes=None, attribute_names=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -153,6 +165,9 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
+    Custom_attributes is a list of numpy arrays of custom attribute values (float) with shape (N,).
+        N is the number of vertices. Each array corresponds to one custom attribute.
+    Attribute_names is a list of strings specifying names for each custom attribute.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -186,6 +201,8 @@ def encode(
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
     cdef vector[float] normalsview
+    cdef vector[vector[float]] custom_attrib_view
+    cdef vector[string] attrib_names_view
 
     colors_channel = 0
     if colors is not None:
@@ -203,20 +220,33 @@ def encode(
         assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"
         texcoordview = tex_coord.reshape((tex_coord.size,))
 
-
     has_normals = 0
     if normals is not None:
         assert np.issubdtype(normals.dtype, float), "Normals must be float"
         assert normals.shape[1] == 3, "Normals must have 3 components"
         has_normals = 1
         normalsview = normals.reshape((normals.size,))
+        
+    # Handle custom attributes
+    if custom_attributes is not None:
+        assert attribute_names is not None, "Must provide attribute_names with custom_attributes"
+        assert len(custom_attributes) == len(attribute_names), "Number of custom attributes must match number of attribute names"
+        
+        for i, (name, values) in enumerate(zip(attribute_names, custom_attributes)):
+            assert isinstance(name, str), f"Attribute name at index {i} must be a string"
+            attr_values = np.asarray(values, dtype=np.float32)
+            assert len(attr_values) == len(points), f"Attribute '{name}' must have same length as points"
+            
+            custom_attrib_view.push_back(attr_values)
+            attrib_names_view.push_back(name.encode('utf-8'))
 
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel
+            colorsview, colors_channel,
+            custom_attrib_view, attrib_names_view
         )
     else:
         facesview = faces.reshape((faces.size,))
@@ -226,9 +256,9 @@ def encode(
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
             colorsview, colors_channel, texcoordview, tex_coord_channel,
-            normalsview, has_normals  # Add these two parameters
+            normalsview, has_normals,
+            custom_attrib_view, attrib_names_view
         )
-
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
         return bytes(encoded.buffer)

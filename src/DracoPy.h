@@ -41,6 +41,9 @@ namespace DracoFunctions {
 
     decoding_status decode_status;
     std::vector<uint8_t> colors;
+
+    std::vector<std::vector<float>> custom_attributes;
+    std::vector<std::string> attribute_names;
   };
 
   struct MeshObject : PointCloudObject {
@@ -176,14 +179,58 @@ namespace DracoFunctions {
           meshObject.encoding_options_set = true;
       }
     }
+    int num_custom_attributes = 0;
+    if (metadata && metadata->GetEntryInt("num_custom_attributes", &num_custom_attributes) && num_custom_attributes > 0)
+    {
+      meshObject.attribute_names.resize(num_custom_attributes);
+      meshObject.custom_attributes.resize(num_custom_attributes);
 
-    if (geotype == draco::EncodedGeometryType::POINT_CLOUD) {
+      std::vector<int> attr_ids(num_custom_attributes, -1);
+
+      // First, collect all attribute IDs and names
+      for (int i = 0; i < num_custom_attributes; ++i)
+      {
+        std::string name;
+        int attr_id;
+        if (metadata->GetEntryString("attr_name_" + std::to_string(i), &name) &&
+            metadata->GetEntryInt("attr_id_" + std::to_string(i), &attr_id))
+        {
+          meshObject.attribute_names[i] = name;
+          attr_ids[i] = attr_id;
+        }
+      }
+
+      // Then, extract all custom attribute values
+      for (int i = 0; i < num_custom_attributes; ++i)
+      {
+        if (attr_ids[i] >= 0)
+        {
+          const auto *const attr = mesh->attribute(attr_ids[i]);
+          if (attr)
+          {
+            meshObject.custom_attributes[i].resize(mesh->num_points());
+            float attr_val;
+            for (draco::PointIndex v(0); v < mesh->num_points(); ++v)
+            {
+              if (attr->ConvertValue<float>(attr->mapped_index(v), 1, &attr_val))
+              {
+                meshObject.custom_attributes[i][v.value()] = attr_val;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (geotype == draco::EncodedGeometryType::POINT_CLOUD)
+    {
       meshObject.decode_status = successful;
       return meshObject;
     }
 
     meshObject.faces.reserve(3 * mesh->num_faces());
-    for (draco::FaceIndex i(0); i < mesh->num_faces(); ++i) {
+    for (draco::FaceIndex i(0); i < mesh->num_faces(); ++i)
+    {
       const auto &f = mesh->face(i);
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[0]))));
       meshObject.faces.push_back(*(reinterpret_cast<const uint32_t *>(&(f[1]))));
@@ -191,7 +238,8 @@ namespace DracoFunctions {
     }
 
     const int normal_att_id = mesh->GetNamedAttributeId(draco::GeometryAttribute::NORMAL);
-    if (normal_att_id < 0) {  // No normal values are present.
+    if (normal_att_id < 0)
+    { // No normal values are present.
       meshObject.decode_status = successful;
       return meshObject;
     }
@@ -200,8 +248,10 @@ namespace DracoFunctions {
     meshObject.normals.reserve(3 * normal_att->size());
 
     std::array<float, 3> normal_val;
-    for (draco::PointIndex v(0); v < normal_att->size(); ++v){
-      if (!normal_att->ConvertValue<float, 3>(normal_att->mapped_index(v), &normal_val[0])){
+    for (draco::PointIndex v(0); v < normal_att->size(); ++v)
+    {
+      if (!normal_att->ConvertValue<float, 3>(normal_att->mapped_index(v), &normal_val[0]))
+      {
         meshObject.decode_status = no_normal_coord_attribute;
       }
       meshObject.normals.push_back(normal_val[0]);
@@ -213,7 +263,18 @@ namespace DracoFunctions {
     return meshObject;
   }
 
-  void setup_encoder_and_metadata(draco::PointCloud *point_cloud_or_mesh, draco::Encoder &encoder, int compression_level, int quantization_bits, float quantization_range, const float *quantization_origin, bool create_metadata) {
+  void setup_encoder_and_metadata(
+    draco::PointCloud *point_cloud_or_mesh,
+    draco::Encoder &encoder,
+    int compression_level,
+    int quantization_bits,
+    float quantization_range,
+    const float *quantization_origin,
+    bool create_metadata,
+    const std::vector<std::string> &attribute_names = std::vector<std::string>(),
+    const std::vector<int> &custom_attr_ids = std::vector<int>()
+)
+  {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
     std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
@@ -235,6 +296,15 @@ namespace DracoFunctions {
     }
     if (create_metadata) {
       metadata->AddEntryInt("quantization_bits", quantization_bits);
+      if (!attribute_names.empty() && !custom_attr_ids.empty())
+      {
+        for (size_t i = 0; i < attribute_names.size(); ++i)
+        {
+          metadata->AddEntryString("attr_name_" + std::to_string(i), attribute_names[i]);
+          metadata->AddEntryInt("attr_id_" + std::to_string(i), custom_attr_ids[i]);
+        }
+        metadata->AddEntryInt("num_custom_attributes", static_cast<int>(attribute_names.size()));
+      }
       point_cloud_or_mesh->AddMetadata(std::move(metadata));
     }
   }
@@ -254,8 +324,9 @@ namespace DracoFunctions {
     const std::vector<float> &tex_coord,
     const uint8_t tex_coord_channel,
     const std::vector<float> &normals,
-    const uint8_t has_normals
-  ) {
+    const uint8_t has_normals,
+    const std::vector<std::vector<float>> &custom_attributes,
+    const std::vector<std::string> &attribute_names) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
     //    In order to support preserve_order, we need to build mesh
@@ -345,7 +416,34 @@ namespace DracoFunctions {
       });
     }
 
-    for (size_t i = 0; i < num_pts; ++i) {
+    // Add custom attributes
+    std::vector<int> custom_attr_ids;
+    if (!attribute_names.empty())
+    {
+      // Validate input
+      if (custom_attributes.size() != attribute_names.size())
+      {
+        throw std::runtime_error("Mismatch between custom_attributes and attribute_names sizes");
+      }
+
+      // Add attributes
+      for (size_t i = 0; i < attribute_names.size(); ++i)
+      {
+        draco::GeometryAttribute custom_attr;
+        custom_attr.Init(draco::GeometryAttribute::GENERIC, // Attribute type
+                         nullptr,                           // data buffer
+                         1,                                 // number of components (scalar values)
+                         draco::DT_FLOAT32,                 // data type
+                         false,                             // normalized
+                         sizeof(float),                     // byte stride
+                         0);                                // byte offset
+        int attr_id = mesh.AddAttribute(custom_attr, true, num_pts);
+        custom_attr_ids.push_back(attr_id);
+      }
+    }
+
+    for (size_t i = 0; i < num_pts; ++i)
+    {
       mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
       if(colors_channel){
         mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
@@ -355,7 +453,12 @@ namespace DracoFunctions {
       }
       if(has_normals){
         mesh.attribute(normal_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &normals[i * 3]);
-      }  
+      }
+      // Set custom attribute values
+      for (size_t j = 0; j < custom_attr_ids.size(); ++j)
+      {
+        mesh.attribute(custom_attr_ids[j])->SetAttributeValue(draco::AttributeValueIndex(i), &custom_attributes[j][i]);
+      }
     }
 
     // Process faces
@@ -374,11 +477,12 @@ namespace DracoFunctions {
 
     draco::Encoder encoder;
     setup_encoder_and_metadata(
-      &mesh, encoder, compression_level,
-      quantization_bits, quantization_range,
-      quantization_origin, create_metadata
-    );
-    if (preserve_order) {
+        &mesh, encoder, compression_level,
+        quantization_bits, quantization_range,
+        quantization_origin, create_metadata,
+        attribute_names, custom_attr_ids);
+    if (preserve_order)
+    {
       encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
     }
 
@@ -404,7 +508,9 @@ namespace DracoFunctions {
     const float *quantization_origin, const bool preserve_order,
     const bool create_metadata, const int integer_mark,
     const std::vector<uint8_t> &colors,
-    const uint8_t colors_channel
+    const uint8_t colors_channel,
+    const std::vector<std::vector<float>> &custom_attributes,
+    const std::vector<std::string> &attribute_names
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
@@ -439,8 +545,12 @@ namespace DracoFunctions {
     std::unique_ptr<draco::PointCloud> ptr_point_cloud = pcb.Finalize(!preserve_order);
     draco::PointCloud *point_cloud = ptr_point_cloud.get();
     draco::Encoder encoder;
-    setup_encoder_and_metadata(point_cloud, encoder, compression_level, quantization_bits, quantization_range, quantization_origin, create_metadata);
-    if (preserve_order) {
+    setup_encoder_and_metadata(
+        point_cloud, encoder, compression_level,
+        quantization_bits, quantization_range,
+        quantization_origin, create_metadata);
+    if (preserve_order)
+    {
       encoder.SetEncodingMethod(draco::POINT_CLOUD_SEQUENTIAL_ENCODING);
     }
 
