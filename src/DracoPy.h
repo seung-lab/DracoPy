@@ -331,22 +331,30 @@ namespace DracoFunctions {
 
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    std::vector<int32_t> pts_int32;
+    std::vector<uint32_t> pts_uint32;
     if (integer_mark == 1) {
-      std::vector<int32_t> pts_int;
-      pts_int.reserve(points.size());
-      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+      pts_int32.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_int32), [](float x) {
         return lrint(x);
       });
     } else if (integer_mark == 2) {
-      std::vector<uint32_t> pts_int;
-      pts_int.reserve(points.size());
-      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+      pts_uint32.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_uint32), [](float x) {
         return (x <= 0.f)? 0: (uint32_t)(x + 0.5);
       });
     }
 
+
     for (size_t i = 0; i < num_pts; ++i) {
-      mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+      if (integer_mark == 1) {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int32[i * 3ul]);
+      } else if (integer_mark == 2) {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_uint32[i * 3ul]);
+      } else {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+      }
+
       if(colors_channel){
         mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
       }
@@ -357,6 +365,7 @@ namespace DracoFunctions {
         mesh.attribute(normal_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &normals[i * 3]);
       }  
     }
+    
 
     // Process faces
     const size_t num_faces = faces.size() / 3;

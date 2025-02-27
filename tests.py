@@ -247,3 +247,19 @@ def test_decoding_and_encoding_point_cloud_file():
         invalid_c = np.random.randint(0, 255, [point_cloud_object.points.shape[0], 128]).astype(np.uint8)
         invalid_m = DracoPy.encode(point_cloud_object.points, compression_level=1,
                                    quantization_bits=26, colors=invalid_c)
+
+
+def test_normals_encoding():
+    # Read reference mesh
+    with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+    
+    # Create test normal vectors
+    test_normals = np.array([[1.0, 0.0, 0.0]] * mesh.points.shape[0])
+    
+    # Encode with test normals
+    binary = DracoPy.encode(mesh.points, mesh.faces, normals=test_normals)
+    
+    # Decode and verify normals
+    decoded_mesh = DracoPy.decode(binary)
+    assert np.allclose(decoded_mesh.normals, test_normals)
