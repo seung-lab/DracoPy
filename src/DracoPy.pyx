@@ -119,7 +119,7 @@ def encode(
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
-    colors=None, tex_coord=None
+    colors=None, tex_coord=None, normals=None
 ) -> bytes:
     """
     bytes encode(
@@ -127,7 +127,7 @@ def encode(
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
-        colors=None, tex_coord=None
+        colors=None, tex_coord=None, normals=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -151,6 +151,8 @@ def encode(
         vertices. K must be >= 1. Use None if mesh does not have colors
     Tex coord is a numpy array of texture coordinates (float) with shape (N, 2). N is the number of
         vertices. Use None if mesh does not have texture coordinates.
+    Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
+        vertices. Use None if mesh does not have normal vectors.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -162,6 +164,7 @@ def encode(
     faces = format_array(faces)
     colors = format_array(colors)
     tex_coord = format_array(tex_coord, col=2)
+    normals = format_array(normals, col=3)
 
     integer_mark = 0
 
@@ -182,6 +185,7 @@ def encode(
     cdef vector[uint32_t] facesview
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
+    cdef vector[float] normalsview
 
     colors_channel = 0
     if colors is not None:
@@ -199,6 +203,14 @@ def encode(
         assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"
         texcoordview = tex_coord.reshape((tex_coord.size,))
 
+
+    has_normals = 0
+    if normals is not None:
+        assert np.issubdtype(normals.dtype, float), "Normals must be float"
+        assert normals.shape[1] == 3, "Normals must have 3 components"
+        has_normals = 1
+        normalsview = normals.reshape((normals.size,))
+
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
@@ -213,8 +225,10 @@ def encode(
             quantization_bits, compression_level,
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel, texcoordview, tex_coord_channel
+            colorsview, colors_channel, texcoordview, tex_coord_channel,
+            normalsview, has_normals  # Add these two parameters
         )
+
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
         return bytes(encoded.buffer)

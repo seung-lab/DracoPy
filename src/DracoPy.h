@@ -252,7 +252,9 @@ namespace DracoFunctions {
     const std::vector<uint8_t> &colors,
     const uint8_t colors_channel,
     const std::vector<float> &tex_coord,
-    const uint8_t tex_coord_channel
+    const uint8_t tex_coord_channel,
+    const std::vector<float> &normals,
+    const uint8_t has_normals
   ) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
@@ -314,48 +316,56 @@ namespace DracoFunctions {
       tex_coord_att_id = mesh.AddAttribute(tex_coord_attr, true, num_pts);
     }
 
+    int normal_att_id = -1;
+    if(has_normals) {
+      draco::GeometryAttribute normal_attr;
+      normal_attr.Init(draco::GeometryAttribute::NORMAL,    // Attribute type
+                       nullptr,                             // data buffer
+                       3,                                   // number of components (normals are 3D vectors)
+                       draco::DT_FLOAT32,                   // data type
+                       false,                               // normalized
+                       sizeof(float) * 3,                   // byte stride
+                       0);                                  // byte offset
+      normal_att_id = mesh.AddAttribute(normal_attr, true, num_pts);
+    }
+
+
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    std::vector<int32_t> pts_int32;
+    std::vector<uint32_t> pts_uint32;
     if (integer_mark == 1) {
-      std::vector<int32_t> pts_int;
-      pts_int.reserve(points.size());
-      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+      pts_int32.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_int32), [](float x) {
         return lrint(x);
       });
-      for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
-        if(colors_channel){
-          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
-        }
-        if(tex_coord_channel){
-          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
-        }
-      }
     } else if (integer_mark == 2) {
-      std::vector<uint32_t> pts_int;
-      pts_int.reserve(points.size());
-      std::transform(points.begin(), points.end(), std::back_inserter(pts_int), [](float x) {
+      pts_uint32.reserve(points.size());
+      std::transform(points.begin(), points.end(), std::back_inserter(pts_uint32), [](float x) {
         return (x <= 0.f)? 0: (uint32_t)(x + 0.5);
       });
-      for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int[i * 3ul]);
-        if(colors_channel){
-          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
-        }
-        if(tex_coord_channel){
-          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
-        }
-      }
-    } else {
-      for (size_t i = 0; i < num_pts; ++i) {
-        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
-        if(colors_channel){
-          mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
-        }
-        if(tex_coord_channel){
-          mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
-        }
-      }
     }
+
+
+    for (size_t i = 0; i < num_pts; ++i) {
+      if (integer_mark == 1) {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_int32[i * 3ul]);
+      } else if (integer_mark == 2) {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &pts_uint32[i * 3ul]);
+      } else {
+        mesh.attribute(pos_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &points[i * 3ul]);
+      }
+
+      if(colors_channel){
+        mesh.attribute(color_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &colors[i * colors_channel]);
+      }
+      if(tex_coord_channel){
+        mesh.attribute(tex_coord_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tex_coord[i * tex_coord_channel]);
+      }
+      if(has_normals){
+        mesh.attribute(normal_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &normals[i * 3]);
+      }  
+    }
+    
 
     // Process faces
     const size_t num_faces = faces.size() / 3;

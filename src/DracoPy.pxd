@@ -69,6 +69,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const uint8_t colors_channel,
         const vector[float] tex_coord,
         const uint8_t tex_coord_channel,
+        const vector[float] normals,
+        const uint8_t has_normals
     ) except +
 
     EncodedObject encode_point_cloud(
