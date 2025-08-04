@@ -1,6 +1,6 @@
 #cython: language_level=3
 from libcpp.vector cimport vector
-from libc.stdint cimport uint8_t, uint32_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t
 from libcpp cimport bool
 
 cimport numpy as cnp
@@ -17,37 +17,39 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
     cdef enum encoding_status:
         successful_encoding, failed_during_encoding
 
-    cdef struct PointCloudObject:
-        vector[float] points
+    cdef struct AttributeData:
+        int unique_id
+        int num_components
+        int data_type
+        int attribute_type
+        vector[float] float_data
+        vector[uint32_t] uint_data
+        vector[uint8_t] byte_data
 
+    cdef struct PointCloudObject:
+        vector[AttributeData] attributes
         # Encoding options
         bool encoding_options_set
-        bool colors_set
         int quantization_bits
         double quantization_range
         vector[double] quantization_origin
 
         # Represents the decoding success or error message
         decoding_status decode_status
-        vector[uint8_t] colors
 
     cdef struct MeshObject:
-        vector[float] points
-        vector[unsigned int] faces
-
-        vector[float] normals
-        vector[float] tex_coord
-
+        vector[AttributeData] attributes
         # Encoding options
         bool encoding_options_set
-        bool colors_set
         int quantization_bits
         double quantization_range
         vector[double] quantization_origin
 
         # Represents the decoding success or error message
         decoding_status decode_status
-        vector[uint8_t] colors
+        
+        # Mesh-specific
+        vector[unsigned int] faces
 
     cdef struct EncodedObject:
         vector[unsigned char] buffer
@@ -70,7 +72,13 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const vector[float] tex_coord,
         const uint8_t tex_coord_channel,
         const vector[float] normals,
-        const uint8_t has_normals
+        const uint8_t has_normals,
+        const vector[float] tangents,
+        const uint8_t tangent_channel,
+        const vector[unsigned short] joints,
+        const uint8_t joint_channel,
+        const vector[float] weights,
+        const uint8_t weight_channel
     ) except +
 
     EncodedObject encode_point_cloud(

@@ -25,6 +25,39 @@ class DracoPointCloud:
         else:
             self.encoding_options = None
 
+        self._attributes = []
+        
+        attributes_list = self.data_struct['attributes']
+        
+        if len(attributes_list) > 0:    
+            for attr in attributes_list:
+                attr_info = {
+                    'unique_id': attr.get('unique_id', 0),
+                    'num_components': attr.get('num_components', 0),
+                    'data_type': attr.get('data_type', 0),
+                    'attribute_type': attr.get('attribute_type', 0),
+                    'data': None
+                }
+                float_data = attr.get('float_data', [])
+                uint_data = attr.get('uint_data', [])
+                byte_data = attr.get('byte_data', [])
+
+                # Get the appropriate data array based on data type
+                data_array = None
+                if len(float_data) > 0:
+                    data_array = np.array(float_data, dtype=np.float32)
+                elif len(uint_data) > 0:
+                    data_array = np.array(uint_data, dtype=np.uint32)
+                elif len(byte_data) > 0:
+                    data_array = np.array(byte_data, dtype=np.uint8)
+
+                if data_array is not None:
+                    attr_info['data'] = data_array.reshape((-1, attr_info['num_components']))
+                else:
+                    attr_info['data'] = None
+
+                self._attributes.append(attr_info)
+
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
             return self.encoding_options.get_encoded_coordinate(value, axis)
@@ -37,42 +70,56 @@ class DracoPointCloud:
     def num_axes(self):
         return 3
 
+    def get_attribute_by_type(self, attribute_type):
+        for attr in self.attributes:
+            if attr['attribute_type'] == attribute_type:
+                return attr
+        return None
+
+    def get_attribute_by_unique_id(self, unique_id):
+        for attr in self.attributes:
+            if attr['unique_id'] == unique_id:
+                return attr
+        return None
+
+    @property
+    def attributes(self):
+        return self._attributes
+
     @property
     def points(self):
-        points_ = self.data_struct['points']
-        N = len(points_) // 3
-        return np.array(points_).reshape((N, 3))
+        position_attr = self.get_attribute_by_type(0)  # POSITION=0
+        if position_attr and position_attr['data'] is not None:
+            return position_attr['data']
+        return None
 
     @property
     def colors(self):
-        if self.data_struct['colors_set']:
-            colors_ = self.data_struct['colors']
-            N = len(self.data_struct['points']) // 3
-            return np.array(colors_).reshape((N, -1))
-        else:
-            return None
+        color_attr = self.get_attribute_by_type(2)  # COLOR=2
+        if color_attr and color_attr['data'] is not None:
+            return color_attr['data']
+        return None
 
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
         faces_ = self.data_struct['faces']
         N = len(faces_) // 3
-        return np.array(faces_).reshape((N, 3))
+        return np.array(faces_, dtype=np.uint32).reshape((N, 3))
 
     @property
     def normals(self):
-        normals_ = self.data_struct['normals']
-        N = len(normals_) // 3
-        return np.array(normals_).reshape((N,3))
+        normal_attr = self.get_attribute_by_type(1)  # NORMAL = 1
+        if normal_attr and normal_attr['data'] is not None:
+            return normal_attr['data']
+        return None
 
     @property
     def tex_coord(self):
-        tex_coord_ = self.data_struct['tex_coord']
-        if len(tex_coord_) == 0:
-            return None
-        N = len(self.data_struct['points']) // 3
-        NC = len(tex_coord_) // N
-        return np.array(tex_coord_).reshape((N, NC))
+        tex_attr = self.get_attribute_by_type(3)  # TEX_COORD = 3
+        if tex_attr and tex_attr['data'] is not None:
+            return tex_attr['data']
+        return None
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -119,7 +166,8 @@ def encode(
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
-    colors=None, tex_coord=None, normals=None
+    colors=None, tex_coord=None, normals=None,
+    tangents=None, joints=None, weights=None
 ) -> bytes:
     """
     bytes encode(
@@ -127,7 +175,8 @@ def encode(
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
-        colors=None, tex_coord=None, normals=None
+        colors=None, tex_coord=None, normals=None,
+        tangents=None, joints=None, weights=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -153,6 +202,12 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
+    Tangents is a numpy array of tangent vectors (float) with shape (N, 3) or (N, 4). N is the number of
+        vertices. Use None if mesh does not have tangent vectors.
+    Joints is a numpy array of joint indices (uint16) with shape (N, K). N is the number of
+        vertices. K is the number of joint influences per vertex. Use None if mesh does not have skeletal data.
+    Weights is a numpy array of joint weights (float) with shape (N, K). N is the number of
+        vertices. K is the number of joint influences per vertex. Use None if mesh does not have skeletal data.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -165,6 +220,9 @@ def encode(
     colors = format_array(colors)
     tex_coord = format_array(tex_coord, col=2)
     normals = format_array(normals, col=3)
+    tangents = format_array(tangents)
+    joints = format_array(joints)
+    weights = format_array(weights)
 
     integer_mark = 0
 
@@ -186,6 +244,9 @@ def encode(
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
     cdef vector[float] normalsview
+    cdef vector[float] tangentsview
+    cdef vector[unsigned short] jointsview
+    cdef vector[float] weightsview
 
     colors_channel = 0
     if colors is not None:
@@ -211,6 +272,31 @@ def encode(
         has_normals = 1
         normalsview = normals.reshape((normals.size,))
 
+    tangent_channel = 0
+    if tangents is not None:
+        assert np.issubdtype(tangents.dtype, np.floating), "Tangents must be float"
+        assert len(tangents.shape) == 2, "Tangents must be 2D"
+        tangent_channel = tangents.shape[1]
+        assert tangent_channel == 3 or tangent_channel == 4, "Tangents must have 3 or 4 components"
+        tangentsview = tangents.reshape((tangents.size,))
+
+    joint_channel = 0
+    if joints is not None:
+        assert np.issubdtype(joints.dtype, np.integer), "Joints must be integer"
+        assert len(joints.shape) == 2, "Joints must be 2D"
+        joint_channel = joints.shape[1]
+        assert 1 <= joint_channel <= 16, "Number of joint channels must be in range [1, 16]"
+        joints = joints.astype(np.uint16)
+        jointsview = joints.reshape((joints.size,))
+
+    weight_channel = 0
+    if weights is not None:
+        assert np.issubdtype(weights.dtype, np.floating), "Weights must be float"
+        assert len(weights.shape) == 2, "Weights must be 2D"
+        weight_channel = weights.shape[1]
+        assert 1 <= weight_channel <= 16, "Number of weight channels must be in range [1, 16]"
+        weightsview = weights.reshape((weights.size,))
+
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
@@ -226,7 +312,10 @@ def encode(
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
             colorsview, colors_channel, texcoordview, tex_coord_channel,
-            normalsview, has_normals  # Add these two parameters
+            normalsview, has_normals,
+            tangentsview, tangent_channel,
+            jointsview, joint_channel,
+            weightsview, weight_channel
         )
 
 
