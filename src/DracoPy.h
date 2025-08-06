@@ -20,8 +20,6 @@ namespace DracoFunctions {
     successful,
     not_draco_encoded,
     no_position_attribute,
-    no_tex_coord_attribute,
-    no_normal_coord_attribute,
     failed_during_decoding
   };
   enum encoding_status {
@@ -83,16 +81,37 @@ namespace DracoFunctions {
     decoderBuffer.Init(buffer, buffer_len);
 
     auto type_statusor = draco::Decoder::GetEncodedGeometryType(&decoderBuffer);
- 
+    CHECK_STATUS(type_statusor, meshObject)
     draco::EncodedGeometryType geotype = std::move(type_statusor).value();
 
-    draco::Decoder decoder;
-    auto decodeResult = decoder.DecodeMeshFromBuffer(&decoderBuffer);
-    if (!decodeResult.ok()) {
-      meshObject.decode_status = failed_during_decoding;
+    if (geotype == draco::EncodedGeometryType::INVALID_GEOMETRY_TYPE) {
+      meshObject.decode_status = not_draco_encoded;
       return meshObject;
     }
-    const std::unique_ptr<draco::Mesh> &mesh = decodeResult.value();
+
+    draco::Decoder decoder;
+    std::unique_ptr<draco::Mesh> in_mesh;
+    std::unique_ptr<draco::PointCloud> in_pointcloud;
+    draco::Mesh *mesh;
+
+    if (geotype == draco::EncodedGeometryType::POINT_CLOUD) {
+      auto statusor = decoder.DecodePointCloudFromBuffer(&decoderBuffer);
+      CHECK_STATUS(statusor, meshObject)
+      in_pointcloud = std::move(statusor).value();
+      // This is okay because draco::Mesh is a subclass of
+      // draco::PointCloud
+      mesh = static_cast<draco::Mesh*>(in_pointcloud.get());
+    }
+    else if (geotype == draco::EncodedGeometryType::TRIANGULAR_MESH) {
+      auto statusor = decoder.DecodeMeshFromBuffer(&decoderBuffer);
+      CHECK_STATUS(statusor, meshObject)
+      in_mesh = std::move(statusor).value();
+      mesh = in_mesh.get();
+    }
+    else {
+      throw std::runtime_error("Should never be reached.");
+    }
+
 
     // Get faces if it's a mesh
     if (geotype == draco::EncodedGeometryType::TRIANGULAR_MESH) {
