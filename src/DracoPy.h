@@ -141,68 +141,63 @@ namespace DracoFunctions {
       switch (att->data_type()) {
         case draco::DT_FLOAT32: {
           attr.float_data.reserve(num_values);
-          float *values = new float[att->num_components()];
+          std::unique_ptr<float[]> values(new float[att->num_components()]);
           for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
-            if (att->ConvertValue<float>(att->mapped_index(v), att->num_components(), values)) {
+            if (att->ConvertValue<float>(att->mapped_index(v), att->num_components(), values.get())) {
               for (int c = 0; c < att->num_components(); ++c) {
                 attr.float_data.push_back(values[c]);
               }
             }
           }
-          delete[] values;
           break;
         }
         case draco::DT_UINT8: {
           attr.byte_data.reserve(num_values);
-          uint8_t *values = new uint8_t[att->num_components()];
+          std::unique_ptr<uint8_t[]> values(new uint8_t[att->num_components()]);
           for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
-            if (att->ConvertValue<uint8_t>(att->mapped_index(v), att->num_components(), values)) {
+            if (att->ConvertValue<uint8_t>(att->mapped_index(v), att->num_components(), values.get())) {
               for (int c = 0; c < att->num_components(); ++c) {
                 attr.byte_data.push_back(values[c]);
               }
             }
           }
-          delete[] values;
           break;
         }
         case draco::DT_UINT16: {
           attr.uint_data.reserve(num_values);
-          uint16_t *values = new uint16_t[att->num_components()];
+          std::unique_ptr<uint16_t[]> values(new uint16_t[att->num_components()]);
           for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
-            if (att->ConvertValue<uint16_t>(att->mapped_index(v), att->num_components(), values)) {
+            if (att->ConvertValue<uint16_t>(att->mapped_index(v), att->num_components(), values.get())) {
               for (int c = 0; c < att->num_components(); ++c) {
                 attr.uint_data.push_back(static_cast<uint32_t>(values[c]));
               }
             }
           }
-          delete[] values;
           break;
         }
         case draco::DT_UINT32: {
           attr.uint_data.reserve(num_values);
-          uint32_t *values = new uint32_t[att->num_components()];
+          std::unique_ptr<uint32_t[]> values(new uint32_t[att->num_components()]);
           for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
-            if (att->ConvertValue<uint32_t>(att->mapped_index(v), att->num_components(), values)) {
+            if (att->ConvertValue<uint32_t>(att->mapped_index(v), att->num_components(), values.get())) {
               for (int c = 0; c < att->num_components(); ++c) {
                 attr.uint_data.push_back(values[c]);
               }
             }
           }
-          delete[] values;
           break;
         }
         default: {
           // For other data types, try to convert to float as fallback
           attr.float_data.reserve(num_values);
-          float *values = new float[att->num_components()];
+          std::unique_ptr<float[]> values(new float[att->num_components()]);
           for (draco::PointIndex v(0); v < mesh->num_points(); ++v) {
-            if (att->ConvertValue<float>(att->mapped_index(v), att->num_components(), values)) {
+            if (att->ConvertValue<float>(att->mapped_index(v), att->num_components(), values.get())) {
               for (int c = 0; c < att->num_components(); ++c) {
                 attr.float_data.push_back(values[c]);
               }
             }
           }
-          delete[] values;
           break;
         }
       }

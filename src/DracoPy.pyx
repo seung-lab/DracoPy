@@ -286,7 +286,7 @@ def encode(
         assert len(joints.shape) == 2, "Joints must be 2D"
         joint_channel = joints.shape[1]
         assert 1 <= joint_channel <= 16, "Number of joint channels must be in range [1, 16]"
-        joints = joints.astype(np.uint16)
+        joints = joints.astype(np.uint16, copy=False)
         jointsview = joints.reshape((joints.size,))
 
     weight_channel = 0
