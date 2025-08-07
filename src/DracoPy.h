@@ -263,12 +263,13 @@ namespace DracoFunctions {
     const uint8_t tex_coord_channel,
     const std::vector<float> &normals,
     const uint8_t has_normals,
-    const std::vector<float> &tangents,
-    const uint8_t tangent_channel,
-    const std::vector<unsigned short> &joints,
-    const uint8_t joint_channel,
-    const std::vector<float> &weights,
-    const uint8_t weight_channel
+    std::vector<uint8_t>& unique_ids,
+    std::vector<std::vector<float>>& attr_float_data,
+    std::vector<std::vector<uint8_t>>& attr_uint8_data,
+    std::vector<std::vector<uint16_t>>& attr_uint16_data,
+    std::vector<std::vector<uint32_t>>& attr_uint32_data,
+    std::vector<int>& attr_data_types,
+    std::vector<int>& attr_num_components
   ) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
@@ -343,26 +344,38 @@ namespace DracoFunctions {
       normal_att_id = mesh.AddAttribute(normal_attr, true, num_pts);
     }
 
-    int tangent_att_id = -1;
-    if(tangent_channel) {
-      draco::GeometryAttribute tangent_attr;
-      tangent_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, tangent_channel, draco::DT_FLOAT32, false, sizeof(float) * tangent_channel, 0);
-      tangent_att_id = mesh.AddAttribute(tangent_attr, true, num_pts);
+
+
+    // GENERIC ATTRIBUTES
+    std::vector<int> generic_attr_ids;
+    generic_attr_ids.reserve(unique_ids.size());
+
+    //std::cout << "DEBUG: attr_names size: " << unique_ids.size() << std::endl;
+
+    for (size_t i = 0; i < unique_ids.size(); ++i) {
+      draco::GeometryAttribute generic_attr;
+      draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[i]);
+      int num_components = attr_num_components[i];
+      if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
+        // Unsupported data type, skip
+        // std::cout << "DEBUG: Unsupported attribute data type for " << unique_ids[i] << std::endl;
+        generic_attr_ids.push_back(-1);
+        continue;
+      }
+      generic_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, num_components, dtype, false, 0, 0);
+      int generic_att_id = mesh.AddAttribute(generic_attr, true, num_pts);
+      mesh.attribute(generic_att_id)->set_unique_id(unique_ids[i]);
+      if (generic_att_id == -1) {
+        // Failed to add attribute, skip
+        // std::cout << "DEBUG: Failed to add attribute " << unique_ids[i] << std::endl;
+        generic_attr_ids.push_back(-1);
+        continue;
+      }
+      generic_attr_ids.push_back(generic_att_id);
     }
 
-    int joint_att_id = -1;
-    if(joint_channel) {
-      draco::GeometryAttribute joint_attr;
-      joint_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, joint_channel, draco::DT_UINT16, false, sizeof(uint16_t) * joint_channel, 0);
-      joint_att_id = mesh.AddAttribute(joint_attr, true, num_pts);
-    }
 
-    int weight_att_id = -1;
-    if(weight_channel) {
-      draco::GeometryAttribute weight_attr;
-      weight_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, weight_channel, draco::DT_FLOAT32, false, sizeof(float) * weight_channel, 0);
-      weight_att_id = mesh.AddAttribute(weight_attr, true, num_pts);
-    }
+    // std::cout << "DEBUG: Encode all generic attributes, total: " << attr_ids.size() << std::endl;
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
     std::vector<int32_t> pts_int32;
@@ -398,19 +411,31 @@ namespace DracoFunctions {
       if(has_normals){
         mesh.attribute(normal_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &normals[i * 3]);
       }
-      if(tangent_channel){
-        mesh.attribute(tangent_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &tangents[i * tangent_channel]);
-      }
-      if(joint_channel){
-        std::vector<uint16_t> joint_vals(joint_channel);
-        for (int c = 0; c < joint_channel; ++c) {
-          joint_vals[c] = static_cast<uint16_t>(joints[i * joint_channel + c]);
+
+
+      // GENERIC ATTRIBUTES
+      for (size_t j = 0; j < generic_attr_ids.size(); ++j) {
+        const auto &unique_id = unique_ids[j];
+        const auto &float_data = attr_float_data[j];
+        const auto &uint8_data = attr_uint8_data[j];
+        const auto &uint16_data = attr_uint16_data[j];
+        const auto &uint32_data = attr_uint32_data[j];
+
+        if (generic_attr_ids[j] == -1) {
+          // Skip if attribute was not added
+          continue;
+        } 
+
+        if (attr_data_types[j] == draco::DT_FLOAT32) {
+          mesh.attribute(generic_attr_ids[j])->SetAttributeValue(draco::AttributeValueIndex(i), &float_data[i * attr_num_components[j]]);
+        } else if (attr_data_types[j] == draco::DT_UINT8) {
+          mesh.attribute(generic_attr_ids[j])->SetAttributeValue(draco::AttributeValueIndex(i), &uint8_data[i * attr_num_components[j]]);
+        } else if (attr_data_types[j] == draco::DT_UINT16) {
+          mesh.attribute(generic_attr_ids[j])->SetAttributeValue(draco::AttributeValueIndex(i), &uint16_data[i * attr_num_components[j]]);
+        } else if (attr_data_types[j] == draco::DT_UINT32) {
+          mesh.attribute(generic_attr_ids[j])->SetAttributeValue(draco::AttributeValueIndex(i), &uint32_data[i * attr_num_components[j]]);
         }
-        mesh.attribute(joint_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), joint_vals.data());
       }
-      if(weight_channel){
-        mesh.attribute(weight_att_id)->SetAttributeValue(draco::AttributeValueIndex(i), &weights[i * weight_channel]);
-      }  
     }
 
     const size_t num_faces = faces.size() / 3;

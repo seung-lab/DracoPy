@@ -15,6 +15,29 @@ cimport numpy as cnp
 cnp.import_array()
 
 import numpy as np
+from enum import IntEnum
+
+class DataType(IntEnum):
+    DT_INVALID = 0
+    DT_INT8 = 1
+    DT_UINT8 = 2
+    DT_INT16 = 3
+    DT_UINT16 = 4
+    DT_INT32 = 5
+    DT_UINT32 = 6
+    DT_INT64 = 7
+    DT_UINT64 = 8
+    DT_FLOAT32 = 9
+    DT_FLOAT64 = 10
+    DT_BOOL = 11
+
+class AttributeType(IntEnum):
+    INVALID = -1
+    POSITION = 0
+    NORMAL = 1
+    COLOR = 2
+    TEX_COORD = 3
+    GENERIC = 4
 
 class DracoPointCloud:
     def __init__(self, data_struct):
@@ -88,14 +111,14 @@ class DracoPointCloud:
 
     @property
     def points(self):
-        position_attr = self.get_attribute_by_type(0)  # POSITION=0
+        position_attr = self.get_attribute_by_type(AttributeType.POSITION)  # POSITION=0
         if position_attr and position_attr['data'] is not None:
             return position_attr['data']
         return None
 
     @property
     def colors(self):
-        color_attr = self.get_attribute_by_type(2)  # COLOR=2
+        color_attr = self.get_attribute_by_type(AttributeType.COLOR)  # COLOR=2
         if color_attr and color_attr['data'] is not None:
             return color_attr['data']
         return None
@@ -109,14 +132,14 @@ class DracoMesh(DracoPointCloud):
 
     @property
     def normals(self):
-        normal_attr = self.get_attribute_by_type(1)  # NORMAL = 1
+        normal_attr = self.get_attribute_by_type(AttributeType.NORMAL)  # NORMAL = 1
         if normal_attr and normal_attr['data'] is not None:
             return normal_attr['data']
         return None
 
     @property
     def tex_coord(self):
-        tex_attr = self.get_attribute_by_type(3)  # TEX_COORD = 3
+        tex_attr = self.get_attribute_by_type(AttributeType.TEX_COORD)  # TEX_COORD = 3
         if tex_attr and tex_attr['data'] is not None:
             return tex_attr['data']
         return None
@@ -167,7 +190,7 @@ def encode(
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
     colors=None, tex_coord=None, normals=None,
-    tangents=None, joints=None, weights=None
+    generic_attributes=None
 ) -> bytes:
     """
     bytes encode(
@@ -176,7 +199,7 @@ def encode(
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
         colors=None, tex_coord=None, normals=None,
-        tangents=None, joints=None, weights=None
+        generic_attributes=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -202,12 +225,11 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
-    Tangents is a numpy array of tangent vectors (float) with shape (N, 3) or (N, 4). N is the number of
-        vertices. Use None if mesh does not have tangent vectors.
-    Joints is a numpy array of joint indices (uint16) with shape (N, K). N is the number of
-        vertices. K is the number of joint influences per vertex. Use None if mesh does not have skeletal data.
-    Weights is a numpy array of joint weights (float) with shape (N, K). N is the number of
-        vertices. K is the number of joint influences per vertex. Use None if mesh does not have skeletal data.
+    Generic_attributes is a dictionary of additional attributes to encode.
+        The keys are attribute unique_ids and the values are numpy arrays with shape (N, K).
+        N is the number of vertices. K is the number of components for that attribute.
+        Supported data types are float, uint8, uint16, and uint32.
+        Use None if there are no generic attributes to encode.
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -220,9 +242,73 @@ def encode(
     colors = format_array(colors)
     tex_coord = format_array(tex_coord, col=2)
     normals = format_array(normals, col=3)
-    tangents = format_array(tangents)
-    joints = format_array(joints)
-    weights = format_array(weights)
+
+
+    # Process generic attributes from generic_attributes
+    cdef vector[uint8_t] unique_ids
+    cdef vector[vector[float]] attr_float_data
+    cdef vector[vector[uint8_t]] attr_uint8_data
+    cdef vector[vector[uint16_t]] attr_uint16_data
+    cdef vector[vector[uint32_t]] attr_uint32_data
+    cdef vector[int] attr_data_types  # 0=float, 1=uint8, 2=uint16, 3=uint32
+    cdef vector[int] attr_num_components
+
+    if generic_attributes:
+        for unique_id, attr_data in generic_attributes.items():
+            if attr_data is None:
+                continue
+                
+            # Format the attribute data
+            attr_array = format_array(attr_data)
+            if attr_array is None:
+                continue
+                
+            # Validate attribute array
+            if len(attr_array.shape) != 2:
+                raise ValueError(f"Attribute '{unique_id}' must be 2D array")
+            if attr_array.shape[0] != points.shape[0]:
+                raise ValueError(f"Attribute '{unique_id}' must have same number of vertices as points")
+            
+            # Store attribute info
+            unique_ids.push_back(unique_id)
+            attr_num_components.push_back(attr_array.shape[1])
+            
+            # Handle different data types
+            if np.issubdtype(attr_array.dtype, np.floating):
+                attr_data_types.push_back(DataType.DT_FLOAT32)  # 9, float
+                attr_array = attr_array.astype(np.float32)
+                float_view = attr_array.reshape((attr_array.size,))
+                attr_float_data.push_back(float_view)
+                # Add empty vectors for other types
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint8:
+                attr_data_types.push_back(DataType.DT_UINT8)  # 2, uint8
+                uint8_view = attr_array.reshape((attr_array.size,))
+                attr_uint8_data.push_back(uint8_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint16:
+                attr_data_types.push_back(DataType.DT_UINT16)  # 4, uint16
+                uint16_view = attr_array.reshape((attr_array.size,))
+                attr_uint16_data.push_back(uint16_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint32:
+                attr_data_types.push_back(DataType.DT_UINT32)  # 6, uint32
+                uint32_view = attr_array.reshape((attr_array.size,))
+                attr_uint32_data.push_back(uint32_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+            else:
+                raise ValueError(f"Unsupported data type for attribute '{unique_id}': {attr_array.dtype}")
 
     integer_mark = 0
 
@@ -244,9 +330,7 @@ def encode(
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
     cdef vector[float] normalsview
-    cdef vector[float] tangentsview
-    cdef vector[unsigned short] jointsview
-    cdef vector[float] weightsview
+
 
     colors_channel = 0
     if colors is not None:
@@ -272,31 +356,6 @@ def encode(
         has_normals = 1
         normalsview = normals.reshape((normals.size,))
 
-    tangent_channel = 0
-    if tangents is not None:
-        assert np.issubdtype(tangents.dtype, np.floating), "Tangents must be float"
-        assert len(tangents.shape) == 2, "Tangents must be 2D"
-        tangent_channel = tangents.shape[1]
-        assert tangent_channel == 3 or tangent_channel == 4, "Tangents must have 3 or 4 components"
-        tangentsview = tangents.reshape((tangents.size,))
-
-    joint_channel = 0
-    if joints is not None:
-        assert np.issubdtype(joints.dtype, np.integer), "Joints must be integer"
-        assert len(joints.shape) == 2, "Joints must be 2D"
-        joint_channel = joints.shape[1]
-        assert 1 <= joint_channel <= 16, "Number of joint channels must be in range [1, 16]"
-        joints = joints.astype(np.uint16, copy=False)
-        jointsview = joints.reshape((joints.size,))
-
-    weight_channel = 0
-    if weights is not None:
-        assert np.issubdtype(weights.dtype, np.floating), "Weights must be float"
-        assert len(weights.shape) == 2, "Weights must be 2D"
-        weight_channel = weights.shape[1]
-        assert 1 <= weight_channel <= 16, "Number of weight channels must be in range [1, 16]"
-        weightsview = weights.reshape((weights.size,))
-
     if faces is None:
         encoded = DracoPy.encode_point_cloud(
             pointsview, quantization_bits, compression_level,
@@ -313,9 +372,9 @@ def encode(
             preserve_order, create_metadata, integer_mark,
             colorsview, colors_channel, texcoordview, tex_coord_channel,
             normalsview, has_normals,
-            tangentsview, tangent_channel,
-            jointsview, joint_channel,
-            weightsview, weight_channel
+            unique_ids, attr_float_data, attr_uint8_data,
+            attr_uint16_data, attr_uint32_data,
+            attr_data_types, attr_num_components
         )
 
 

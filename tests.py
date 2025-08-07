@@ -275,26 +275,31 @@ def test_generic_attributes():
     test_weights = np.array([[0.5, 0.5]] * mesh.points.shape[0], dtype=np.float32)
 
     # Encode with test attributes
-    binary = DracoPy.encode(mesh.points, mesh.faces, tangents=test_tangents, joints=test_joints, weights=test_weights)
+    generic_attributes = {
+        0: test_tangents,
+        1: test_joints,
+        6: test_weights
+    }
+    binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
 
     # Decode and verify attributes
     decoded_mesh = DracoPy.decode(binary)
 
-    decoded_tangents = decoded_mesh.get_attribute_by_unique_id(0) # first generic attribute
-    decoded_joints = decoded_mesh.get_attribute_by_unique_id(1) # second generic attribute
-    decoded_weights = decoded_mesh.get_attribute_by_unique_id(2) # third generic attribute
+    decoded_tangents = decoded_mesh.get_attribute_by_unique_id(0)
+    decoded_joints = decoded_mesh.get_attribute_by_unique_id(1)
+    decoded_weights = decoded_mesh.get_attribute_by_unique_id(6)
 
-    assert decoded_tangents["attribute_type"] == 4 # GENERIC
-    assert decoded_tangents["data_type"] == 9 # FLOAT32
+    assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32
     assert decoded_tangents["num_components"] == 3
     assert np.allclose(decoded_tangents["data"], test_tangents)
 
-    assert decoded_joints["attribute_type"] == 4 # GENERIC
-    assert decoded_joints["data_type"] == 4 # UINT32
+    assert decoded_joints["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_joints["data_type"] == DracoPy.DataType.DT_UINT32
     assert decoded_joints["num_components"] == 2
     assert np.array_equal(decoded_joints["data"], test_joints)
 
-    assert decoded_weights["attribute_type"] == 4 # GENERIC
-    assert decoded_weights["data_type"] == 9 # FLOAT32
+    assert decoded_weights["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_weights["data_type"] == DracoPy.DataType.DT_FLOAT32
     assert decoded_weights["num_components"] == 2
     assert np.allclose(decoded_weights["data"], test_weights)

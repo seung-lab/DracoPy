@@ -1,5 +1,6 @@
 #cython: language_level=3
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 from libc.stdint cimport uint8_t, uint16_t, uint32_t
 from libcpp cimport bool
 
@@ -73,12 +74,13 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const uint8_t tex_coord_channel,
         const vector[float] normals,
         const uint8_t has_normals,
-        const vector[float] tangents,
-        const uint8_t tangent_channel,
-        const vector[unsigned short] joints,
-        const uint8_t joint_channel,
-        const vector[float] weights,
-        const uint8_t weight_channel
+        vector[uint8_t]& unique_ids,
+        vector[vector[float]]& attr_float_data,
+        vector[vector[uint8_t]]& attr_uint8_data,
+        vector[vector[uint16_t]]& attr_uint16_data,
+        vector[vector[uint32_t]]& attr_uint32_data,
+        vector[int]& attr_data_types,
+        vector[int]& attr_num_components
     ) except +
 
     EncodedObject encode_point_cloud(
