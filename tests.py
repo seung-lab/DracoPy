@@ -16,7 +16,7 @@ def test_decoding_and_encoding_mesh_file():
 
     assert len(mesh.points) == EXPECTED_POINTS_BUNNY_MESH
     assert len(mesh.faces) == EXPECTED_FACES_BUNNY
-    assert len(mesh.normals) == 0
+    assert mesh.normals is None
 
     with open(os.path.join(testdata_directory, "bunny_normals.drc"), "rb") as draco_file:
         mesh = DracoPy.decode(draco_file.read())
@@ -263,3 +263,43 @@ def test_normals_encoding():
     # Decode and verify normals
     decoded_mesh = DracoPy.decode(binary)
     assert np.allclose(decoded_mesh.normals, test_normals)
+
+def test_generic_attributes():
+    # Read reference mesh
+    with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+    
+    # Create test attributes vectors
+    test_tangents = np.array([[0.0, 1.0, 0.0]] * mesh.points.shape[0])
+    test_joints = np.array([[0, 1]] * mesh.points.shape[0], dtype=np.uint32)
+    test_weights = np.array([[0.5, 0.5]] * mesh.points.shape[0], dtype=np.float32)
+
+    # Encode with test attributes
+    generic_attributes = {
+        0: test_tangents,
+        1: test_joints,
+        6: test_weights
+    }
+    binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+
+    # Decode and verify attributes
+    decoded_mesh = DracoPy.decode(binary)
+
+    decoded_tangents = decoded_mesh.get_attribute_by_unique_id(0)
+    decoded_joints = decoded_mesh.get_attribute_by_unique_id(1)
+    decoded_weights = decoded_mesh.get_attribute_by_unique_id(6)
+
+    assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32
+    assert decoded_tangents["num_components"] == 3
+    assert np.allclose(decoded_tangents["data"], test_tangents)
+
+    assert decoded_joints["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_joints["data_type"] == DracoPy.DataType.DT_UINT32
+    assert decoded_joints["num_components"] == 2
+    assert np.array_equal(decoded_joints["data"], test_joints)
+
+    assert decoded_weights["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_weights["data_type"] == DracoPy.DataType.DT_FLOAT32
+    assert decoded_weights["num_components"] == 2
+    assert np.allclose(decoded_weights["data"], test_weights)

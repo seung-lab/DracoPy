@@ -15,6 +15,29 @@ cimport numpy as cnp
 cnp.import_array()
 
 import numpy as np
+from enum import IntEnum
+
+class DataType(IntEnum):
+    DT_INVALID = 0
+    DT_INT8 = 1
+    DT_UINT8 = 2
+    DT_INT16 = 3
+    DT_UINT16 = 4
+    DT_INT32 = 5
+    DT_UINT32 = 6
+    DT_INT64 = 7
+    DT_UINT64 = 8
+    DT_FLOAT32 = 9
+    DT_FLOAT64 = 10
+    DT_BOOL = 11
+
+class AttributeType(IntEnum):
+    INVALID = -1
+    POSITION = 0
+    NORMAL = 1
+    COLOR = 2
+    TEX_COORD = 3
+    GENERIC = 4
 
 class DracoPointCloud:
     def __init__(self, data_struct):
@@ -24,6 +47,39 @@ class DracoPointCloud:
                 data_struct['quantization_range'], data_struct['quantization_origin'])
         else:
             self.encoding_options = None
+
+        self._attributes = []
+        
+        attributes_list = self.data_struct['attributes']
+        
+        if len(attributes_list) > 0:    
+            for attr in attributes_list:
+                attr_info = {
+                    'unique_id': attr.get('unique_id', 0),
+                    'num_components': attr.get('num_components', 0),
+                    'data_type': attr.get('data_type', 0),
+                    'attribute_type': attr.get('attribute_type', 0),
+                    'data': None
+                }
+                float_data = attr.get('float_data', [])
+                uint_data = attr.get('uint_data', [])
+                byte_data = attr.get('byte_data', [])
+
+                # Get the appropriate data array based on data type
+                data_array = None
+                if len(float_data) > 0:
+                    data_array = np.array(float_data, dtype=np.float32)
+                elif len(uint_data) > 0:
+                    data_array = np.array(uint_data, dtype=np.uint32)
+                elif len(byte_data) > 0:
+                    data_array = np.array(byte_data, dtype=np.uint8)
+
+                if data_array is not None:
+                    attr_info['data'] = data_array.reshape((-1, attr_info['num_components']))
+                else:
+                    attr_info['data'] = None
+
+                self._attributes.append(attr_info)
 
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
@@ -37,42 +93,56 @@ class DracoPointCloud:
     def num_axes(self):
         return 3
 
+    def get_attribute_by_type(self, attribute_type):
+        for attr in self.attributes:
+            if attr['attribute_type'] == attribute_type:
+                return attr
+        return None
+
+    def get_attribute_by_unique_id(self, unique_id):
+        for attr in self.attributes:
+            if attr['unique_id'] == unique_id:
+                return attr
+        return None
+
+    @property
+    def attributes(self):
+        return self._attributes
+
     @property
     def points(self):
-        points_ = self.data_struct['points']
-        N = len(points_) // 3
-        return np.array(points_).reshape((N, 3))
+        position_attr = self.get_attribute_by_type(AttributeType.POSITION)  # POSITION=0
+        if position_attr and position_attr['data'] is not None:
+            return position_attr['data']
+        return None
 
     @property
     def colors(self):
-        if self.data_struct['colors_set']:
-            colors_ = self.data_struct['colors']
-            N = len(self.data_struct['points']) // 3
-            return np.array(colors_).reshape((N, -1))
-        else:
-            return None
+        color_attr = self.get_attribute_by_type(AttributeType.COLOR)  # COLOR=2
+        if color_attr and color_attr['data'] is not None:
+            return color_attr['data']
+        return None
 
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
         faces_ = self.data_struct['faces']
         N = len(faces_) // 3
-        return np.array(faces_).reshape((N, 3))
+        return np.array(faces_, dtype=np.uint32).reshape((N, 3))
 
     @property
     def normals(self):
-        normals_ = self.data_struct['normals']
-        N = len(normals_) // 3
-        return np.array(normals_).reshape((N,3))
+        normal_attr = self.get_attribute_by_type(AttributeType.NORMAL)  # NORMAL = 1
+        if normal_attr and normal_attr['data'] is not None:
+            return normal_attr['data']
+        return None
 
     @property
     def tex_coord(self):
-        tex_coord_ = self.data_struct['tex_coord']
-        if len(tex_coord_) == 0:
-            return None
-        N = len(self.data_struct['points']) // 3
-        NC = len(tex_coord_) // N
-        return np.array(tex_coord_).reshape((N, NC))
+        tex_attr = self.get_attribute_by_type(AttributeType.TEX_COORD)  # TEX_COORD = 3
+        if tex_attr and tex_attr['data'] is not None:
+            return tex_attr['data']
+        return None
 
 class EncodingOptions(object):
     def __init__(self, quantization_bits, quantization_range, quantization_origin):
@@ -119,7 +189,8 @@ def encode(
     quantization_bits=14, compression_level=1,
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
-    colors=None, tex_coord=None, normals=None
+    colors=None, tex_coord=None, normals=None,
+    generic_attributes=None
 ) -> bytes:
     """
     bytes encode(
@@ -127,7 +198,8 @@ def encode(
         quantization_bits=11, compression_level=1,
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
-        colors=None, tex_coord=None, normals=None
+        colors=None, tex_coord=None, normals=None,
+        generic_attributes=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -153,6 +225,23 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
+    Generic_attributes is a dictionary of additional attributes to encode, where:
+       - Keys: unique_ids (integer identifiers for each attribute, e.g., 0, 1, 2...)
+       - Values: numpy arrays with shape (N, K) where:
+         - N = number of vertices in the mesh
+         - K = number of components per attribute
+       - Supported data types: float, uint8, uint16, uint32
+       - Use None if there are no generic attributes to encode.
+
+        @example
+        ```python
+        # Example with additional vertex tangents, joints, and weights
+        generic_attributes = {
+            0: vertex_tangents,    # shape (1000, 3) for tangents, unique_id is 0
+            1: vertex_joints,      # shape (1000, 4) for joints, unique_id is 1
+            4: vertex_weights      # shape (1000, 4) for weights, unique_id is 4
+        }
+        ```
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
@@ -165,6 +254,73 @@ def encode(
     colors = format_array(colors)
     tex_coord = format_array(tex_coord, col=2)
     normals = format_array(normals, col=3)
+
+
+    # Process generic attributes from generic_attributes
+    cdef vector[uint8_t] unique_ids
+    cdef vector[vector[float]] attr_float_data
+    cdef vector[vector[uint8_t]] attr_uint8_data
+    cdef vector[vector[uint16_t]] attr_uint16_data
+    cdef vector[vector[uint32_t]] attr_uint32_data
+    cdef vector[int] attr_data_types  # 0=float, 1=uint8, 2=uint16, 3=uint32
+    cdef vector[int] attr_num_components
+
+    if generic_attributes:
+        for unique_id, attr_data in generic_attributes.items():
+            if attr_data is None:
+                continue
+                
+            # Format the attribute data
+            attr_array = format_array(attr_data)
+            if attr_array is None:
+                continue
+                
+            # Validate attribute array
+            if len(attr_array.shape) != 2:
+                raise ValueError(f"Attribute '{unique_id}' must be 2D array")
+            if attr_array.shape[0] != points.shape[0]:
+                raise ValueError(f"Attribute '{unique_id}' must have same number of vertices as points")
+            
+            # Store attribute info
+            unique_ids.push_back(unique_id)
+            attr_num_components.push_back(attr_array.shape[1])
+            
+            # Handle different data types
+            if np.issubdtype(attr_array.dtype, np.floating):
+                attr_data_types.push_back(DataType.DT_FLOAT32)  # 9, float
+                attr_array = attr_array.astype(np.float32)
+                float_view = attr_array.reshape((attr_array.size,))
+                attr_float_data.push_back(float_view)
+                # Add empty vectors for other types
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint8:
+                attr_data_types.push_back(DataType.DT_UINT8)  # 2, uint8
+                uint8_view = attr_array.reshape((attr_array.size,))
+                attr_uint8_data.push_back(uint8_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint16:
+                attr_data_types.push_back(DataType.DT_UINT16)  # 4, uint16
+                uint16_view = attr_array.reshape((attr_array.size,))
+                attr_uint16_data.push_back(uint16_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint32_data.push_back(vector[uint32_t]())
+            elif attr_array.dtype == np.uint32:
+                attr_data_types.push_back(DataType.DT_UINT32)  # 6, uint32
+                uint32_view = attr_array.reshape((attr_array.size,))
+                attr_uint32_data.push_back(uint32_view)
+                # Add empty vectors for other types
+                attr_float_data.push_back(vector[float]())
+                attr_uint8_data.push_back(vector[uint8_t]())
+                attr_uint16_data.push_back(vector[uint16_t]())
+            else:
+                raise ValueError(f"Unsupported data type for attribute '{unique_id}': {attr_array.dtype}")
 
     integer_mark = 0
 
@@ -186,6 +342,7 @@ def encode(
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
     cdef vector[float] normalsview
+
 
     colors_channel = 0
     if colors is not None:
@@ -226,7 +383,10 @@ def encode(
             quantization_range, &quant_origin[0],
             preserve_order, create_metadata, integer_mark,
             colorsview, colors_channel, texcoordview, tex_coord_channel,
-            normalsview, has_normals  # Add these two parameters
+            normalsview, has_normals,
+            unique_ids, attr_float_data, attr_uint8_data,
+            attr_uint16_data, attr_uint32_data,
+            attr_data_types, attr_num_components
         )
 
 
