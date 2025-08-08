@@ -350,8 +350,6 @@ namespace DracoFunctions {
     std::vector<int> generic_attr_ids;
     generic_attr_ids.reserve(unique_ids.size());
 
-    //std::cout << "DEBUG: attr_names size: " << unique_ids.size() << std::endl;
-
     for (size_t i = 0; i < unique_ids.size(); ++i) {
       draco::GeometryAttribute generic_attr;
       draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[i]);
@@ -374,8 +372,6 @@ namespace DracoFunctions {
       generic_attr_ids.push_back(generic_att_id);
     }
 
-
-    // std::cout << "DEBUG: Encode all generic attributes, total: " << attr_ids.size() << std::endl;
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
     std::vector<int32_t> pts_int32;

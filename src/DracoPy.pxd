@@ -1,6 +1,5 @@
 #cython: language_level=3
 from libcpp.vector cimport vector
-from libcpp.string cimport string
 from libc.stdint cimport uint8_t, uint16_t, uint32_t
 from libcpp cimport bool
 

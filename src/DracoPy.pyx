@@ -225,11 +225,23 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
-    Generic_attributes is a dictionary of additional attributes to encode.
-        The keys are attribute unique_ids and the values are numpy arrays with shape (N, K).
-        N is the number of vertices. K is the number of components for that attribute.
-        Supported data types are float, uint8, uint16, and uint32.
-        Use None if there are no generic attributes to encode.
+    Generic_attributes is a dictionary of additional attributes to encode, where:
+       - Keys: unique_ids (integer identifiers for each attribute, e.g., 0, 1, 2...)
+       - Values: numpy arrays with shape (N, K) where:
+         - N = number of vertices in the mesh
+         - K = number of components per attribute
+       - Supported data types: float, uint8, uint16, uint32
+       - Use None if there are no generic attributes to encode.
+
+        @example
+        ```python
+        # Example with additional vertex tangents, joints, and weights
+        generic_attributes = {
+            0: vertex_tangents,    # shape (1000, 3) for tangents, unique_id is 0
+            1: vertex_joints,      # shape (1000, 4) for joints, unique_id is 1
+            4: vertex_weights      # shape (1000, 4) for weights, unique_id is 4
+        }
+        ```
     """
     assert 0 <= compression_level <= 10, "Compression level must be in range [0, 10]"
 
