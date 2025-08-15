@@ -84,7 +84,7 @@ if os.path.exists(".eggs"):
 
 setup(
     name='DracoPy',
-    version='1.5.0',
+    version='1.6.0',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
     author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez,  Forrest Collman, Zeyu Zhao, Denis Riviere, Brett Tully, Hanseul Jun,  Afshawn Lotfi',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
