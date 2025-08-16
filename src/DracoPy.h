@@ -32,6 +32,7 @@ namespace DracoFunctions {
     int num_components;
     int data_type;  // draco::DataType as int
     int attribute_type;  // draco::GeometryAttribute::Type as int
+    std::string name;  // Attribute name from metadata
     std::vector<float> float_data;    // For float data
     std::vector<uint32_t> uint_data;  // For integer data
     std::vector<uint8_t> byte_data;   // For byte data
@@ -124,6 +125,8 @@ namespace DracoFunctions {
       }
     }
 
+    const draco::GeometryMetadata *metadata = mesh->GetMetadata();
+
     // Collect all attributes in a unified way
     // std::cout << "DEBUG: Collecting all attributes, total: " << mesh->num_attributes() << std::endl;
     for (int att_id = 0; att_id < mesh->num_attributes(); ++att_id) {
@@ -134,6 +137,13 @@ namespace DracoFunctions {
       attr.num_components = att->num_components();
       attr.data_type = static_cast<int>(att->data_type());
       attr.attribute_type = static_cast<int>(att->attribute_type());
+
+      if (metadata) {
+        auto att_metadata = metadata->GetAttributeMetadataByUniqueId(attr.unique_id);
+        if (att_metadata) {
+          att_metadata->GetEntryString("name", &(attr.name));
+        }
+      }
 
       // Extract data based on data type
       const int num_values = mesh->num_points() * att->num_components();
@@ -207,7 +217,6 @@ namespace DracoFunctions {
     }
 
     // Set encoding options from metadata
-    const draco::GeometryMetadata *metadata = mesh->GetMetadata();
     meshObject.encoding_options_set = false;
     if (metadata) {
       metadata->GetEntryInt("quantization_bits", &(meshObject.quantization_bits));
@@ -224,13 +233,18 @@ namespace DracoFunctions {
   void setup_encoder_and_metadata(draco::PointCloud *point_cloud_or_mesh, draco::Encoder &encoder, int compression_level, int quantization_bits, float quantization_range, const float *quantization_origin, bool create_metadata) {
     int speed = 10 - compression_level;
     encoder.SetSpeedOptions(speed, speed);
-    std::unique_ptr<draco::GeometryMetadata> metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
+    // Use existing metadata or create a new one if `create_metadata` is true.
+    auto metadata = point_cloud_or_mesh->metadata();
+    if (metadata == nullptr && create_metadata) {
+      auto new_metadata = std::unique_ptr<draco::GeometryMetadata>(new draco::GeometryMetadata());
+      point_cloud_or_mesh->AddMetadata(std::move(new_metadata));
+      metadata = point_cloud_or_mesh->metadata();
+    }
     if (quantization_origin == NULL || quantization_range <= 0.f) {
       // @zeruniverse All quantization_range <= 0.f is useless, see
       //    https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L160-L170
       encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, quantization_bits);
-    }
-    else {
+    } else {
       encoder.SetAttributeExplicitQuantization(draco::GeometryAttribute::POSITION, quantization_bits, 3, quantization_origin, quantization_range);
       if (create_metadata) {
         metadata->AddEntryDouble("quantization_range", quantization_range);
@@ -243,7 +257,6 @@ namespace DracoFunctions {
     }
     if (create_metadata) {
       metadata->AddEntryInt("quantization_bits", quantization_bits);
-      point_cloud_or_mesh->AddMetadata(std::move(metadata));
     }
   }
 
@@ -263,13 +276,14 @@ namespace DracoFunctions {
     const uint8_t tex_coord_channel,
     const std::vector<float> &normals,
     const uint8_t has_normals,
-    std::vector<uint8_t>& unique_ids,
+    std::vector<int8_t>& unique_ids,
     std::vector<std::vector<float>>& attr_float_data,
     std::vector<std::vector<uint8_t>>& attr_uint8_data,
     std::vector<std::vector<uint16_t>>& attr_uint16_data,
     std::vector<std::vector<uint32_t>>& attr_uint32_data,
     std::vector<int>& attr_data_types,
-    std::vector<int>& attr_num_components
+    std::vector<int>& attr_num_components,
+    std::vector<std::string>& attr_names
   ) {
     // @zeruniverse TriangleSoupMeshBuilder will cause problems when
     //    preserve_order=True due to vertices merging.
@@ -361,15 +375,23 @@ namespace DracoFunctions {
         continue;
       }
       generic_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, num_components, dtype, false, 0, 0);
-      int generic_att_id = mesh.AddAttribute(generic_attr, true, num_pts);
-      mesh.attribute(generic_att_id)->set_unique_id(unique_ids[i]);
-      if (generic_att_id == -1) {
+      int att_id = mesh.AddAttribute(generic_attr, true, num_pts);
+      if (att_id == -1) {
         // Failed to add attribute, skip
         // std::cout << "DEBUG: Failed to add attribute " << unique_ids[i] << std::endl;
         generic_attr_ids.push_back(-1);
         continue;
       }
-      generic_attr_ids.push_back(generic_att_id);
+      if (unique_ids[i] >= 0) {
+        mesh.attribute(att_id)->set_unique_id(unique_ids[i]);
+      }
+      if (!attr_names[i].empty()) {
+        auto attribute_metadata = std::unique_ptr<draco::AttributeMetadata>(new draco::AttributeMetadata());
+        attribute_metadata->AddEntryString("name", attr_names[i]);
+        mesh.AddAttributeMetadata(att_id, std::move(attribute_metadata));
+      }
+
+      generic_attr_ids.push_back(att_id);
     }
 
 
@@ -411,7 +433,6 @@ namespace DracoFunctions {
 
       // GENERIC ATTRIBUTES
       for (size_t j = 0; j < generic_attr_ids.size(); ++j) {
-        const auto &unique_id = unique_ids[j];
         const auto &float_data = attr_float_data[j];
         const auto &uint8_data = attr_uint8_data[j];
         const auto &uint16_data = attr_uint16_data[j];

@@ -10,6 +10,7 @@ EXPECTED_POINTS_BUNNY_MESH = 104502 // 3
 EXPECTED_POINTS_BUNNY_PTC = 107841 // 3
 EXPECTED_FACES_BUNNY = 208353 // 3
 
+
 def test_decoding_and_encoding_mesh_file():
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         mesh = DracoPy.decode(draco_file.read())
@@ -55,8 +56,8 @@ def test_decoding_and_encoding_mesh_file():
     encoding_test5 = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                     quantization_bits=26, colors=colors, tex_coord=tex_coord)
     mesh_decode = DracoPy.decode(encoding_test5)
-    
-    #this is very slow
+
+    # this is very slow
     # from tqdm import tqdm
     # ptmap = {}
     # for pt in tqdm(mesh.points):
@@ -86,14 +87,15 @@ def test_decoding_and_encoding_mesh_file():
         invalid_m = DracoPy.encode(mesh.points, mesh.faces, compression_level=1,
                                    quantization_bits=26, colors=invalid_c)
 
+
 def test_tex_coord_encoding():
     points = np.array([
-        [0,0,0],
-        [1,0,0],
-        [1,1,0],
-        [0,1,0],
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
     ])
-    faces = np.array([[0,1,2], [0,3,2]])
+    faces = np.array([[0, 1, 2], [0, 3, 2]])
     # tex_coord = np.random.random([len(points), 2]).astype(float)
     tex_coord = np.array([
         [0.0, 0.1],
@@ -103,10 +105,10 @@ def test_tex_coord_encoding():
     ])
 
     encoded = DracoPy.encode(
-        points, faces, 
+        points, faces,
         compression_level=1,
-        quantization_bits=26, 
-        # colors=colors, 
+        quantization_bits=26,
+        # colors=colors,
         tex_coord=tex_coord
     )
     mesh = DracoPy.decode(encoded)
@@ -170,6 +172,7 @@ def test_decoding_and_encoding_mesh_file_integer_positions():
     pts_f = np.sort(pts_f, axis=0)
     pts_i = np.sort(np.copy(points), axis=0)
     assert np.all(np.isclose(pts_i, pts_f))
+
 
 def test_decoding_improper_file():
     with open(os.path.join(testdata_directory, "bunny.obj"), "rb") as improper_file:
@@ -253,22 +256,23 @@ def test_normals_encoding():
     # Read reference mesh
     with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
         mesh = DracoPy.decode(draco_file.read())
-    
+
     # Create test normal vectors
     test_normals = np.array([[1.0, 0.0, 0.0]] * mesh.points.shape[0])
-    
+
     # Encode with test normals
     binary = DracoPy.encode(mesh.points, mesh.faces, normals=test_normals)
-    
+
     # Decode and verify normals
     decoded_mesh = DracoPy.decode(binary)
     assert np.allclose(decoded_mesh.normals, test_normals)
+
 
 def test_generic_attributes():
     # Read reference mesh
     with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
         mesh = DracoPy.decode(draco_file.read())
-    
+
     # Create test attributes vectors
     test_tangents = np.array([[0.0, 1.0, 0.0]] * mesh.points.shape[0])
     test_joints = np.array([[0, 1]] * mesh.points.shape[0], dtype=np.uint32)
@@ -303,3 +307,71 @@ def test_generic_attributes():
     assert decoded_weights["data_type"] == DracoPy.DataType.DT_FLOAT32
     assert decoded_weights["num_components"] == 2
     assert np.allclose(decoded_weights["data"], test_weights)
+
+
+def test_named_generic_attributes():
+    # Read reference mesh
+    with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+
+    # Create test attributes vectors
+    test_tangents = np.array([[0.0, 1.0, 0.0]] * mesh.points.shape[0])
+    test_joints = np.array([[0, 1]] * mesh.points.shape[0], dtype=np.uint32)
+    test_weights = np.array([[0.5, 0.5]] * mesh.points.shape[0], dtype=np.float32)
+
+    # Encode with test attributes
+    generic_attributes = {
+        'tangents': test_tangents,
+        'joints': test_joints,
+        'weights': test_weights
+    }
+    binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+
+    # Decode and verify attributes
+    decoded_mesh = DracoPy.decode(binary)
+
+    decoded_tangents = decoded_mesh.get_attribute_by_name('tangents')
+    decoded_joints = decoded_mesh.get_attribute_by_name('joints')
+    decoded_weights = decoded_mesh.get_attribute_by_name('weights')
+
+    assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32
+    assert decoded_tangents["num_components"] == 3
+    assert np.allclose(decoded_tangents["data"], test_tangents)
+
+    assert decoded_joints["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_joints["data_type"] == DracoPy.DataType.DT_UINT32
+    assert decoded_joints["num_components"] == 2
+    assert np.array_equal(decoded_joints["data"], test_joints)
+
+    assert decoded_weights["attribute_type"] == DracoPy.AttributeType.GENERIC
+    assert decoded_weights["data_type"] == DracoPy.DataType.DT_FLOAT32
+    assert decoded_weights["num_components"] == 2
+    assert np.allclose(decoded_weights["data"], test_weights)
+
+
+def test_invalid_generic_attribute_keys():
+    # Read reference mesh
+    with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+
+    # Create test attributes vectors
+    test_tangents = np.array([[0.0, 1.0, 0.0]] * mesh.points.shape[0])
+
+    generic_attributes = {
+        0.5: test_tangents,
+    }
+    with pytest.raises(ValueError):
+        DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+
+    generic_attributes = {
+        -3: test_tangents,
+    }
+    with pytest.raises(ValueError):
+        DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+
+    generic_attributes = {
+        ('foo', ): test_tangents,
+    }
+    with pytest.raises(ValueError):
+        DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
