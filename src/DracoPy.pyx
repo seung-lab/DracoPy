@@ -236,7 +236,10 @@ def encode(
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
     Generic_attributes is a dictionary of additional attributes to encode, where:
-       - Keys: unique_ids (integer identifiers for each attribute, e.g., 0, 1, 2...)
+       - Keys: non-negative integer unique_ids or strings
+         - When the key is an integer, it is used as the attribute's unique_id.
+         - When it is a string, it is stored in the attribute's metadata entry as "name".
+           Use the `get_attribute_by_name()` method to retrieve attributes by name.
        - Values: numpy arrays with shape (N, K) where:
          - N = number of vertices in the mesh
          - K = number of components per attribute
@@ -250,6 +253,13 @@ def encode(
             0: vertex_tangents,    # shape (1000, 3) for tangents, unique_id is 0
             1: vertex_joints,      # shape (1000, 4) for joints, unique_id is 1
             4: vertex_weights      # shape (1000, 4) for weights, unique_id is 4
+        }
+
+        # Use string keys to name attributes
+        generic_attributes = {
+            "tangents": vertex_tangents,
+            "joints": vertex_joints,
+            "weights": vertex_weights
         }
         ```
     """
