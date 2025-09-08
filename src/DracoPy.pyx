@@ -5,6 +5,7 @@ from cpython.mem cimport PyMem_Malloc, PyMem_Free
 cimport DracoPy
 import struct
 from math import floor
+from libcpp.string cimport string
 from libc.string cimport memcmp
 from libc.stdint cimport (
   int8_t, int16_t, int32_t, int64_t,
@@ -79,6 +80,9 @@ class DracoPointCloud:
                 else:
                     attr_info['data'] = None
 
+                name = attr.get('name', None)
+                attr_info['name'] = name.decode('utf-8') if name else None
+
                 self._attributes.append(attr_info)
 
     def get_encoded_coordinate(self, value, axis):
@@ -102,6 +106,12 @@ class DracoPointCloud:
     def get_attribute_by_unique_id(self, unique_id):
         for attr in self.attributes:
             if attr['unique_id'] == unique_id:
+                return attr
+        return None
+
+    def get_attribute_by_name(self, name):
+        for attr in self.attributes:
+            if attr['name'] == name:
                 return attr
         return None
 
@@ -226,7 +236,10 @@ def encode(
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
     Generic_attributes is a dictionary of additional attributes to encode, where:
-       - Keys: unique_ids (integer identifiers for each attribute, e.g., 0, 1, 2...)
+       - Keys: non-negative integer unique_ids or strings
+         - When the key is an integer, it is used as the attribute's unique_id.
+         - When it is a string, it is stored in the attribute's metadata entry as "name".
+           Use the `get_attribute_by_name()` method to retrieve attributes by name.
        - Values: numpy arrays with shape (N, K) where:
          - N = number of vertices in the mesh
          - K = number of components per attribute
@@ -240,6 +253,13 @@ def encode(
             0: vertex_tangents,    # shape (1000, 3) for tangents, unique_id is 0
             1: vertex_joints,      # shape (1000, 4) for joints, unique_id is 1
             4: vertex_weights      # shape (1000, 4) for weights, unique_id is 4
+        }
+
+        # Use string keys to name attributes
+        generic_attributes = {
+            "tangents": vertex_tangents,
+            "joints": vertex_joints,
+            "weights": vertex_weights
         }
         ```
     """
@@ -257,16 +277,22 @@ def encode(
 
 
     # Process generic attributes from generic_attributes
-    cdef vector[uint8_t] unique_ids
+    cdef vector[int8_t] unique_ids
     cdef vector[vector[float]] attr_float_data
     cdef vector[vector[uint8_t]] attr_uint8_data
     cdef vector[vector[uint16_t]] attr_uint16_data
     cdef vector[vector[uint32_t]] attr_uint32_data
     cdef vector[int] attr_data_types  # 0=float, 1=uint8, 2=uint16, 3=uint32
     cdef vector[int] attr_num_components
+    cdef vector[string] attr_names
 
     if generic_attributes:
-        for unique_id, attr_data in generic_attributes.items():
+        for id_or_name, attr_data in generic_attributes.items():
+            if type(id_or_name) not in (int, str):
+                raise ValueError(f"Generic attribute keys must be integers or strings")
+            if type(id_or_name) == int and id_or_name < 0:
+                raise ValueError(f"Generic attribute IDs must be positive integers")
+
             if attr_data is None:
                 continue
                 
@@ -277,12 +303,18 @@ def encode(
                 
             # Validate attribute array
             if len(attr_array.shape) != 2:
-                raise ValueError(f"Attribute '{unique_id}' must be 2D array")
+                raise ValueError(f"Attribute '{id_or_name}' must be 2D array")
             if attr_array.shape[0] != points.shape[0]:
-                raise ValueError(f"Attribute '{unique_id}' must have same number of vertices as points")
+                raise ValueError(f"Attribute '{id_or_name}' must have same number of vertices as points")
             
+            if type(id_or_name) == int:
+                unique_ids.push_back(id_or_name)
+                attr_names.push_back("")
+            else:
+                unique_ids.push_back(-1)
+                attr_names.push_back(id_or_name.encode('utf-8'))
+
             # Store attribute info
-            unique_ids.push_back(unique_id)
             attr_num_components.push_back(attr_array.shape[1])
             
             # Handle different data types
@@ -320,7 +352,7 @@ def encode(
                 attr_uint8_data.push_back(vector[uint8_t]())
                 attr_uint16_data.push_back(vector[uint16_t]())
             else:
-                raise ValueError(f"Unsupported data type for attribute '{unique_id}': {attr_array.dtype}")
+                raise ValueError(f"Unsupported data type for attribute '{id_or_name}': {attr_array.dtype}")
 
     integer_mark = 0
 
@@ -386,7 +418,8 @@ def encode(
             normalsview, has_normals,
             unique_ids, attr_float_data, attr_uint8_data,
             attr_uint16_data, attr_uint32_data,
-            attr_data_types, attr_num_components
+            attr_data_types, attr_num_components,
+            attr_names
         )
 
 

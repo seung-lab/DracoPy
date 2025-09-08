@@ -1,7 +1,8 @@
 #cython: language_level=3
 from libcpp.vector cimport vector
-from libc.stdint cimport uint8_t, uint16_t, uint32_t
+from libc.stdint cimport int8_t, uint8_t, uint16_t, uint32_t
 from libcpp cimport bool
+from libcpp.string cimport string
 
 cimport numpy as cnp
 import numpy as np
@@ -22,6 +23,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         int num_components
         int data_type
         int attribute_type
+        string name
         vector[float] float_data
         vector[uint32_t] uint_data
         vector[uint8_t] byte_data
@@ -73,13 +75,14 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const uint8_t tex_coord_channel,
         const vector[float] normals,
         const uint8_t has_normals,
-        vector[uint8_t]& unique_ids,
+        vector[int8_t]& unique_ids,
         vector[vector[float]]& attr_float_data,
         vector[vector[uint8_t]]& attr_uint8_data,
         vector[vector[uint16_t]]& attr_uint16_data,
         vector[vector[uint32_t]]& attr_uint32_data,
         vector[int]& attr_data_types,
-        vector[int]& attr_num_components
+        vector[int]& attr_num_components,
+        vector[string]& attr_names
     ) except +
 
     EncodedObject encode_point_cloud(
