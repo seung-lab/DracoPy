@@ -518,11 +518,26 @@ namespace DracoFunctions {
     const float *quantization_origin, const bool preserve_order,
     const bool create_metadata, const int integer_mark,
     const std::vector<uint8_t> &colors,
-    const uint8_t colors_channel
+    const uint8_t colors_channel,
+    std::vector<int8_t>& unique_ids,
+    std::vector<std::vector<float>>& attr_float_data,
+    std::vector<std::vector<uint8_t>>& attr_uint8_data,
+    std::vector<std::vector<uint16_t>>& attr_uint16_data,
+    std::vector<std::vector<uint32_t>>& attr_uint32_data,
+    std::vector<int>& attr_data_types,
+    std::vector<int>& attr_num_components,
+    std::vector<std::string>& attr_names
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
+
+    // Ensure unique ids for native attributes don't conflict with generic attributes
+    uint32_t next_unique_id = 0;
+    auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
+    if (max_unique_id != unique_ids.end()) {
+      next_unique_id = *max_unique_id + 1;
+    }
 
     auto dtype = (integer_mark == 1)
       ? draco::DataType::DT_INT32
@@ -535,11 +550,15 @@ namespace DracoFunctions {
     const int pos_att_id = pcb.AddAttribute(
       draco::GeometryAttribute::POSITION, 3, dtype
     );
+    pcb.SetAttributeUniqueId(pos_att_id, next_unique_id);
+    next_unique_id++;
 
     if(colors_channel){
       const int color_att_id = pcb.AddAttribute(
         draco::GeometryAttribute::COLOR, colors_channel, draco::DataType::DT_UINT8
       );
+      pcb.SetAttributeUniqueId(color_att_id, next_unique_id);
+      next_unique_id++;
       for (draco::PointIndex i(0); i < num_points; i++) {
         pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
         pcb.SetAttributeValueForPoint(color_att_id, i, colors.data() + colors_channel * i.value());
@@ -547,6 +566,42 @@ namespace DracoFunctions {
     } else {
       for (draco::PointIndex i(0); i < num_points; i++) {
         pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
+      }
+    }
+
+    // GENERIC ATTRIBUTES
+    for (size_t j = 0; j < unique_ids.size(); ++j) {
+      draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[j]);
+      int num_components = attr_num_components[j];
+      if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
+        // Unsupported data type, skip
+        continue;
+      }
+      int att_id = pcb.AddAttribute(draco::GeometryAttribute::GENERIC, num_components, dtype);
+      if (att_id == -1) {
+        // Failed to add attribute, skip
+        continue;
+      }
+      if (unique_ids[j] >= 0) {
+        pcb.SetAttributeUniqueId(att_id, unique_ids[j]);
+      } else {
+        pcb.SetAttributeUniqueId(att_id, next_unique_id);
+        next_unique_id++;
+      }
+      if (!attr_names[j].empty()) {
+        auto attribute_metadata = std::unique_ptr<draco::AttributeMetadata>(new draco::AttributeMetadata());
+        attribute_metadata->AddEntryString("name", attr_names[j]);
+        pcb.AddAttributeMetadata(att_id, std::move(attribute_metadata));
+      }
+
+      if (dtype == draco::DT_FLOAT32) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_float_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT8) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint8_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT16) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint16_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT32) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint32_data[j].data(), 0);
       }
     }
 
