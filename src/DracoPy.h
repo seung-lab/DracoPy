@@ -291,6 +291,13 @@ namespace DracoFunctions {
     //    manually.
     draco::Mesh mesh; //Initialize a draco mesh
 
+    // Ensure unique ids for native attributes don't conflict with generic attributes
+    uint32_t next_unique_id = 0;
+    auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
+    if (max_unique_id != unique_ids.end()) {
+      next_unique_id = *max_unique_id + 1;
+    }
+
     // Process vertices
     const size_t num_pts = points.size() / 3;
     mesh.set_num_points(num_pts);
@@ -331,6 +338,8 @@ namespace DracoFunctions {
                        sizeof(uint8_t) * colors_channel,   // byte stride
                        0);                                 // byte offset
       color_att_id = mesh.AddAttribute(colors_attr, true, num_pts);
+      mesh.attribute(color_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
     int tex_coord_att_id = -1;
     if(tex_coord_channel) {
@@ -343,6 +352,8 @@ namespace DracoFunctions {
                           sizeof(float) * tex_coord_channel,   // byte stride
                           0);                                  // byte offset
       tex_coord_att_id = mesh.AddAttribute(tex_coord_attr, true, num_pts);
+      mesh.attribute(tex_coord_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
 
     int normal_att_id = -1;
@@ -356,6 +367,8 @@ namespace DracoFunctions {
                        sizeof(float) * 3,                   // byte stride
                        0);                                  // byte offset
       normal_att_id = mesh.AddAttribute(normal_attr, true, num_pts);
+      mesh.attribute(normal_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
 
 
@@ -384,6 +397,9 @@ namespace DracoFunctions {
       }
       if (unique_ids[i] >= 0) {
         mesh.attribute(att_id)->set_unique_id(unique_ids[i]);
+      } else {
+        mesh.attribute(att_id)->set_unique_id(next_unique_id);
+        next_unique_id++;
       }
       if (!attr_names[i].empty()) {
         auto attribute_metadata = std::unique_ptr<draco::AttributeMetadata>(new draco::AttributeMetadata());
@@ -396,6 +412,8 @@ namespace DracoFunctions {
 
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    mesh.attribute(pos_att_id)->set_unique_id(next_unique_id);
+    next_unique_id++;
     std::vector<int32_t> pts_int32;
     std::vector<uint32_t> pts_uint32;
     if (integer_mark == 1) {

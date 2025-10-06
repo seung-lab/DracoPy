@@ -282,16 +282,19 @@ def test_generic_attributes():
     generic_attributes = {
         0: test_tangents,
         1: test_joints,
-        6: test_weights
+        3: test_weights
     }
     binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
 
     # Decode and verify attributes
     decoded_mesh = DracoPy.decode(binary)
 
+    assert len(decoded_mesh.attributes) == len(
+        set([attr["unique_id"] for attr in decoded_mesh.attributes])
+    )
     decoded_tangents = decoded_mesh.get_attribute_by_unique_id(0)
     decoded_joints = decoded_mesh.get_attribute_by_unique_id(1)
-    decoded_weights = decoded_mesh.get_attribute_by_unique_id(6)
+    decoded_weights = decoded_mesh.get_attribute_by_unique_id(3)
 
     assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
     assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32
@@ -330,6 +333,9 @@ def test_named_generic_attributes():
     # Decode and verify attributes
     decoded_mesh = DracoPy.decode(binary)
 
+    assert len(decoded_mesh.attributes) == len(
+        set([attr["unique_id"] for attr in decoded_mesh.attributes])
+    )
     decoded_tangents = decoded_mesh.get_attribute_by_name('tangents')
     decoded_joints = decoded_mesh.get_attribute_by_name('joints')
     decoded_weights = decoded_mesh.get_attribute_by_name('weights')
