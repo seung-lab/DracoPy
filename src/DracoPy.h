@@ -293,6 +293,10 @@ namespace DracoFunctions {
 
     // Ensure unique ids for native attributes don't conflict with generic attributes
     uint32_t next_unique_id = 0;
+    auto min_unique_id = std::min_element(unique_ids.begin(), unique_ids.end());
+    if (min_unique_id != unique_ids.end() && *min_unique_id < -1) {
+      throw std::invalid_argument("Should never be reached; all unique_ids should be >= -1.");
+    }
     auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
     if (max_unique_id != unique_ids.end()) {
       next_unique_id = *max_unique_id + 1;
@@ -534,6 +538,10 @@ namespace DracoFunctions {
 
     // Ensure unique ids for native attributes don't conflict with generic attributes
     uint32_t next_unique_id = 0;
+    auto min_unique_id = std::min_element(unique_ids.begin(), unique_ids.end());
+    if (min_unique_id != unique_ids.end() && *min_unique_id < -1) {
+      throw std::invalid_argument("Should never be reached; all unique_ids should be >= -1.");
+    }
     auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
     if (max_unique_id != unique_ids.end()) {
       next_unique_id = *max_unique_id + 1;
