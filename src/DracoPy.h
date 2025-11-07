@@ -5,6 +5,7 @@
 #include<cmath>
 #include<vector>
 #include<cstddef>
+#include<sstream>
 #include "draco/compression/decode.h"
 #include "draco/compression/encode.h"
 #include "draco/compression/config/compression_shared.h"
@@ -386,18 +387,16 @@ namespace DracoFunctions {
       draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[i]);
       int num_components = attr_num_components[i];
       if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
-        // Unsupported data type, skip
-        // std::cout << "DEBUG: Unsupported attribute data type for " << unique_ids[i] << std::endl;
-        generic_attr_ids.push_back(-1);
-        continue;
+        std::ostringstream oss;
+        oss << "Unsupported attribute data type for attribute with unique id " << int(unique_ids[i]);
+        throw std::invalid_argument(oss.str());
       }
       generic_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, num_components, dtype, false, 0, 0);
       int att_id = mesh.AddAttribute(generic_attr, true, num_pts);
       if (att_id == -1) {
-        // Failed to add attribute, skip
-        // std::cout << "DEBUG: Failed to add attribute " << unique_ids[i] << std::endl;
-        generic_attr_ids.push_back(-1);
-        continue;
+        std::ostringstream oss;
+        oss << "Failed to add attribute with unique id " << int(unique_ids[i]);
+        throw std::runtime_error(oss.str());
       }
       if (unique_ids[i] >= 0) {
         mesh.attribute(att_id)->set_unique_id(unique_ids[i]);
@@ -461,8 +460,7 @@ namespace DracoFunctions {
         const auto &uint32_data = attr_uint32_data[j];
 
         if (generic_attr_ids[j] == -1) {
-          // Skip if attribute was not added
-          continue;
+          throw std::runtime_error("Should never be reached; all successfully added attributes should have nonnegative att_id.");
         } 
 
         if (attr_data_types[j] == draco::DT_FLOAT32) {
@@ -582,13 +580,15 @@ namespace DracoFunctions {
       draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[j]);
       int num_components = attr_num_components[j];
       if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
-        // Unsupported data type, skip
-        continue;
+        std::ostringstream oss;
+        oss << "Unsupported attribute data type for attribute with unique id " << int(unique_ids[j]);
+        throw std::invalid_argument(oss.str());
       }
       int att_id = pcb.AddAttribute(draco::GeometryAttribute::GENERIC, num_components, dtype);
       if (att_id == -1) {
-        // Failed to add attribute, skip
-        continue;
+        std::ostringstream oss;
+        oss << "Failed to add attribute with unique id " << int(unique_ids[j]);
+        throw std::runtime_error(oss.str());
       }
       if (unique_ids[j] >= 0) {
         pcb.SetAttributeUniqueId(att_id, unique_ids[j]);
