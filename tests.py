@@ -268,7 +268,8 @@ def test_normals_encoding():
     assert np.allclose(decoded_mesh.normals, test_normals)
 
 
-def test_generic_attributes():
+@pytest.mark.parametrize("object_type", [DracoPy.DracoMesh, DracoPy.DracoPointCloud])
+def test_generic_attributes(object_type):
     # Read reference mesh
     with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
         mesh = DracoPy.decode(draco_file.read())
@@ -282,16 +283,26 @@ def test_generic_attributes():
     generic_attributes = {
         0: test_tangents,
         1: test_joints,
-        6: test_weights
+        3: test_weights
     }
-    binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+    if object_type is DracoPy.DracoMesh:
+        binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+    else:
+        binary = DracoPy.encode(mesh.points, generic_attributes=generic_attributes)
 
     # Decode and verify attributes
-    decoded_mesh = DracoPy.decode(binary)
+    decoded_object = DracoPy.decode(binary)
+    if object_type is DracoPy.DracoMesh:
+        assert type(decoded_object) is DracoPy.DracoMesh
+    else:
+        assert type(decoded_object) is DracoPy.DracoPointCloud
 
-    decoded_tangents = decoded_mesh.get_attribute_by_unique_id(0)
-    decoded_joints = decoded_mesh.get_attribute_by_unique_id(1)
-    decoded_weights = decoded_mesh.get_attribute_by_unique_id(6)
+    assert len(decoded_object.attributes) == len(
+        set([attr["unique_id"] for attr in decoded_object.attributes])
+    )
+    decoded_tangents = decoded_object.get_attribute_by_unique_id(0)
+    decoded_joints = decoded_object.get_attribute_by_unique_id(1)
+    decoded_weights = decoded_object.get_attribute_by_unique_id(3)
 
     assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
     assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32
@@ -309,7 +320,8 @@ def test_generic_attributes():
     assert np.allclose(decoded_weights["data"], test_weights)
 
 
-def test_named_generic_attributes():
+@pytest.mark.parametrize("object_type", [DracoPy.DracoMesh, DracoPy.DracoPointCloud])
+def test_named_generic_attributes(object_type):
     # Read reference mesh
     with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
         mesh = DracoPy.decode(draco_file.read())
@@ -325,14 +337,24 @@ def test_named_generic_attributes():
         'joints': test_joints,
         'weights': test_weights
     }
-    binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+    if object_type is DracoPy.DracoMesh:
+        binary = DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+    else:
+        binary = DracoPy.encode(mesh.points, generic_attributes=generic_attributes)
 
     # Decode and verify attributes
-    decoded_mesh = DracoPy.decode(binary)
-
-    decoded_tangents = decoded_mesh.get_attribute_by_name('tangents')
-    decoded_joints = decoded_mesh.get_attribute_by_name('joints')
-    decoded_weights = decoded_mesh.get_attribute_by_name('weights')
+    decoded_object = DracoPy.decode(binary)
+    if object_type is DracoPy.DracoMesh:
+        assert type(decoded_object) is DracoPy.DracoMesh
+    else:
+        assert type(decoded_object) is DracoPy.DracoPointCloud
+    
+    assert len(decoded_object.attributes) == len(
+        set([attr["unique_id"] for attr in decoded_object.attributes])
+    )
+    decoded_tangents = decoded_object.get_attribute_by_name('tangents')
+    decoded_joints = decoded_object.get_attribute_by_name('joints')
+    decoded_weights = decoded_object.get_attribute_by_name('weights')
 
     assert decoded_tangents["attribute_type"] == DracoPy.AttributeType.GENERIC
     assert decoded_tangents["data_type"] == DracoPy.DataType.DT_FLOAT32

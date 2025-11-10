@@ -5,6 +5,7 @@
 #include<cmath>
 #include<vector>
 #include<cstddef>
+#include<sstream>
 #include "draco/compression/decode.h"
 #include "draco/compression/encode.h"
 #include "draco/compression/config/compression_shared.h"
@@ -291,6 +292,17 @@ namespace DracoFunctions {
     //    manually.
     draco::Mesh mesh; //Initialize a draco mesh
 
+    // Ensure unique ids for native attributes don't conflict with generic attributes
+    uint32_t next_unique_id = 0;
+    auto min_unique_id = std::min_element(unique_ids.begin(), unique_ids.end());
+    if (min_unique_id != unique_ids.end() && *min_unique_id < -1) {
+      throw std::invalid_argument("Should never be reached; all unique_ids should be >= -1.");
+    }
+    auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
+    if (max_unique_id != unique_ids.end()) {
+      next_unique_id = *max_unique_id + 1;
+    }
+
     // Process vertices
     const size_t num_pts = points.size() / 3;
     mesh.set_num_points(num_pts);
@@ -331,6 +343,8 @@ namespace DracoFunctions {
                        sizeof(uint8_t) * colors_channel,   // byte stride
                        0);                                 // byte offset
       color_att_id = mesh.AddAttribute(colors_attr, true, num_pts);
+      mesh.attribute(color_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
     int tex_coord_att_id = -1;
     if(tex_coord_channel) {
@@ -343,6 +357,8 @@ namespace DracoFunctions {
                           sizeof(float) * tex_coord_channel,   // byte stride
                           0);                                  // byte offset
       tex_coord_att_id = mesh.AddAttribute(tex_coord_attr, true, num_pts);
+      mesh.attribute(tex_coord_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
 
     int normal_att_id = -1;
@@ -356,6 +372,8 @@ namespace DracoFunctions {
                        sizeof(float) * 3,                   // byte stride
                        0);                                  // byte offset
       normal_att_id = mesh.AddAttribute(normal_attr, true, num_pts);
+      mesh.attribute(normal_att_id)->set_unique_id(next_unique_id);
+      next_unique_id++;
     }
 
 
@@ -369,21 +387,22 @@ namespace DracoFunctions {
       draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[i]);
       int num_components = attr_num_components[i];
       if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
-        // Unsupported data type, skip
-        // std::cout << "DEBUG: Unsupported attribute data type for " << unique_ids[i] << std::endl;
-        generic_attr_ids.push_back(-1);
-        continue;
+        std::ostringstream oss;
+        oss << "Unsupported attribute data type for attribute with unique id " << int(unique_ids[i]);
+        throw std::invalid_argument(oss.str());
       }
       generic_attr.Init(draco::GeometryAttribute::GENERIC, nullptr, num_components, dtype, false, 0, 0);
       int att_id = mesh.AddAttribute(generic_attr, true, num_pts);
       if (att_id == -1) {
-        // Failed to add attribute, skip
-        // std::cout << "DEBUG: Failed to add attribute " << unique_ids[i] << std::endl;
-        generic_attr_ids.push_back(-1);
-        continue;
+        std::ostringstream oss;
+        oss << "Failed to add attribute with unique id " << int(unique_ids[i]);
+        throw std::runtime_error(oss.str());
       }
       if (unique_ids[i] >= 0) {
         mesh.attribute(att_id)->set_unique_id(unique_ids[i]);
+      } else {
+        mesh.attribute(att_id)->set_unique_id(next_unique_id);
+        next_unique_id++;
       }
       if (!attr_names[i].empty()) {
         auto attribute_metadata = std::unique_ptr<draco::AttributeMetadata>(new draco::AttributeMetadata());
@@ -396,6 +415,8 @@ namespace DracoFunctions {
 
 
     const int pos_att_id = mesh.AddAttribute(positions_attr, true, num_pts);
+    mesh.attribute(pos_att_id)->set_unique_id(next_unique_id);
+    next_unique_id++;
     std::vector<int32_t> pts_int32;
     std::vector<uint32_t> pts_uint32;
     if (integer_mark == 1) {
@@ -439,8 +460,7 @@ namespace DracoFunctions {
         const auto &uint32_data = attr_uint32_data[j];
 
         if (generic_attr_ids[j] == -1) {
-          // Skip if attribute was not added
-          continue;
+          throw std::runtime_error("Should never be reached; all successfully added attributes should have nonnegative att_id.");
         } 
 
         if (attr_data_types[j] == draco::DT_FLOAT32) {
@@ -500,11 +520,30 @@ namespace DracoFunctions {
     const float *quantization_origin, const bool preserve_order,
     const bool create_metadata, const int integer_mark,
     const std::vector<uint8_t> &colors,
-    const uint8_t colors_channel
+    const uint8_t colors_channel,
+    std::vector<int8_t>& unique_ids,
+    std::vector<std::vector<float>>& attr_float_data,
+    std::vector<std::vector<uint8_t>>& attr_uint8_data,
+    std::vector<std::vector<uint16_t>>& attr_uint16_data,
+    std::vector<std::vector<uint32_t>>& attr_uint32_data,
+    std::vector<int>& attr_data_types,
+    std::vector<int>& attr_num_components,
+    std::vector<std::string>& attr_names
   ) {
     int num_points = points.size() / 3;
     draco::PointCloudBuilder pcb;
     pcb.Start(num_points);
+
+    // Ensure unique ids for native attributes don't conflict with generic attributes
+    uint32_t next_unique_id = 0;
+    auto min_unique_id = std::min_element(unique_ids.begin(), unique_ids.end());
+    if (min_unique_id != unique_ids.end() && *min_unique_id < -1) {
+      throw std::invalid_argument("Should never be reached; all unique_ids should be >= -1.");
+    }
+    auto max_unique_id = std::max_element(unique_ids.begin(), unique_ids.end());
+    if (max_unique_id != unique_ids.end()) {
+      next_unique_id = *max_unique_id + 1;
+    }
 
     auto dtype = (integer_mark == 1)
       ? draco::DataType::DT_INT32
@@ -517,11 +556,15 @@ namespace DracoFunctions {
     const int pos_att_id = pcb.AddAttribute(
       draco::GeometryAttribute::POSITION, 3, dtype
     );
+    pcb.SetAttributeUniqueId(pos_att_id, next_unique_id);
+    next_unique_id++;
 
     if(colors_channel){
       const int color_att_id = pcb.AddAttribute(
         draco::GeometryAttribute::COLOR, colors_channel, draco::DataType::DT_UINT8
       );
+      pcb.SetAttributeUniqueId(color_att_id, next_unique_id);
+      next_unique_id++;
       for (draco::PointIndex i(0); i < num_points; i++) {
         pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
         pcb.SetAttributeValueForPoint(color_att_id, i, colors.data() + colors_channel * i.value());
@@ -529,6 +572,44 @@ namespace DracoFunctions {
     } else {
       for (draco::PointIndex i(0); i < num_points; i++) {
         pcb.SetAttributeValueForPoint(pos_att_id, i, points.data() + 3 * i.value());
+      }
+    }
+
+    // GENERIC ATTRIBUTES
+    for (size_t j = 0; j < unique_ids.size(); ++j) {
+      draco::DataType dtype = static_cast<draco::DataType>(attr_data_types[j]);
+      int num_components = attr_num_components[j];
+      if (dtype != draco::DT_FLOAT32 && dtype != draco::DT_UINT8 && dtype != draco::DT_UINT16 && dtype != draco::DT_UINT32) {
+        std::ostringstream oss;
+        oss << "Unsupported attribute data type for attribute with unique id " << int(unique_ids[j]);
+        throw std::invalid_argument(oss.str());
+      }
+      int att_id = pcb.AddAttribute(draco::GeometryAttribute::GENERIC, num_components, dtype);
+      if (att_id == -1) {
+        std::ostringstream oss;
+        oss << "Failed to add attribute with unique id " << int(unique_ids[j]);
+        throw std::runtime_error(oss.str());
+      }
+      if (unique_ids[j] >= 0) {
+        pcb.SetAttributeUniqueId(att_id, unique_ids[j]);
+      } else {
+        pcb.SetAttributeUniqueId(att_id, next_unique_id);
+        next_unique_id++;
+      }
+      if (!attr_names[j].empty()) {
+        auto attribute_metadata = std::unique_ptr<draco::AttributeMetadata>(new draco::AttributeMetadata());
+        attribute_metadata->AddEntryString("name", attr_names[j]);
+        pcb.AddAttributeMetadata(att_id, std::move(attribute_metadata));
+      }
+
+      if (dtype == draco::DT_FLOAT32) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_float_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT8) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint8_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT16) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint16_data[j].data(), 0);
+      } else if (dtype == draco::DT_UINT32) {
+        pcb.SetAttributeValuesForAllPoints(att_id, attr_uint32_data[j].data(), 0);
       }
     }
 

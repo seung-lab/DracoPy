@@ -95,5 +95,13 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const bool create_metadata,
         const int integer_mark,
         const vector[uint8_t] colors,
-        const uint8_t colors_channel
+        const uint8_t colors_channel,
+        vector[int8_t]& unique_ids,
+        vector[vector[float]]& attr_float_data,
+        vector[vector[uint8_t]]& attr_uint8_data,
+        vector[vector[uint16_t]]& attr_uint16_data,
+        vector[vector[uint32_t]]& attr_uint32_data,
+        vector[int]& attr_data_types,
+        vector[int]& attr_num_components,
+        vector[string]& attr_names
     ) except +

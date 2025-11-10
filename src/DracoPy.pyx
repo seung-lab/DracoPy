@@ -405,7 +405,11 @@ def encode(
             pointsview, quantization_bits, compression_level,
             quantization_range, <float*>&quant_origin[0],
             preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel
+            colorsview, colors_channel,
+            unique_ids, attr_float_data, attr_uint8_data,
+            attr_uint16_data, attr_uint32_data,
+            attr_data_types, attr_num_components,
+            attr_names
         )
     else:
         facesview = faces.reshape((faces.size,))
