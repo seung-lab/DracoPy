@@ -267,7 +267,7 @@ def encode(
 
     # @zeruniverse Draco supports quantization_bits 1 to 30, see following link:
     # https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L107
-    assert 1 <= quantization_bits <= 30, "Quantization bits must be in range [1, 30]"
+    assert 0 <= quantization_bits <= 30, "Quantization bits must be in range [0, 30]"
 
     points = format_array(points)
     faces = format_array(faces)
