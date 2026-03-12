@@ -323,36 +323,25 @@ def encode(
                 attr_array = attr_array.astype(np.float32)
                 float_view = attr_array.reshape((attr_array.size,))
                 attr_float_data.push_back(float_view)
-                # Add empty vectors for other types
-                attr_uint8_data.push_back(vector[uint8_t]())
-                attr_uint16_data.push_back(vector[uint16_t]())
-                attr_uint32_data.push_back(vector[uint32_t]())
             elif attr_array.dtype == np.uint8:
                 attr_data_types.push_back(DataType.DT_UINT8)  # 2, uint8
                 uint8_view = attr_array.reshape((attr_array.size,))
                 attr_uint8_data.push_back(uint8_view)
-                # Add empty vectors for other types
-                attr_float_data.push_back(vector[float]())
-                attr_uint16_data.push_back(vector[uint16_t]())
-                attr_uint32_data.push_back(vector[uint32_t]())
             elif attr_array.dtype == np.uint16:
                 attr_data_types.push_back(DataType.DT_UINT16)  # 4, uint16
                 uint16_view = attr_array.reshape((attr_array.size,))
                 attr_uint16_data.push_back(uint16_view)
-                # Add empty vectors for other types
-                attr_float_data.push_back(vector[float]())
-                attr_uint8_data.push_back(vector[uint8_t]())
-                attr_uint32_data.push_back(vector[uint32_t]())
             elif attr_array.dtype == np.uint32:
                 attr_data_types.push_back(DataType.DT_UINT32)  # 6, uint32
                 uint32_view = attr_array.reshape((attr_array.size,))
                 attr_uint32_data.push_back(uint32_view)
-                # Add empty vectors for other types
-                attr_float_data.push_back(vector[float]())
-                attr_uint8_data.push_back(vector[uint8_t]())
-                attr_uint16_data.push_back(vector[uint16_t]())
             else:
                 raise ValueError(f"Unsupported data type for attribute '{id_or_name}': {attr_array.dtype}")
+
+            # Add empty vectors for other types
+            attr_float_data.push_back(vector[float]())
+            attr_uint8_data.push_back(vector[uint8_t]())
+            attr_uint16_data.push_back(vector[uint16_t]())
 
     integer_mark = 0
 
