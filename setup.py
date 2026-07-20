@@ -7,7 +7,6 @@ import shutil
 from skbuild import setup
 from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
 from skbuild.exceptions import SKBuildError
-from skbuild.cmaker import get_cmake_version
 
 import multiprocessing as mp
 
