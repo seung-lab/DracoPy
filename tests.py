@@ -1,4 +1,9 @@
+import concurrent.futures
 import os
+import sys
+import threading
+import time
+
 import DracoPy
 import pytest
 
@@ -397,3 +402,75 @@ def test_invalid_generic_attribute_keys():
     }
     with pytest.raises(ValueError):
         DracoPy.encode(mesh.points, mesh.faces, generic_attributes=generic_attributes)
+
+
+@pytest.mark.parametrize("op", ["decode", "encode"])
+def test_releases_the_gil(op):
+    """
+    Encoding and decoding must not block other Python threads.
+
+    Measures how far a spinning thread gets while this thread is busy in
+    DracoPy, relative to how far it gets while this thread only sleeps. If the
+    GIL were held for the duration of the draco call the spinner could not run
+    at all, and threaded callers would get no parallelism. Measured ratios are
+    ~0.03 when the GIL is held and >0.6 when it is released, so the threshold
+    below is nowhere near either. One core is enough: a released GIL lets the
+    OS time-slice the spinner in either way.
+    """
+    with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
+        buf = draco_file.read()
+
+    if op == "decode":
+        work = lambda: DracoPy.decode(buf)
+    else:
+        mesh = DracoPy.decode(buf)
+        work = lambda: DracoPy.encode(mesh.points, mesh.faces)
+
+    state = {"ticks": 0, "running": True}
+
+    def spin():
+        while state["running"]:
+            state["ticks"] += 1
+
+    def ticks_during(action, seconds=0.15):
+        state["ticks"] = 0
+        deadline = time.perf_counter() + seconds
+        while time.perf_counter() < deadline:
+            action()
+        return state["ticks"]
+
+    old_interval = sys.getswitchinterval()
+    sys.setswitchinterval(1e-4)
+    spinner = threading.Thread(target=spin)
+    spinner.start()
+    try:
+        time.sleep(0.05)  # let the spinner reach steady state
+        idle_ticks = ticks_during(lambda: time.sleep(0.001))
+        busy_ticks = ticks_during(work)
+    finally:
+        state["running"] = False
+        spinner.join()
+        sys.setswitchinterval(old_interval)
+
+    ratio = busy_ticks / max(idle_ticks, 1)
+    assert ratio > 0.25, (
+        f"{op} appears to hold the GIL: a concurrent thread ran at {ratio:.1%} "
+        f"of its unblocked rate ({busy_ticks} vs {idle_ticks} ticks)"
+    )
+
+
+def test_threaded_decode_matches_serial():
+    """Concurrent decodes must be independent of each other."""
+    buffers = []
+    for name in ("bunny.drc", "bunny_normals.drc", "point_cloud_bunny.drc"):
+        with open(os.path.join(testdata_directory, name), "rb") as draco_file:
+            buffers.append(draco_file.read())
+
+    expected = [DracoPy.decode(buf).points for buf in buffers]
+    work = buffers * 16
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(DracoPy.decode, work))
+
+    for i, got in enumerate(results):
+        assert np.array_equal(got.points, expected[i % len(buffers)])
