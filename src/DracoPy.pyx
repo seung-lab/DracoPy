@@ -6,6 +6,7 @@ cimport DracoPy
 import struct
 from math import floor
 from libcpp.string cimport string
+from libcpp.utility cimport move
 from libc.string cimport memcpy
 from libc.stdint cimport (
   int8_t, int16_t, int32_t, int64_t,
@@ -536,7 +537,7 @@ def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
     # buffer_ptr stays valid without the GIL: the caller's argument reference
     # keeps the bytes object alive for the duration of the call.
     with nogil:
-        mesh_struct = DracoPy.decode_buffer(buffer_ptr, buffer_len)
+        mesh_struct = move(DracoPy.decode_buffer(buffer_ptr, buffer_len))
 
     if mesh_struct.decode_status != DracoPy.decoding_status.successful:
         raise_decoding_error(mesh_struct.decode_status)
