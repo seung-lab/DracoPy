@@ -474,3 +474,56 @@ def test_threaded_decode_matches_serial():
 
     for i, got in enumerate(results):
         assert np.array_equal(got.points, expected[i % len(buffers)])
+
+
+@pytest.mark.parametrize("kwarg", ["points", "faces", "colors", "tex_coord", "normals"])
+def test_encoding_is_independent_of_array_layout(kwarg):
+    """
+    Inputs are cast to a contiguous buffer before being handed to C++.
+
+    encode() fills its std::vectors with one memmove from the numpy buffer, so
+    a strided or Fortran-ordered input would be read wrong if the cast were
+    ever dropped. Every layout must produce the same bytes.
+    """
+    with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+
+    rng = np.random.RandomState(0)
+    n = mesh.points.shape[0]
+    arrays = {
+        "points": mesh.points,
+        "faces": mesh.faces,
+        "colors": rng.randint(0, 255, [n, 3]).astype(np.uint8),
+        "tex_coord": rng.random_sample([n, 2]),
+        "normals": rng.random_sample([n, 3]),
+    }
+    contiguous = arrays[kwarg]
+
+    # same values, but with a row stride wider than the row itself
+    padded = np.zeros((contiguous.shape[0], contiguous.shape[1] + 4), contiguous.dtype)
+    padded[:, : contiguous.shape[1]] = contiguous
+    strided = padded[:, : contiguous.shape[1]]
+    assert not strided.flags["C_CONTIGUOUS"]
+
+    def encode_with(value):
+        kwargs = {"points": arrays["points"], "faces": arrays["faces"]}
+        if kwarg not in kwargs:
+            kwargs[kwarg] = contiguous
+        kwargs[kwarg] = value
+        return DracoPy.encode(**kwargs)
+
+    expected = encode_with(contiguous)
+    assert encode_with(strided) == expected
+    assert encode_with(np.asfortranarray(contiguous)) == expected
+
+
+def test_encoding_rejects_out_of_range_face_indices():
+    """Casting faces to uint32 must not silently wrap an invalid index."""
+    with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+
+    for bad_index in (-1, 2 ** 33):
+        faces = mesh.faces.astype(np.int64)
+        faces[0, 0] = bad_index
+        with pytest.raises(OverflowError):
+            DracoPy.encode(mesh.points, faces)
