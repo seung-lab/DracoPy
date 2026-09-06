@@ -354,11 +354,17 @@ def encode(
     _copy_to_vector[float](pointsview, points)
 
     if faces is not None:
-        # An index outside uint32 would wrap in the cast below and encode a
-        # corrupt mesh: numpy wraps silently, and draco builds a PointIndex
-        # from the value without checking it. This is the only place to catch it.
-        if faces.size > 0 and (faces.min() < 0 or faces.max() > 0xFFFFFFFF):
-            raise OverflowError("face indices must fit in a uint32")
+        # draco builds a PointIndex straight from each value without checking
+        # it, and the uint32 cast below silently wraps anything that does not
+        # fit, so an index outside the vertex range reads past the attribute
+        # buffers rather than failing. Neither numpy nor draco will catch that,
+        # which makes this the only place it can be caught. Written so that a
+        # NaN, which compares false against everything, is rejected too.
+        if faces.size > 0 and not (faces.min() >= 0 and faces.max() < points.shape[0]):
+            raise ValueError(
+                f"face indices must be in [0, {points.shape[0]}), "
+                f"got [{faces.min()}, {faces.max()}]"
+            )
         _copy_to_vector[uint32_t](facesview, faces)
 
     cdef uint8_t colors_channel = 0

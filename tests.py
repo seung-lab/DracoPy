@@ -515,12 +515,30 @@ def test_encoding_is_independent_of_array_layout(kwarg):
 
 
 def test_encoding_rejects_out_of_range_face_indices():
-    """Casting faces to uint32 must not silently wrap an invalid index."""
+    """
+    Every invalid index must be rejected, not just one that overflows uint32.
+
+    draco indexes the attribute buffers with whatever it is given, so an index
+    that fits in a uint32 but exceeds the vertex count reads out of bounds --
+    2 ** 32 - 1 segfaults the interpreter if it gets through.
+    """
     with open(os.path.join(testdata_directory, "bunny.drc"), "rb") as draco_file:
         mesh = DracoPy.decode(draco_file.read())
+    num_points = mesh.points.shape[0]
 
-    for bad_index in (-1, 2 ** 33):
+    for bad_index in (-1, 2 ** 33, 2 ** 32 - 1, num_points, num_points + 5):
         faces = mesh.faces.astype(np.int64)
         faces[0, 0] = bad_index
-        with pytest.raises(OverflowError):
+        with pytest.raises(ValueError):
             DracoPy.encode(mesh.points, faces)
+
+    # NaN compares false against every bound, so it needs the negated form
+    faces = mesh.faces.astype(np.float64)
+    faces[0, 0] = float("nan")
+    with pytest.raises(ValueError):
+        DracoPy.encode(mesh.points, faces)
+
+    # the largest valid index must still be accepted
+    faces = mesh.faces.astype(np.int64)
+    faces[0, 0] = num_points - 1
+    assert DracoPy.encode(mesh.points, faces)
