@@ -347,7 +347,7 @@ def encode(
             attr_uint16_data.resize(unique_ids.size())
             attr_uint32_data.resize(unique_ids.size())
 
-    integer_mark = 0
+    cdef int integer_mark = 0
 
     if np.issubdtype(points.dtype, np.signedinteger):
         integer_mark = 1
@@ -369,55 +369,66 @@ def encode(
     cdef vector[float] normalsview
 
 
-    colors_channel = 0
+    cdef uint8_t colors_channel = 0
     if colors is not None:
         assert np.issubdtype(colors.dtype, np.uint8), "Colors must be uint8"
         assert len(colors.shape) == 2, "Colors must be 2D"
+        assert 1 <= colors.shape[1] <= 127, "Number of color channels must be in range [1, 127]"
         colors_channel = colors.shape[1]
-        assert 1 <= colors_channel <= 127, "Number of color channels must be in range [1, 127]"
         colorsview = colors.reshape((colors.size,))
 
-    tex_coord_channel = 0
+    cdef uint8_t tex_coord_channel = 0
     if tex_coord is not None:
         assert np.issubdtype(tex_coord.dtype, float), "Tex coord must be float"
         assert len(tex_coord.shape) == 2, "Tex coord must be 2D"
+        assert 1 <= tex_coord.shape[1] <= 127, "Number of tex coord channels must be in range [1, 127]"
         tex_coord_channel = tex_coord.shape[1]
-        assert 1 <= tex_coord_channel <= 127, "Number of tex coord channels must be in range [1, 127]"
         texcoordview = tex_coord.reshape((tex_coord.size,))
 
 
-    has_normals = 0
+    cdef uint8_t has_normals = 0
     if normals is not None:
         assert np.issubdtype(normals.dtype, float), "Normals must be float"
         assert normals.shape[1] == 3, "Normals must have 3 components"
         has_normals = 1
         normalsview = normals.reshape((normals.size,))
 
+    # Convert the remaining Python-typed parameters up front, so that the
+    # encode call below touches nothing that needs the GIL.
+    cdef DracoPy.EncodedObject encoded
+    cdef int c_quantization_bits = quantization_bits
+    cdef int c_compression_level = compression_level
+    cdef float c_quantization_range = quantization_range
+    cdef bint c_preserve_order = preserve_order
+    cdef bint c_create_metadata = create_metadata
+
     if faces is None:
-        encoded = DracoPy.encode_point_cloud(
-            pointsview, quantization_bits, compression_level,
-            quantization_range, <float*>&quant_origin[0],
-            preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel,
-            unique_ids, attr_float_data, attr_uint8_data,
-            attr_uint16_data, attr_uint32_data,
-            attr_data_types, attr_num_components,
-            attr_names
-        )
+        with nogil:
+            encoded = DracoPy.encode_point_cloud(
+                pointsview, c_quantization_bits, c_compression_level,
+                c_quantization_range, &quant_origin[0],
+                c_preserve_order, c_create_metadata, integer_mark,
+                colorsview, colors_channel,
+                unique_ids, attr_float_data, attr_uint8_data,
+                attr_uint16_data, attr_uint32_data,
+                attr_data_types, attr_num_components,
+                attr_names
+            )
     else:
         facesview = faces.reshape((faces.size,))
-        encoded = DracoPy.encode_mesh(
-            pointsview, facesview,
-            quantization_bits, compression_level,
-            quantization_range, &quant_origin[0],
-            preserve_order, create_metadata, integer_mark,
-            colorsview, colors_channel, texcoordview, tex_coord_channel,
-            normalsview, has_normals,
-            unique_ids, attr_float_data, attr_uint8_data,
-            attr_uint16_data, attr_uint32_data,
-            attr_data_types, attr_num_components,
-            attr_names
-        )
+        with nogil:
+            encoded = DracoPy.encode_mesh(
+                pointsview, facesview,
+                c_quantization_bits, c_compression_level,
+                c_quantization_range, &quant_origin[0],
+                c_preserve_order, c_create_metadata, integer_mark,
+                colorsview, colors_channel, texcoordview, tex_coord_channel,
+                normalsview, has_normals,
+                unique_ids, attr_float_data, attr_uint8_data,
+                attr_uint16_data, attr_uint32_data,
+                attr_data_types, attr_num_components,
+                attr_names
+            )
 
 
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
@@ -439,8 +450,19 @@ def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
 
     Decodes a binary draco file into either a DracoPointCloud
     or a DracoMesh.
+
+    The GIL is released for the draco decode itself, so decoding several
+    buffers from a thread pool runs in parallel.
     """
-    mesh_struct = DracoPy.decode_buffer(buffer, len(buffer))
+    cdef const char* buffer_ptr = buffer
+    cdef size_t buffer_len = len(buffer)
+    cdef DracoPy.MeshObject mesh_struct
+
+    # buffer_ptr stays valid without the GIL: the caller's argument reference
+    # keeps the bytes object alive for the duration of the call.
+    with nogil:
+        mesh_struct = DracoPy.decode_buffer(buffer_ptr, buffer_len)
+
     if mesh_struct.decode_status != DracoPy.decoding_status.successful:
         raise_decoding_error(mesh_struct.decode_status)
 
