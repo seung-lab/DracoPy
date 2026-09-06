@@ -152,17 +152,24 @@ ctypedef fused _buffer_t:
     uint16_t
     uint32_t
 
-cdef void _fill(vector[_buffer_t]& vec, const _buffer_t[::1] values):
+cdef void _copy_to_vector(vector[_buffer_t]& vec, arr):
     """
-    Fill vec from a contiguous buffer of the matching C type.
+    Fill vec from arr with a single memmove.
 
     Assigning a numpy array straight to a std::vector makes Cython box and
-    convert one element at a time; casting to the target dtype first turns the
-    whole buffer into a single memmove.
-
-    Call sites name the specialization explicitly (_fill[float](...)), because
-    Cython cannot infer it through the stdint ctypedefs.
+    convert one element at a time. Call sites name the specialization --
+    _copy_to_vector[float](...) -- because Cython cannot infer it through the
+    stdint ctypedefs; the dtype below follows from that specialization.
     """
+    cdef const _buffer_t[::1] values
+    if _buffer_t is float:
+        values = np.ascontiguousarray(arr, dtype=np.float32).reshape(-1)
+    elif _buffer_t is uint8_t:
+        values = np.ascontiguousarray(arr, dtype=np.uint8).reshape(-1)
+    elif _buffer_t is uint16_t:
+        values = np.ascontiguousarray(arr, dtype=np.uint16).reshape(-1)
+    else:
+        values = np.ascontiguousarray(arr, dtype=np.uint32).reshape(-1)
     if values.shape[0] > 0:
         vec.assign(&values[0], &values[0] + values.shape[0])
 
@@ -267,11 +274,6 @@ def encode(
     cdef vector[int] attr_data_types  # 0=float, 1=uint8, 2=uint16, 3=uint32
     cdef vector[int] attr_num_components
     cdef vector[string] attr_names
-    cdef size_t attr_index
-    cdef const float[::1] attr_float_mv
-    cdef const uint8_t[::1] attr_uint8_mv
-    cdef const uint16_t[::1] attr_uint16_mv
-    cdef const uint32_t[::1] attr_uint32_mv
 
     if generic_attributes:
         for id_or_name, attr_data in generic_attributes.items():
@@ -304,11 +306,9 @@ def encode(
             # Store attribute info
             attr_num_components.push_back(attr_array.shape[1])
 
-            # The C++ side indexes all four typed buffers with one shared
-            # attribute index, so give this attribute a slot in every buffer
-            # before filling whichever one matches its dtype. The three that
-            # go unfilled stay empty and keep the indices aligned.
-            attr_index = unique_ids.size() - 1
+            # encode_mesh indexes all four typed buffers with one shared
+            # attribute index, so every attribute needs a slot in each; the
+            # three left unfilled stay empty and keep the indices aligned.
             attr_float_data.resize(unique_ids.size())
             attr_uint8_data.resize(unique_ids.size())
             attr_uint16_data.resize(unique_ids.size())
@@ -317,20 +317,16 @@ def encode(
             # Handle different data types
             if np.issubdtype(attr_array.dtype, np.floating):
                 attr_data_types.push_back(DataType.DT_FLOAT32)  # 9, float
-                attr_float_mv = np.ascontiguousarray(attr_array, dtype=np.float32).reshape(-1)
-                _fill[float](attr_float_data[attr_index], attr_float_mv)
+                _copy_to_vector[float](attr_float_data.back(), attr_array)
             elif attr_array.dtype == np.uint8:
                 attr_data_types.push_back(DataType.DT_UINT8)  # 2, uint8
-                attr_uint8_mv = np.ascontiguousarray(attr_array).reshape(-1)
-                _fill[uint8_t](attr_uint8_data[attr_index], attr_uint8_mv)
+                _copy_to_vector[uint8_t](attr_uint8_data.back(), attr_array)
             elif attr_array.dtype == np.uint16:
                 attr_data_types.push_back(DataType.DT_UINT16)  # 4, uint16
-                attr_uint16_mv = np.ascontiguousarray(attr_array).reshape(-1)
-                _fill[uint16_t](attr_uint16_data[attr_index], attr_uint16_mv)
+                _copy_to_vector[uint16_t](attr_uint16_data.back(), attr_array)
             elif attr_array.dtype == np.uint32:
                 attr_data_types.push_back(DataType.DT_UINT32)  # 6, uint32
-                attr_uint32_mv = np.ascontiguousarray(attr_array).reshape(-1)
-                _fill[uint32_t](attr_uint32_data[attr_index], attr_uint32_mv)
+                _copy_to_vector[uint32_t](attr_uint32_data.back(), attr_array)
             else:
                 raise ValueError(f"Unsupported data type for attribute '{id_or_name}': {attr_array.dtype}")
 
@@ -354,22 +350,16 @@ def encode(
     cdef vector[uint8_t] colorsview
     cdef vector[float] texcoordview
     cdef vector[float] normalsview
-    cdef const float[::1] points_mv
-    cdef const uint32_t[::1] faces_mv
-    cdef const uint8_t[::1] colors_mv
-    cdef const float[::1] tex_coord_mv
-    cdef const float[::1] normals_mv
 
-    points_mv = np.ascontiguousarray(points, dtype=np.float32).reshape(-1)
-    _fill[float](pointsview, points_mv)
+    _copy_to_vector[float](pointsview, points)
 
     if faces is not None:
-        # numpy wraps an out-of-range index silently, where converting element
-        # by element used to raise. Keep raising.
+        # An index outside uint32 would wrap in the cast below and encode a
+        # corrupt mesh: numpy wraps silently, and draco builds a PointIndex
+        # from the value without checking it. This is the only place to catch it.
         if faces.size > 0 and (faces.min() < 0 or faces.max() > 0xFFFFFFFF):
             raise OverflowError("face indices must fit in a uint32")
-        faces_mv = np.ascontiguousarray(faces, dtype=np.uint32).reshape(-1)
-        _fill[uint32_t](facesview, faces_mv)
+        _copy_to_vector[uint32_t](facesview, faces)
 
     cdef uint8_t colors_channel = 0
     if colors is not None:
@@ -377,8 +367,7 @@ def encode(
         assert len(colors.shape) == 2, "Colors must be 2D"
         assert 1 <= colors.shape[1] <= 127, "Number of color channels must be in range [1, 127]"
         colors_channel = colors.shape[1]
-        colors_mv = np.ascontiguousarray(colors).reshape(-1)
-        _fill[uint8_t](colorsview, colors_mv)
+        _copy_to_vector[uint8_t](colorsview, colors)
 
     cdef uint8_t tex_coord_channel = 0
     if tex_coord is not None:
@@ -386,8 +375,7 @@ def encode(
         assert len(tex_coord.shape) == 2, "Tex coord must be 2D"
         assert 1 <= tex_coord.shape[1] <= 127, "Number of tex coord channels must be in range [1, 127]"
         tex_coord_channel = tex_coord.shape[1]
-        tex_coord_mv = np.ascontiguousarray(tex_coord, dtype=np.float32).reshape(-1)
-        _fill[float](texcoordview, tex_coord_mv)
+        _copy_to_vector[float](texcoordview, tex_coord)
 
 
     cdef uint8_t has_normals = 0
@@ -395,8 +383,7 @@ def encode(
         assert np.issubdtype(normals.dtype, float), "Normals must be float"
         assert normals.shape[1] == 3, "Normals must have 3 components"
         has_normals = 1
-        normals_mv = np.ascontiguousarray(normals, dtype=np.float32).reshape(-1)
-        _fill[float](normalsview, normals_mv)
+        _copy_to_vector[float](normalsview, normals)
 
     # Convert the remaining Python-typed parameters up front, so that the
     # encode call below touches nothing that needs the GIL.

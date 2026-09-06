@@ -499,18 +499,15 @@ def test_encoding_is_independent_of_array_layout(kwarg):
     }
     contiguous = arrays[kwarg]
 
-    # same values, but with a row stride wider than the row itself
-    padded = np.zeros((contiguous.shape[0], contiguous.shape[1] + 4), contiguous.dtype)
-    padded[:, : contiguous.shape[1]] = contiguous
-    strided = padded[:, : contiguous.shape[1]]
+    # same values, but with a gap between the elements of each row
+    strided = np.repeat(contiguous, 2, axis=1)[:, ::2]
     assert not strided.flags["C_CONTIGUOUS"]
 
     def encode_with(value):
-        kwargs = {"points": arrays["points"], "faces": arrays["faces"]}
-        if kwarg not in kwargs:
-            kwargs[kwarg] = contiguous
-        kwargs[kwarg] = value
-        return DracoPy.encode(**kwargs)
+        # a later duplicate key wins, so this also covers kwarg in (points, faces)
+        return DracoPy.encode(
+            **{"points": arrays["points"], "faces": arrays["faces"], kwarg: value}
+        )
 
     expected = encode_with(contiguous)
     assert encode_with(strided) == expected
