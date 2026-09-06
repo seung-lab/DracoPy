@@ -338,10 +338,14 @@ def encode(
             else:
                 raise ValueError(f"Unsupported data type for attribute '{id_or_name}': {attr_array.dtype}")
 
-            # Add empty vectors for other types
-            attr_float_data.push_back(vector[float]())
-            attr_uint8_data.push_back(vector[uint8_t]())
-            attr_uint16_data.push_back(vector[uint16_t]())
+            # The C++ side indexes all four typed buffers with one shared
+            # attribute index, so each attribute must occupy a slot in every
+            # buffer. Padding the three that were skipped has to happen per
+            # attribute, or later attributes land at the wrong index.
+            attr_float_data.resize(unique_ids.size())
+            attr_uint8_data.resize(unique_ids.size())
+            attr_uint16_data.resize(unique_ids.size())
+            attr_uint32_data.resize(unique_ids.size())
 
     integer_mark = 0
 
