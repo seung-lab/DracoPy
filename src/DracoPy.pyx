@@ -6,7 +6,7 @@ cimport DracoPy
 import struct
 from math import floor
 from libcpp.string cimport string
-from libc.string cimport memcmp
+from libc.string cimport memcpy
 from libc.stdint cimport (
   int8_t, int16_t, int32_t, int64_t,
   uint8_t, uint16_t, uint32_t, uint64_t,
@@ -49,42 +49,6 @@ class DracoPointCloud:
         else:
             self.encoding_options = None
 
-        self._attributes = []
-        
-        attributes_list = self.data_struct['attributes']
-        
-        if len(attributes_list) > 0:    
-            for attr in attributes_list:
-                attr_info = {
-                    'unique_id': attr.get('unique_id', 0),
-                    'num_components': attr.get('num_components', 0),
-                    'data_type': attr.get('data_type', 0),
-                    'attribute_type': attr.get('attribute_type', 0),
-                    'data': None
-                }
-                float_data = attr.get('float_data', [])
-                uint_data = attr.get('uint_data', [])
-                byte_data = attr.get('byte_data', [])
-
-                # Get the appropriate data array based on data type
-                data_array = None
-                if len(float_data) > 0:
-                    data_array = np.array(float_data, dtype=np.float32)
-                elif len(uint_data) > 0:
-                    data_array = np.array(uint_data, dtype=np.uint32)
-                elif len(byte_data) > 0:
-                    data_array = np.array(byte_data, dtype=np.uint8)
-
-                if data_array is not None:
-                    attr_info['data'] = data_array.reshape((-1, attr_info['num_components']))
-                else:
-                    attr_info['data'] = None
-
-                name = attr.get('name', None)
-                attr_info['name'] = name.decode('utf-8') if name else None
-
-                self._attributes.append(attr_info)
-
     def get_encoded_coordinate(self, value, axis):
         if self.encoding_options is not None:
             return self.encoding_options.get_encoded_coordinate(value, axis)
@@ -117,7 +81,7 @@ class DracoPointCloud:
 
     @property
     def attributes(self):
-        return self._attributes
+        return self.data_struct['attributes']
 
     @property
     def points(self):
@@ -136,9 +100,7 @@ class DracoPointCloud:
 class DracoMesh(DracoPointCloud):
     @property
     def faces(self):
-        faces_ = self.data_struct['faces']
-        N = len(faces_) // 3
-        return np.array(faces_, dtype=np.uint32).reshape((N, 3))
+        return self.data_struct['faces']
 
     @property
     def normals(self):
@@ -430,11 +392,89 @@ def encode(
                 attr_names
             )
 
-
     if encoded.encode_status == DracoPy.encoding_status.successful_encoding:
-        return bytes(encoded.buffer)
+        return <bytes>(<const char*>encoded.buffer.data())[:encoded.buffer.size()]
     elif encoded.encode_status == DracoPy.encoding_status.failed_during_encoding:
         raise EncodingFailedException('Invalid mesh')
+
+cdef cnp.ndarray _copy_to_ndarray(const void* src, size_t rows, int cols, object dtype):
+    """
+    Allocate a (rows, cols) array of dtype and blit src into it.
+
+    One memcpy per buffer, rather than a Python object per element, is what
+    keeps decode()'s GIL-held section small enough for threads to scale.
+    """
+    cdef cnp.ndarray arr = np.empty((rows, cols), dtype=dtype)
+    cdef size_t nbytes = cnp.PyArray_NBYTES(arr)
+    if nbytes > 0:
+        memcpy(cnp.PyArray_DATA(arr), src, nbytes)
+    return arr
+
+cdef object _attribute_data_to_ndarray(DracoPy.AttributeData* attr):
+    """
+    Copy one decoded attribute into an (N, num_components) array.
+
+    The C++ decoder populates exactly one of the three typed buffers, so which
+    buffer is non-empty -- not data_type -- selects the output dtype. Types
+    draco reports that DracoPy has no buffer for are converted to float there
+    (see the default case of the switch in DracoPy.h).
+    """
+    cdef size_t n
+    cdef const void* src
+    cdef object dtype
+    cdef int cols = attr.num_components
+
+    if attr.float_data.size() > 0:
+        n = attr.float_data.size()
+        src = <const void*>attr.float_data.data()
+        dtype = np.float32
+    elif attr.uint_data.size() > 0:
+        n = attr.uint_data.size()
+        src = <const void*>attr.uint_data.data()
+        dtype = np.uint32
+    elif attr.byte_data.size() > 0:
+        n = attr.byte_data.size()
+        src = <const void*>attr.byte_data.data()
+        dtype = np.uint8
+    else:
+        return None
+
+    if cols <= 0 or n % <size_t>cols != 0:
+        raise ValueError(
+            f"Attribute {attr.unique_id}: {n} values is not a whole number of "
+            f"{cols}-component elements"
+        )
+
+    return _copy_to_ndarray(src, n // <size_t>cols, cols, dtype)
+
+cdef object _mesh_object_to_data_struct(DracoPy.MeshObject* mesh_struct):
+    """Copy a decoded MeshObject out into plain Python containers."""
+    cdef list attributes = []
+    cdef DracoPy.AttributeData* attr
+    cdef size_t num_faces = mesh_struct.faces.size()
+    cdef size_t i
+
+    for i in range(mesh_struct.attributes.size()):
+        attr = &mesh_struct.attributes[i]
+        attributes.append({
+            'unique_id': attr.unique_id,
+            'num_components': attr.num_components,
+            'data_type': attr.data_type,
+            'attribute_type': attr.attribute_type,
+            'name': (<bytes>attr.name).decode('utf-8') or None,
+            'data': _attribute_data_to_ndarray(attr),
+        })
+
+    return {
+        'attributes': attributes,
+        'faces': _copy_to_ndarray(
+            <const void*>mesh_struct.faces.data(), num_faces // 3, 3, np.uint32
+        ),
+        'encoding_options_set': mesh_struct.encoding_options_set,
+        'quantization_bits': mesh_struct.quantization_bits,
+        'quantization_range': mesh_struct.quantization_range,
+        'quantization_origin': mesh_struct.quantization_origin,
+    }
 
 def raise_decoding_error(decoding_status):
     if decoding_status == DracoPy.decoding_status.not_draco_encoded:
@@ -466,9 +506,11 @@ def decode(bytes buffer) -> Union[DracoMesh, DracoPointCloud]:
     if mesh_struct.decode_status != DracoPy.decoding_status.successful:
         raise_decoding_error(mesh_struct.decode_status)
 
-    if len(mesh_struct.faces) > 0:
-        return DracoMesh(mesh_struct)
-    return DracoPointCloud(mesh_struct)
+    data_struct = _mesh_object_to_data_struct(&mesh_struct)
+
+    if mesh_struct.faces.size() > 0:
+        return DracoMesh(data_struct)
+    return DracoPointCloud(data_struct)
 
 # FOR BACKWARDS COMPATIBILITY
 
