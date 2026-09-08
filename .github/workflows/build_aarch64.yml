@@ -3,7 +3,7 @@ name: Build Wheels
 on: [push, workflow_dispatch] 
 
 env:
-  CIBW_SKIP: cp36-* cp37* pp* *-musllinux*
+  CIBW_SKIP: pp* cp315t*
 
 jobs:
   build_wheels:
@@ -13,15 +13,11 @@ jobs:
       matrix:
         os: [macos-latest]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04-arm64
             arch: aarch64
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        if:  ${{ matrix.arch == 'aarch64' }}
-        uses: docker/setup-qemu-action@v2
+      - uses: actions/checkout@v4
 
       - name: Install OpenSSL
         if:  ${{ matrix.arch == 'aarch64' }}
@@ -36,7 +32,7 @@ jobs:
         #   cmake-version: '3.16.x'
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.4.0
+        uses: pypa/cibuildwheel@v4.2.0
         # to supply options, put them in 'env', like:
         env:
           CIBW_BEFORE_BUILD: git submodule init && git submodule update && pip install "cmake>=3.30.2" && pip install cython numpy scikit-build
