@@ -57,7 +57,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[unsigned char] buffer
         encoding_status encode_status
 
-    MeshObject decode_buffer(const char *buffer, size_t buffer_len) except +
+    MeshObject decode_buffer(const char *buffer, size_t buffer_len) except + nogil
 
     EncodedObject encode_mesh(
         const vector[float] points,
@@ -83,7 +83,7 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[int]& attr_data_types,
         vector[int]& attr_num_components,
         vector[string]& attr_names
-    ) except +
+    ) except + nogil
 
     EncodedObject encode_point_cloud(
         const vector[float] points,
@@ -104,4 +104,4 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         vector[int]& attr_data_types,
         vector[int]& attr_num_components,
         vector[string]& attr_names
-    ) except +
+    ) except + nogil
