@@ -78,7 +78,7 @@ if is_windows:
 else:
     extra_link_args = ['-L{0}'.format(lib_dir) for lib_dir in lib_dirs] + library_link_args
     extra_compile_args = [
-      '-std=c++11','-O3'
+      '-std=c++17','-O3'
     ]
 
 if os.path.exists(".eggs"):
@@ -86,9 +86,9 @@ if os.path.exists(".eggs"):
 
 setup(
     name='DracoPy',
-    version='2.0.0',
+    version='2.1.0',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
-    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez,  Forrest Collman, Zeyu Zhao, Denis Riviere, Brett Tully, Hanseul Jun,  Afshawn Lotfi, Pan Xinmiao, Kenneth Bongort, Ed Schmerling',
+    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez,  Forrest Collman, Zeyu Zhao, Denis Riviere, Brett Tully, Hanseul Jun,  Afshawn Lotfi, Pan Xinmiao, Kenneth Bongort, Ed Schmerling, Philipp Schlegel',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     long_description=read('README.md'),
@@ -124,6 +124,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
         "Topic :: Scientific/Engineering",
         "Operating System :: POSIX",
         "Operating System :: MacOS",
