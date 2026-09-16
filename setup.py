@@ -5,7 +5,7 @@ import sys
 import shutil
 
 from skbuild import setup
-from skbuild.constants import CMAKE_INSTALL_DIR
+from skbuild.constants import CMAKE_INSTALL_DIR, skbuild_plat_name
 from skbuild.exceptions import SKBuildError
 
 import multiprocessing as mp
@@ -48,13 +48,15 @@ is_macos = sys.platform == 'darwin' or operating_system == "darwin"
 is_windows = sys.platform == 'win32' or operating_system == "windows"
 
 if is_macos:
-    release = platform.mac_ver()[0]
-    release = os.environ.get("MACOSX_DEPLOYMENT_TARGET", "") or release
-    major_macos = release.split(".")[0]
+    # e.g. 'macosx-26.0-arm64'
+    plat = skbuild_plat_name()
+    plat = plat.split('-')
+    major_macos = plat[1]
+    arch = plat[2]
 
     cmake_args = [
-        f'-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING={major_macos}.0',
-        f'-DCMAKE_OSX_ARCHITECTURES:STRING={platform.machine()}' # e.g. x86_64, arm64
+        f'-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING={major_macos}',
+        f'-DCMAKE_OSX_ARCHITECTURES:STRING={arch}' # e.g. x86_64, arm64
     ]
     library_link_args = [
         f'-l{lib}' for lib in ('draco',)
