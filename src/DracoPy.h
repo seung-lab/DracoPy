@@ -277,6 +277,8 @@ namespace DracoFunctions {
     const uint8_t tex_coord_channel,
     const std::vector<float> &normals,
     const uint8_t has_normals,
+    const int tex_coord_quantization_bits,
+    const int normal_quantization_bits,
     std::vector<int8_t>& unique_ids,
     std::vector<std::vector<float>>& attr_float_data,
     std::vector<std::vector<uint8_t>>& attr_uint8_data,
@@ -494,6 +496,13 @@ namespace DracoFunctions {
       quantization_bits, quantization_range,
       quantization_origin, create_metadata
     );
+    // Without these, Draco stores texture coordinates and normals losslessly as floats.
+    if (tex_coord_quantization_bits > 0) {
+      encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, tex_coord_quantization_bits);
+    }
+    if (normal_quantization_bits > 0) {
+      encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, normal_quantization_bits);
+    }
     if (preserve_order) {
       encoder.SetEncodingMethod(draco::MESH_SEQUENTIAL_ENCODING);
     }

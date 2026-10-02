@@ -273,6 +273,33 @@ def test_normals_encoding():
     assert np.allclose(decoded_mesh.normals, test_normals)
 
 
+def test_normals_and_tex_coord_quantization():
+    with open(os.path.join(testdata_directory, "bunny.drc"), 'rb') as draco_file:
+        mesh = DracoPy.decode(draco_file.read())
+
+    rng = np.random.default_rng(0)
+    normals = rng.normal(size=mesh.points.shape)
+    normals /= np.linalg.norm(normals, axis=1, keepdims=True)
+    tex_coord = rng.random((mesh.points.shape[0], 2))
+
+    lossless = DracoPy.encode(mesh.points, mesh.faces, normals=normals, tex_coord=tex_coord)
+    quantized = DracoPy.encode(
+        mesh.points, mesh.faces,
+        normals=normals, tex_coord=tex_coord,
+        normal_quantization_bits=10,
+        tex_coord_quantization_bits=12,
+    )
+    assert len(quantized) < len(lossless) / 2
+
+    decoded_mesh = DracoPy.decode(quantized)
+    assert len(decoded_mesh.normals) == len(decoded_mesh.points)
+    assert np.allclose(np.linalg.norm(decoded_mesh.normals, axis=1), 1, atol=0.01)
+    assert len(np.unique(decoded_mesh.tex_coord[:, 0])) <= 2 ** 12
+
+    with pytest.raises(AssertionError):
+        DracoPy.encode(mesh.points, mesh.faces, normals=normals, normal_quantization_bits=31)
+
+
 @pytest.mark.parametrize("object_type", [DracoPy.DracoMesh, DracoPy.DracoPointCloud])
 def test_generic_attributes(object_type):
     # Read reference mesh
