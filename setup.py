@@ -88,9 +88,9 @@ if os.path.exists(".eggs"):
 
 setup(
     name='DracoPy',
-    version='2.1.0',
+    version='2.2.0',
     description = 'Python wrapper for Google\'s Draco Mesh Compression Library',
-    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez,  Forrest Collman, Zeyu Zhao, Denis Riviere, Brett Tully, Hanseul Jun,  Afshawn Lotfi, Pan Xinmiao, Kenneth Bongort, Ed Schmerling, Philipp Schlegel',
+    author = 'Manuel Castro, William Silversmith :: Contributors :: Fatih Erol, Faru Nuri Sonmez,  Forrest Collman, Zeyu Zhao, Denis Riviere, Brett Tully, Hanseul Jun,  Afshawn Lotfi, Pan Xinmiao, Kenneth Bongort, Ed Schmerling, Philipp Schlegel,  Aidan Newsome',
     author_email = 'macastro@princeton.edu, ws9@princeton.edu',
     url = 'https://github.com/seung-lab/DracoPy',
     long_description=read('README.md'),
