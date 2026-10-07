@@ -75,6 +75,8 @@ cdef extern from "DracoPy.h" namespace "DracoFunctions":
         const uint8_t tex_coord_channel,
         const vector[float] normals,
         const uint8_t has_normals,
+        const int tex_coord_quantization_bits,
+        const int normal_quantization_bits,
         vector[int8_t]& unique_ids,
         vector[vector[float]]& attr_float_data,
         vector[vector[uint8_t]]& attr_uint8_data,

@@ -191,7 +191,8 @@ def encode(
     quantization_range=-1, quantization_origin=None,
     create_metadata=False, preserve_order=False,
     colors=None, tex_coord=None, normals=None,
-    generic_attributes=None
+    generic_attributes=None,
+    tex_coord_quantization_bits=None, normal_quantization_bits=None
 ) -> bytes:
     """
     bytes encode(
@@ -200,7 +201,8 @@ def encode(
         quantization_range=-1, quantization_origin=None,
         create_metadata=False, preserve_order=False,
         colors=None, tex_coord=None, normals=None,
-        generic_attributes=None
+        generic_attributes=None,
+        tex_coord_quantization_bits=None, normal_quantization_bits=None
     )
 
     Encode a list or numpy array of points/vertices (float) and faces
@@ -226,6 +228,9 @@ def encode(
         vertices. Use None if mesh does not have texture coordinates.
     Normals is a numpy array of normal vectors (float) with shape (N, 3). N is the number of
         vertices. Use None if mesh does not have normal vectors.
+    Tex_coord_quantization_bits and normal_quantization_bits quantize the texture
+        coordinates and normals like quantization_bits does the points, between 1 and 30.
+        Use None to store them losslessly as floats.
     Generic_attributes is a dictionary of additional attributes to encode, where:
        - Keys: non-negative integer unique_ids or strings
          - When the key is an integer, it is used as the attribute's unique_id.
@@ -259,6 +264,8 @@ def encode(
     # @zeruniverse Draco supports quantization_bits 1 to 30, see following link:
     # https://github.com/google/draco/blob/master/src/draco/attributes/attribute_quantization_transform.cc#L107
     assert 0 <= quantization_bits <= 30, "Quantization bits must be in range [0, 30]"
+    assert tex_coord_quantization_bits is None or 1 <= tex_coord_quantization_bits <= 30, "Tex coord quantization bits must be in range [1, 30]"
+    assert normal_quantization_bits is None or 1 <= normal_quantization_bits <= 30, "Normal quantization bits must be in range [1, 30]"
 
     points = format_array(points)
     faces = format_array(faces)
@@ -401,6 +408,8 @@ def encode(
     cdef float c_quantization_range = quantization_range
     cdef bint c_preserve_order = preserve_order
     cdef bint c_create_metadata = create_metadata
+    cdef int c_tex_coord_quantization_bits = tex_coord_quantization_bits or 0
+    cdef int c_normal_quantization_bits = normal_quantization_bits or 0
 
     if faces is None:
         with nogil:
@@ -423,6 +432,7 @@ def encode(
                 c_preserve_order, c_create_metadata, integer_mark,
                 colorsview, colors_channel, texcoordview, tex_coord_channel,
                 normalsview, has_normals,
+                c_tex_coord_quantization_bits, c_normal_quantization_bits,
                 unique_ids, attr_float_data, attr_uint8_data,
                 attr_uint16_data, attr_uint32_data,
                 attr_data_types, attr_num_components,
