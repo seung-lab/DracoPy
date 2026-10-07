@@ -1,3 +1,4 @@
+# cython: freethreading_compatible = True
 # distutils: language = c++
 from typing import Union, cast
 
